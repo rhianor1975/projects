@@ -4,8 +4,8 @@
 *.out
 
 # Project executables
-/tunecurses
-/elara
+/Fenrir
+/Elara
 
 # State files (saved preferences)
 .tunecurses_state
