@@ -1,0 +1,170 @@
+{
+  "name": "Ruby",
+  "extensions": [".rb", ".ruby", ".gemspec", ".rake"],
+  
+  "keywords": [
+    "BEGIN", "END", "alias", "and", "begin", "break", "case",
+    "class", "def", "defined?", "do", "else", "elsif", "end",
+    "ensure", "false", "for", "if", "in", "module", "next",
+    "nil", "not", "or", "redo", "rescue", "retry", "return",
+    "self", "super", "then", "true", "undef", "unless", "until",
+    "when", "while", "yield"
+  ],
+  
+  "types": [
+    "Integer", "Float", "String", "Symbol", "Array", "Hash",
+    "Set", "Range", "Regexp", "Proc", "Lambda", "Method",
+    "Class", "Module", "Object", "BasicObject", "Exception",
+    "StandardError", "RuntimeError", "TypeError", "ArgumentError",
+    "NoMethodError", "NameError", "IO", "File", "Dir",
+    "Time", "Date", "DateTime", "JSON", "YAML", "CSV",
+    "OpenStruct", "Struct", "Enumerator", "Enumerator::Lazy",
+    "Thread", "Mutex", "Queue", "SizedQueue", "ConditionVariable",
+    "Process", "Signal", "Kernel", "GC", "Marshal"
+  ],
+  
+  "builtins": [
+    "puts", "print", "printf", "p", "gets", "readline",
+    "readlines", "select", "fork", "exec", "system", "spawn",
+    "exit", "abort", "at_exit", "require", "load", "autoload",
+    "defined?", "lambda", "proc", "binding", "eval", "send",
+    "__send__", "public_send", "respond_to?", "method_missing",
+    "raise", "fail", "catch", "throw", "begin", "rescue",
+    "ensure", "else", "loop", "yield", "block_given?"
+  ],
+  
+  "preprocessor": [
+    "#!", "#!/usr/bin/env", "# encoding:", "# -*-"
+  ],
+  
+  "comments": {
+    "single": "#",
+    "multi_start": "=begin",
+    "multi_end": "=end"
+  },
+  
+  "brackets": {
+    "auto_close": ["(", "[", "{", "\"", "'", "`"]
+  },
+  
+  "indent": {
+    "increase": ["do", "{", "(", "if", "unless", "case", "begin", "def", "class", "module", "for", "while", "until"],
+    "decrease": ["end", "}", ")", "else", "elsif", "when", "rescue", "ensure"]
+  },
+  
+  "completions": {
+    "if": "if $1\n    $2\nend",
+    "unless": "unless $1\n    $2\nend",
+    "elsif": "elsif $1\n    $2",
+    "else": "else\n    $1",
+    "case": "case $1\nwhen $2\n    $3\nwhen $4\n    $5\nelse\n    $6\nend",
+    "when": "when $1\n    $2",
+    "for": "for $1 in $2\n    $3\nend",
+    "while": "while $1\n    $2\nend",
+    "until": "until $1\n    $2\nend",
+    "begin": "begin\n    $1\nrescue $2 => $3\n    $4\nensure\n    $5\nend",
+    "rescue": "rescue $1 => $2\n    $3",
+    "ensure": "ensure\n    $1",
+    "def": "def $1($2)\n    $3\n    return $4\nend",
+    "def self": "def self.$1($2)\n    $3\n    return $4\nend",
+    "class": "class $1\n    def initialize($2)\n        @$3 = $2\n    end\n    \n    $4\nend",
+    "module": "module $1\n    $2\nend",
+    "class << self": "class << self\n    $1\nend",
+    "attr": "attr_reader :$1\nattr_writer :$2\nattr_accessor :$3",
+    "attr_accessor": "attr_accessor :$1",
+    "attr_reader": "attr_reader :$1",
+    "attr_writer": "attr_writer :$1",
+    "require": "require '$1'",
+    "require_relative": "require_relative '$1'",
+    "include": "include $1",
+    "extend": "extend $1",
+    "prepend": "prepend $1",
+    "alias": "alias $1 $2",
+    "private": "private\n    $1",
+    "protected": "protected\n    $1",
+    "public": "public\n    $1",
+    "lambda": "lambda { |$1| $2 }",
+    "proc": "Proc.new { |$1| $2 }",
+    "puts": "puts $1",
+    "print": "print $1",
+    "p": "p $1",
+    "raise": "raise '$1'",
+    "unless": "unless $1\n    $2\nend",
+    "until": "until $1\n    $2\nend",
+    "loop": "loop do\n    $1\n    break if $2\nend",
+    "each": "$1.each do |$2|\n    $3\nend",
+    "map": "$1.map { |$2| $3 }",
+    "select": "$1.select { |$2| $3 }",
+    "reject": "$1.reject { |$2| $3 }",
+    "inject": "$1.inject($2) { |$3, $4| $5 }",
+    "times": "$1.times do |$2|\n    $3\nend",
+    "upto": "$1.upto($2) do |$3|\n    $4\nend",
+    "downto": "$1.downto($2) do |$3|\n    $4\nend",
+    "unless": "unless $1\n    $2\nend",
+    "if modifier": "puts $1 if $2",
+    "unless modifier": "puts $1 unless $2"
+  },
+  
+  "libraries": {
+    "require 'rails'": "-lrails",
+    "require 'sinatra'": "-lsinatra",
+    "require 'rack'": "-lrack",
+    "require 'thin'": "-lthin",
+    "require 'puma'": "-lpuma",
+    "require 'rspec'": "-lrspec",
+    "require 'minitest'": "-lminitest",
+    "require 'activerecord'": "-lactiverecord",
+    "require 'active_support'": "-lactive_support",
+    "require 'nokogiri'": "-lnokogiri",
+    "require 'json'": "",
+    "require 'yaml'": "",
+    "require 'csv'": "",
+    "require 'net/http'": "",
+    "require 'open-uri'": "",
+    "require 'erb'": "",
+    "require 'digest'": "",
+    "require 'securerandom'": "",
+    "require 'date'": "",
+    "require 'time'": "",
+    "require 'benchmark'": "",
+    "require 'logger'": "",
+    "require 'fileutils'": "",
+    "require 'pathname'": "",
+    "require 'singleton'": "",
+    "require 'ostruct'": "",
+    "require 'set'": "",
+    "require 'thread'": "",
+    "require 'tempfile'": "",
+    "require 'socket'": "",
+    "require 'zlib'": "",
+    "require 'sqlite3'": "-lsqlite3",
+    "require 'pg'": "-lpg",
+    "require 'mysql2'": "-lmysql2",
+    "require 'redis'": "-lredis",
+    "require 'mongoid'": "-lmongoid",
+    "require 'sidekiq'": "-lsidekiq",
+    "require 'pry'": "-lpry"
+  },
+  
+  "compile": {
+    "build": "ruby -c {file} 2> compile_errors.txt",
+    "run": "ruby {file}",
+    "check": "rubocop {file}"
+  },
+  
+  "template": [
+    "#!/usr/bin/env ruby",
+    "# -*- coding: utf-8 -*-",
+    "",
+    "def main",
+    "    puts 'Hello, world!'",
+    "end",
+    "",
+    "main if __FILE__ == $PROGRAM_NAME"
+  ],
+  
+  "help": {
+    "short": "Ruby: F7=Lint F8=Run",
+    "long": "Ruby files (.rb, .ruby)\nF7: Check with ruby -c\nF8: Run with ruby\nTab: Auto-completion for Ruby features"
+  }
+}

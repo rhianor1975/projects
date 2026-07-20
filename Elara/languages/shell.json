@@ -1,0 +1,96 @@
+{
+  "name": "Shell",
+  "extensions": [".sh", ".bash", ".zsh", ".ksh"],
+  
+  "keywords": [
+    "if", "then", "else", "elif", "fi", "case", "esac", "while",
+    "until", "do", "done", "for", "in", "select", "function",
+    "time", "return", "break", "continue", "exit", "export",
+    "read", "readonly", "local", "unset", "shift", "source",
+    "set", "exec", "trap", "type", "command", "eval", "let",
+    "test", "true", "false", "null", "alias", "unalias"
+  ],
+  
+  "types": [
+    "file", "directory", "pipe", "socket", "variable", "array",
+    "integer", "string", "boolean", "function"
+  ],
+  
+  "builtins": [
+    "echo", "printf", "cd", "pwd", "ls", "cat", "grep", "sed",
+    "awk", "find", "xargs", "head", "tail", "sort", "uniq",
+    "wc", "cut", "paste", "join", "comm", "diff", "patch",
+    "tar", "gzip", "gunzip", "zip", "unzip", "chmod", "chown",
+    "chgrp", "mkdir", "rmdir", "rm", "cp", "mv", "ln",
+    "touch", "stat", "file", "du", "df", "mount", "umount",
+    "ps", "kill", "killall", "top", "htop", "free", "who",
+    "whoami", "id", "uname", "hostname", "date", "cal",
+    "sleep", "timeout", "watch", "watch"
+  ],
+  
+  "preprocessor": [
+    "#!", "#", "#!/", "# -*-"
+  ],
+  
+  "comments": {
+    "single": "#",
+    "multi_start": "",
+    "multi_end": ""
+  },
+  
+  "brackets": {
+    "auto_close": ["(", "[", "{", "\"", "'", "`"]
+  },
+  
+  "indent": {
+    "increase": ["then", "do", "else", "elif", "case", "("],
+    "decrease": ["fi", "done", "else", "elif", "esac", ")"]
+  },
+  
+  "completions": {
+    "if": "if [ $1 ]; then\n    $2\nfi",
+    "if test": "if test $1; then\n    $2\nfi",
+    "else": "else\n    $1",
+    "elif": "elif [ $1 ]; then\n    $2",
+    "for": "for $1 in $2; do\n    $3\ndone",
+    "while": "while [ $1 ]; do\n    $2\ndone",
+    "until": "until [ $1 ]; do\n    $2\ndone",
+    "case": "case $1 in\n    $2)\n        $3\n        ;;\n    *)\n        $4\n        ;;\nesac",
+    "function": "function $1() {\n    $2\n}",
+    "echo": "echo \"$1\"",
+    "read": "read -p \"$1: \" $2",
+    "export": "export $1=$2",
+    "local": "local $1=$2",
+    "main": "#!/bin/bash\nset -euo pipefail\n\nfunction main() {\n    $1\n}\n\nmain \"$@\"",
+    "arg": "$1",
+    "args": "\"$@\"",
+    "for i": "for i in $(seq 1 $1); do\n    $2\ndone",
+    "while file": "while read -r $1; do\n    $2\ndone < \"$3\"",
+    "command": "if command -v $1 &> /dev/null; then\n    $2\nelse\n    $3\nfi"
+  },
+  
+  "libraries": {
+    "#!/bin": "",
+    "#!/bin/bash": "",
+    "#!/bin/zsh": "",
+    "#!/usr/bin/env": ""
+  },
+  
+  "compile": {
+    "build": "bash -n {file} 2> compile_errors.txt",
+    "run": "bash {file}",
+    "check": "shellcheck {file}"
+  },
+  
+  "template": [
+    "#!/bin/bash",
+    "set -euo pipefail",
+    "",
+    "echo \"Hello, world!\""
+  ],
+  
+  "help": {
+    "short": "Shell: F7=Check F8=Run",
+    "long": "Shell scripts (.sh, .bash, .zsh, .ksh)\nF7: Check syntax with bash -n\nF8: Run with bash\nTab: Auto-completion for shell constructs"
+  }
+}

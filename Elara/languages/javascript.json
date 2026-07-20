@@ -1,0 +1,141 @@
+{
+  "name": "JavaScript",
+  "extensions": [".js", ".mjs", ".cjs", ".jsx"],
+  
+  "keywords": [
+    "abstract", "arguments", "await", "boolean", "break", "byte",
+    "case", "catch", "char", "class", "const", "continue",
+    "debugger", "default", "delete", "do", "double", "else",
+    "enum", "eval", "export", "extends", "false", "final",
+    "finally", "float", "for", "function", "goto", "if",
+    "implements", "import", "in", "instanceof", "int", "interface",
+    "let", "long", "native", "new", "null", "package", "private",
+    "protected", "public", "return", "short", "static", "super",
+    "switch", "synchronized", "this", "throw", "throws",
+    "transient", "true", "try", "typeof", "var", "void",
+    "volatile", "while", "with", "yield"
+  ],
+  
+  "types": [
+    "Array", "ArrayBuffer", "Boolean", "DataView", "Date",
+    "Error", "EvalError", "Float32Array", "Float64Array",
+    "Function", "Int8Array", "Int16Array", "Int32Array",
+    "Map", "Number", "Object", "Promise", "Proxy", "RangeError",
+    "ReferenceError", "RegExp", "Set", "String", "Symbol",
+    "SyntaxError", "TypeError", "Uint8Array", "Uint16Array",
+    "Uint32Array", "URIError", "WeakMap", "WeakSet",
+    "Buffer", "EventEmitter", "Stream", "Process"
+  ],
+  
+  "builtins": [
+    "console", "process", "require", "module", "exports",
+    "setTimeout", "setInterval", "clearTimeout", "clearInterval",
+    "setImmediate", "clearImmediate", "encodeURI", "decodeURI",
+    "encodeURIComponent", "decodeURIComponent", "parseInt",
+    "parseFloat", "isNaN", "isFinite", "escape", "unescape",
+    "eval", "JSON", "Math", "Array", "Object", "String",
+    "Number", "Boolean", "Function", "Date", "RegExp",
+    "Error", "Promise", "Symbol", "Map", "Set", "WeakMap",
+    "WeakSet", "Buffer", "URL", "URLSearchParams"
+  ],
+  
+  "preprocessor": [
+    "#!", "/* @", "// @"
+  ],
+  
+  "comments": {
+    "single": "//",
+    "multi_start": "/*",
+    "multi_end": "*/"
+  },
+  
+  "brackets": {
+    "auto_close": ["(", "[", "{", "\"", "'", "`"]
+  },
+  
+  "indent": {
+    "increase": ["{", "("],
+    "decrease": ["}", ")"]
+  },
+  
+  "completions": {
+    "if": "if ($1) {\n    $2\n}",
+    "else": "else {\n    $1\n}",
+    "else if": "else if ($1) {\n    $2\n}",
+    "for": "for (let $1 = 0; $1 < $2; $1++) {\n    $3\n}",
+    "for in": "for (let $1 in $2) {\n    $3\n}",
+    "for of": "for (let $1 of $2) {\n    $3\n}",
+    "while": "while ($1) {\n    $2\n}",
+    "do": "do {\n    $1\n} while ($2);",
+    "switch": "switch ($1) {\n    case $2:\n        $3\n        break;\n    default:\n        $4\n}",
+    "case": "case $1:\n    $2\n    break;",
+    "default": "default:\n    $1\n    break;",
+    "try": "try {\n    $1\n} catch (error) {\n    $2\n} finally {\n    $3\n}",
+    "throw": "throw $1;",
+    "return": "return $1;",
+    "function": "function $1($2) {\n    $3\n    return $4\n}",
+    "arrow": "($1) => {\n    $2\n}",
+    "class": "class $1 {\n    constructor($2) {\n        $3\n    }\n    \n    $4($5) {\n        $6\n    }\n}",
+    "extends": "class $1 extends $2 {\n    constructor($3) {\n        super($4)\n        $5\n    }\n}",
+    "export": "export default $1;",
+    "import": "import $1 from '$2';",
+    "require": "const $1 = require('$2');",
+    "const": "const $1 = $2;",
+    "let": "let $1 = $2;",
+    "var": "var $1 = $2;",
+    "promise": "new Promise((resolve, reject) => {\n    $1\n});",
+    "async": "async function $1($2) {\n    $3\n    return $4\n}",
+    "await": "await $1;",
+    "console.log": "console.log($1);",
+    "console.error": "console.error($1);",
+    "module.exports": "module.exports = $1;",
+    "exports": "exports.$1 = $2;",
+    "setTimeout": "setTimeout(() => {\n    $1\n}, $2);",
+    "setInterval": "setInterval(() => {\n    $1\n}, $2);"
+  },
+  
+  "libraries": {
+    "require('express')": "-lexpress",
+    "require('react')": "-lreact",
+    "require('react-dom')": "-lreact-dom",
+    "require('vue')": "-lvue",
+    "require('angular')": "-langular",
+    "require('axios')": "-laxios",
+    "require('lodash')": "-llodash",
+    "require('moment')": "-lmoment",
+    "require('mongoose')": "-lmongoose",
+    "require('sequelize')": "-lsequelize",
+    "require('socket.io')": "-lsocket.io",
+    "require('fs')": "",
+    "require('path')": "",
+    "require('http')": "",
+    "require('https')": "",
+    "require('url')": "",
+    "require('querystring')": "",
+    "require('crypto')": "",
+    "require('stream')": "",
+    "require('events')": "",
+    "require('util')": "",
+    "require('child_process')": ""
+  },
+  
+  "compile": {
+    "build": "node -c {file} 2> compile_errors.txt",
+    "run": "node {file}",
+    "check": "eslint {file}"
+  },
+  
+  "template": [
+    "#!/usr/bin/env node",
+    "",
+    "function main() {",
+    "    console.log('Hello, world!');",
+    "    return 0;",
+    "}"
+  ],
+  
+  "help": {
+    "short": "JS: F7=Lint F8=Run",
+    "long": "JavaScript files (.js, .mjs, .cjs, .jsx)\nF7: Check syntax with node -c\nF8: Run with node\nTab: Auto-completion for JS features"
+  }
+}

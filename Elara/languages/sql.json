@@ -1,0 +1,192 @@
+{
+  "name": "SQL",
+  "extensions": [".sql", ".psql", ".ddl", ".dml"],
+  
+  "keywords": [
+    "ABORT", "ABS", "ABSOLUTE", "ACCESS", "ACTION", "ADD",
+    "ADMIN", "AFTER", "AGGREGATE", "ALL", "ALLOCATE", "ALTER",
+    "ANALYSE", "ANALYZE", "AND", "ANY", "ARE", "ARRAY",
+    "AS", "ASC", "ASENSITIVE", "ASSERTION", "ASSIGNMENT",
+    "ASYMMETRIC", "AT", "ATOMIC", "ATTRIBUTE", "AUTHORIZATION",
+    "AVG", "BACKWARD", "BEFORE", "BEGIN", "BETWEEN", "BIGINT",
+    "BINARY", "BIT", "BLOB", "BOTH", "BREADTH", "BY", "CALL",
+    "CALLED", "CARDINALITY", "CASCADE", "CASCADED", "CASE",
+    "CAST", "CATALOG", "CEIL", "CEILING", "CHAIN", "CHAR",
+    "CHARACTER", "CHARACTERISTICS", "CHECK", "CLASS", "CLOB",
+    "CLOSE", "COALESCE", "COLLATE", "COLLATION", "COLUMN",
+    "COMMIT", "CONDITION", "CONNECT", "CONNECTION", "CONSTRAINT",
+    "CONSTRAINTS", "CONSTRUCTOR", "CONTAINS", "CONTINUE",
+    "CONVERT", "COPY", "CORRESPONDING", "COUNT", "CREATE",
+    "CROSS", "CUBE", "CURRENT", "CURRENT_DATE", "CURRENT_PATH",
+    "CURRENT_ROLE", "CURRENT_TIME", "CURRENT_TIMESTAMP",
+    "CURRENT_USER", "CURSOR", "CYCLE", "DATA", "DATABASE",
+    "DATE", "DAY", "DEALLOCATE", "DEC", "DECIMAL", "DECLARE",
+    "DEFAULT", "DEFERRABLE", "DEFERRED", "DELETE", "DENSE_RANK",
+    "DEREF", "DESC", "DESCRIBE", "DESCRIPTOR", "DETERMINISTIC",
+    "DIAGNOSTICS", "DISCONNECT", "DISTINCT", "DO", "DOMAIN",
+    "DOUBLE", "DROP", "DYNAMIC", "EACH", "ELEMENT", "ELSE",
+    "END", "END_EXEC", "ESCAPE", "EVERY", "EXCEPT", "EXCEPTION",
+    "EXCLUDE", "EXEC", "EXECUTE", "EXISTS", "EXP", "EXPLAIN",
+    "EXTERNAL", "EXTRACT", "FALSE", "FETCH", "FILTER", "FIRST",
+    "FLOAT", "FLOOR", "FOR", "FOREIGN", "FORWARD", "FREE",
+    "FROM", "FULL", "FUNCTION", "GET", "GLOBAL", "GRANT",
+    "GROUP", "GROUPING", "HAVING", "HOLD", "HOUR", "IDENTITY",
+    "IF", "IMMEDIATE", "IMMUTABLE", "IN", "INDEX", "INDICATOR",
+    "INITIALLY", "INNER", "INOUT", "INPUT", "INSENSITIVE",
+    "INSERT", "INT", "INTEGER", "INTERVAL", "INTO", "IS",
+    "ISNULL", "ISOLATION", "JOIN", "KEY", "LANGUAGE", "LARGE",
+    "LAST", "LATERAL", "LEADING", "LEFT", "LEVEL", "LIKE",
+    "LIMIT", "LOAD", "LOCAL", "LOCALTIME", "LOCALTIMESTAMP",
+    "LOCK", "LOG", "LOWER", "MATCH", "MAX", "MEMBER", "MERGE",
+    "MIN", "MINUTE", "MOD", "MODIFIES", "MODULE", "MONTH",
+    "MULTISET", "NAMES", "NATIONAL", "NATURAL", "NCHAR",
+    "NCLOB", "NEW", "NEXT", "NO", "NONE", "NORMALIZE",
+    "NOT", "NOTNULL", "NULL", "NULLIF", "NUMERIC", "OBJECT",
+    "OCTET_LENGTH", "OF", "OFF", "OFFSET", "OLD", "ON",
+    "ONLY", "OPEN", "OPTION", "OR", "ORDER", "OUT", "OUTER",
+    "OUTPUT", "OVER", "OVERLAPS", "OVERLAY", "PAD", "PARAMETER",
+    "PARTIAL", "PARTITION", "PLACING", "POSITION", "POWER",
+    "PRECISION", "PREPARE", "PRESERVE", "PRIMARY", "PRIOR",
+    "PRIVILEGES", "PROCEDURE", "PUBLIC", "RANGE", "RANK",
+    "READ", "READS", "REAL", "RECURSIVE", "REF", "REFERENCES",
+    "REFERENCING", "REGR_AVGX", "REGR_AVGY", "REGR_COUNT",
+    "REGR_INTERCEPT", "REGR_R2", "REGR_SLOPE", "REGR_SXX",
+    "REGR_SXY", "REGR_SYY", "REINDEX", "RELATIVE", "RELEASE",
+    "RENAME", "REPEATABLE", "REPLACE", "RESET", "RESTRICT",
+    "RETURN", "RETURNING", "RETURNS", "REVOKE", "RIGHT",
+    "ROLE", "ROLLBACK", "ROLLUP", "ROW", "ROW_NUMBER", "ROWS",
+    "SAVEPOINT", "SCHEMA", "SCROLL", "SEARCH", "SECOND",
+    "SECURITY", "SELECT", "SENSITIVE", "SEQUENCE", "SERIAL",
+    "SERIALIZABLE", "SESSION", "SESSION_USER", "SET", "SETS",
+    "SHOW", "SIMILAR", "SIZE", "SMALLINT", "SOME", "SPATIAL",
+    "SPECIFIC", "SPECIFICTYPE", "SQL", "SQLCODE", "SQLERROR",
+    "SQLEXCEPTION", "SQLSTATE", "SQLWARNING", "SQRT", "START",
+    "STATE", "STATEMENT", "STATIC", "STATISTICS", "STDDEV",
+    "STDDEV_POP", "STDDEV_SAMP", "STREAM", "STRUCTURE",
+    "SUBSTRING", "SUM", "SYMMETRIC", "SYSID", "SYSTEM",
+    "TABLE", "TABLESAMPLE", "TEMP", "TEMPORARY", "THEN",
+    "TIES", "TIME", "TIMESTAMP", "TIMEZONE_HOUR",
+    "TIMEZONE_MINUTE", "TINYINT", "TO", "TRAILING", "TRANSACTION",
+    "TRANSFORM", "TRANSLATE", "TRANSLATION", "TREAT", "TRIGGER",
+    "TRIM", "TRUE", "TRUNCATE", "TYPE", "UNBOUNDED", "UNCOMMITTED",
+    "UNION", "UNIQUE", "UNKNOWN", "UNLISTEN", "UNLOCK",
+    "UNNEST", "UNTIL", "UPDATE", "UPPER", "USAGE", "USER",
+    "USING", "VACUUM", "VALID", "VALIDATE", "VALUE", "VALUES",
+    "VARCHAR", "VARYING", "VARIANCE", "VIEW", "VOLATILE",
+    "WHEN", "WHENEVER", "WHERE", "WIDTH_BUCKET", "WINDOW",
+    "WITH", "WITHIN", "WITHOUT", "WORK", "WRITE", "YEAR",
+    "ZONE"
+  ],
+  
+  "types": [
+    "VARCHAR", "CHAR", "TEXT", "INTEGER", "INT", "BIGINT",
+    "SMALLINT", "TINYINT", "DECIMAL", "NUMERIC", "REAL",
+    "DOUBLE", "FLOAT", "BOOLEAN", "DATE", "TIME", "DATETIME",
+    "TIMESTAMP", "INTERVAL", "JSON", "JSONB", "XML", "BLOB",
+    "CLOB", "ARRAY", "GEOMETRY", "POINT", "LINESTRING",
+    "POLYGON", "MULTIPOINT", "MULTILINESTRING", "MULTIPOLYGON",
+    "GEOMETRYCOLLECTION", "CIRCLE", "BOX", "PATH", "POLYGON",
+    "LINE", "LSEG", "MACADDR", "INET", "CIDR", "UUID",
+    "HSTORE", "TSVECTOR", "TSQUERY", "BIT", "BIT VARYING"
+  ],
+  
+  "builtins": [
+    "COUNT", "SUM", "AVG", "MAX", "MIN", "STDDEV", "VARIANCE",
+    "COALESCE", "NULLIF", "GREATEST", "LEAST", "CURRENT_DATE",
+    "CURRENT_TIME", "CURRENT_TIMESTAMP", "NOW", "EXTRACT",
+    "DATE_PART", "DATE_TRUNC", "AGE", "TO_CHAR", "TO_DATE",
+    "TO_NUMBER", "TO_TIMESTAMP", "UPPER", "LOWER", "INITCAP",
+    "LENGTH", "CHAR_LENGTH", "SUBSTRING", "POSITION", "TRIM",
+    "LPAD", "RPAD", "REPLACE", "TRANSLATE", "REGEXP_MATCH",
+    "REGEXP_REPLACE", "REGEXP_SPLIT_TO_ARRAY",
+    "REGEXP_SPLIT_TO_TABLE", "CONCAT", "CONCAT_WS",
+    "ARRAY_AGG", "STRING_AGG", "JSON_BUILD_OBJECT",
+    "JSON_BUILD_ARRAY", "JSON_OBJECT", "JSON_ARRAY",
+    "JSONB_BUILD_OBJECT", "JSONB_BUILD_ARRAY"
+  ],
+  
+  "preprocessor": [
+    "BEGIN", "COMMIT", "ROLLBACK", "SAVEPOINT", "RELEASE"
+  ],
+  
+  "comments": {
+    "single": "--",
+    "multi_start": "/*",
+    "multi_end": "*/"
+  },
+  
+  "brackets": {
+    "auto_close": ["(", "[", "\"", "'"]
+  },
+  
+  "indent": {
+    "increase": ["(", "SELECT", "WHERE", "FROM", "JOIN", "UNION", "VALUES", "WITH"],
+    "decrease": [")"]
+  },
+  
+  "completions": {
+    "SELECT": "SELECT $1\nFROM $2\nWHERE $3\nORDER BY $4;",
+    "SELECT *": "SELECT *\nFROM $1\nWHERE $2;",
+    "INSERT": "INSERT INTO $1 ($2)\nVALUES ($3);",
+    "INSERT multiple": "INSERT INTO $1 ($2)\nVALUES \n    ($3),\n    ($4);",
+    "UPDATE": "UPDATE $1\nSET $2 = $3\nWHERE $4;",
+    "DELETE": "DELETE FROM $1\nWHERE $2;",
+    "CREATE TABLE": "CREATE TABLE $1 (\n    id INT PRIMARY KEY,\n    $2 VARCHAR(255) NOT NULL,\n    $3 INT,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+    "CREATE TABLE with FK": "CREATE TABLE $1 (\n    id INT PRIMARY KEY,\n    $2 VARCHAR(255) NOT NULL,\n    $3_id INT,\n    FOREIGN KEY ($3_id) REFERENCES $4(id)\n);",
+    "CREATE INDEX": "CREATE INDEX idx_$1 ON $2 ($3);",
+    "CREATE VIEW": "CREATE VIEW $1 AS\nSELECT $2\nFROM $3\nWHERE $4;",
+    "ALTER TABLE ADD": "ALTER TABLE $1\nADD COLUMN $2 $3;",
+    "ALTER TABLE DROP": "ALTER TABLE $1\nDROP COLUMN $2;",
+    "ALTER TABLE MODIFY": "ALTER TABLE $1\nMODIFY COLUMN $2 $3;",
+    "DROP TABLE": "DROP TABLE $1;",
+    "DROP INDEX": "DROP INDEX $1;",
+    "JOIN": "SELECT $1\nFROM $2\nINNER JOIN $3 ON $4 = $5\nWHERE $6;",
+    "LEFT JOIN": "SELECT $1\nFROM $2\nLEFT JOIN $3 ON $4 = $5\nWHERE $6;",
+    "GROUP BY": "SELECT $1, COUNT(*)\nFROM $2\nGROUP BY $1\nHAVING COUNT(*) > $3;",
+    "UNION": "SELECT $1 FROM $2\nUNION\nSELECT $3 FROM $4;",
+    "CASE": "CASE \n    WHEN $1 THEN $2\n    WHEN $3 THEN $4\n    ELSE $5\nEND",
+    "WITH": "WITH $1 AS (\n    SELECT $2\n    FROM $3\n    WHERE $4\n)\nSELECT * FROM $1;",
+    "SUBQUERY": "SELECT $1\nFROM $2\nWHERE $3 IN (SELECT $4 FROM $5 WHERE $6);",
+    "EXISTS": "SELECT $1\nFROM $2\nWHERE EXISTS (SELECT 1 FROM $3 WHERE $4);",
+    "DISTINCT": "SELECT DISTINCT $1\nFROM $2;",
+    "ORDER BY": "ORDER BY $1 $2",
+    "LIMIT": "LIMIT $1",
+    "OFFSET": "OFFSET $1",
+    "COUNT": "COUNT($1)",
+    "SUM": "SUM($1)",
+    "AVG": "AVG($1)",
+    "MAX": "MAX($1)",
+    "MIN": "MIN($1)"
+  },
+  
+  "libraries": {
+    "CREATE TABLE": "",
+    "CREATE DATABASE": "",
+    "CREATE INDEX": "",
+    "CREATE VIEW": "",
+    "CREATE PROCEDURE": "",
+    "CREATE FUNCTION": "",
+    "CREATE TRIGGER": "",
+    "CREATE SEQUENCE": ""
+  },
+  
+  "compile": {
+    "build": "psql -c 'SELECT 1' 2> compile_errors.txt",
+    "run": "psql -f {file}",
+    "check": "psql -c 'SELECT 1'"
+  },
+  
+  "template": [
+    "-- SQL Example",
+    "",
+    "SELECT *",
+    "FROM users",
+    "WHERE active = true",
+    "ORDER BY created_at DESC;"
+  ],
+  
+  "help": {
+    "short": "SQL: F7=Check F8=Run",
+    "long": "SQL files (.sql, .ddl, .dml)\nF7: Check syntax with psql\nF8: Run with psql -f\nTab: Auto-completion for SQL keywords"
+  }
+}

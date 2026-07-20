@@ -1,0 +1,84 @@
+{
+  "name": "Dockerfile",
+  "extensions": [".dockerfile", ".Dockerfile", "Dockerfile"],
+  
+  "keywords": [
+    "FROM", "RUN", "CMD", "LABEL", "MAINTAINER", "EXPOSE",
+    "ENV", "ADD", "COPY", "ENTRYPOINT", "VOLUME", "USER",
+    "WORKDIR", "ARG", "ONBUILD", "STOPSIGNAL", "HEALTHCHECK",
+    "SHELL", "AS", "TARGET", "DOCKER", "BUILD", "PULL",
+    "PUSH", "SAVE", "LOAD", "INSPECT"
+  ],
+  
+  "types": [
+    "IMAGE", "CONTAINER", "VOLUME", "NETWORK", "SECRET", "CONFIG"
+  ],
+  
+  "builtins": [],
+  
+  "preprocessor": [
+    "#", "#!", "#!/bin", "# syntax=", "# escape="
+  ],
+  
+  "comments": {
+    "single": "#",
+    "multi_start": "",
+    "multi_end": ""
+  },
+  
+  "brackets": {
+    "auto_close": ["[", "\"", "'"]
+  },
+  
+  "indent": {
+    "increase": ["\\", "&&", "||", "|"],
+    "decrease": []
+  },
+  
+  "completions": {
+    "FROM": "FROM $1:$2",
+    "FROM as": "FROM $1:$2 AS $3",
+    "RUN": "RUN $1",
+    "RUN apt": "RUN apt-get update && apt-get install -y $1",
+    "RUN pip": "RUN pip install $1",
+    "RUN npm": "RUN npm install $1",
+    "COPY": "COPY $1 $2",
+    "ADD": "ADD $1 $2",
+    "ENV": "ENV $1=$2",
+    "ARG": "ARG $1",
+    "WORKDIR": "WORKDIR /$1",
+    "EXPOSE": "EXPOSE $1",
+    "USER": "USER $1",
+    "CMD": "CMD [\"$1\", \"$2\"]",
+    "ENTRYPOINT": "ENTRYPOINT [\"$1\", \"$2\"]",
+    "VOLUME": "VOLUME [\"$1\"]",
+    "LABEL": "LABEL $1=$2",
+    "HEALTHCHECK": "HEALTHCHECK --interval=$1 --timeout=$2 --retries=$3 CMD $4",
+    "SHELL": "SHELL [\"$1\", \"$2\"]",
+    "STOPSIGNAL": "STOPSIGNAL $1",
+    "ONBUILD": "ONBUILD $1",
+    "multi-stage": "FROM $1 AS builder\n$2\nFROM $3\nCOPY --from=builder $4 $5",
+    "build args": "ARG VERSION=latest\nFROM $1:$VERSION"
+  },
+  
+  "libraries": {},
+  
+  "compile": {
+    "build": "docker build -t {output} . 2> compile_errors.txt",
+    "run": "docker run {output}",
+    "check": "docker build --dry-run ."
+  },
+  
+  "template": [
+    "FROM alpine:latest",
+    "",
+    "WORKDIR /app",
+    "",
+    "CMD [\"echo\", \"Hello, world!\"]"
+  ],
+  
+  "help": {
+    "short": "Dockerfile: F7=Build F8=Run",
+    "long": "Dockerfile files\nF7: Build with docker build\nF8: Run with docker run\nTab: Auto-completion for Dockerfile instructions"
+  }
+}

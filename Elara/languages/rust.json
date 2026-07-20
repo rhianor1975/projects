@@ -1,0 +1,147 @@
+{
+  "name": "Rust",
+  "extensions": [".rs"],
+  
+  "keywords": [
+    "abstract", "alignof", "as", "async", "await", "become", "box",
+    "break", "const", "continue", "crate", "do", "else", "enum",
+    "extern", "false", "final", "fn", "for", "if", "impl", "in",
+    "let", "loop", "macro", "match", "mod", "move", "mut",
+    "offsetof", "override", "priv", "proc", "pub", "pure",
+    "ref", "return", "self", "Self", "sizeof", "static",
+    "struct", "super", "trait", "true", "type", "typeof",
+    "unsafe", "unsized", "use", "virtual", "where", "while", "yield"
+  ],
+  
+  "types": [
+    "i8", "i16", "i32", "i64", "i128", "isize",
+    "u8", "u16", "u32", "u64", "u128", "usize",
+    "f32", "f64", "bool", "char", "str", "String",
+    "Vec", "Box", "Rc", "Arc", "Cell", "RefCell",
+    "Mutex", "RwLock", "Option", "Result", "Path",
+    "PathBuf", "File", "HashMap", "HashSet", "BTreeMap",
+    "BTreeSet", "VecDeque", "LinkedList", "BinaryHeap",
+    "Array", "Slice", "Tuple", "Fn", "FnMut", "FnOnce",
+    "Iterator", "IntoIterator", "FromIterator", "Clone",
+    "Copy", "Debug", "Display", "PartialEq", "Eq",
+    "PartialOrd", "Ord", "Hash", "Default", "Sized",
+    "Send", "Sync", "Unpin", "Future", "Stream", "Sink"
+  ],
+  
+  "builtins": [
+    "println", "print", "eprintln", "eprint", "dbg",
+    "format", "write", "writeln", "assert", "assert_eq",
+    "assert_ne", "debug_assert", "debug_assert_eq",
+    "debug_assert_ne", "todo", "unimplemented", "unreachable",
+    "panic", "compile_error", "stringify", "concat",
+    "concat_idents", "cfg", "cfg_attr", "include", "include_str",
+    "include_bytes", "env", "option_env", "concat",
+    "compile_error", "line", "column", "file", "module_path",
+    "format_args", "format_args_nl", "eprintln", "print",
+    "vec", "vec_from_elem", "box", "try", "await"
+  ],
+  
+  "preprocessor": [
+    "cfg", "cfg_attr", "derive", "allow", "deny", "forbid",
+    "warn", "deprecated", "doc", "must_use", "inline",
+    "cold", "naked", "no_mangle", "export_name", "link_section",
+    "link_name", "repr", "path", "test", "bench", "should_panic",
+    "ignore", "case", "debugger"
+  ],
+  
+  "comments": {
+    "single": "//",
+    "multi_start": "/*",
+    "multi_end": "*/"
+  },
+  
+  "brackets": {
+    "auto_close": ["(", "[", "{", "\"", "'"]
+  },
+  
+  "indent": {
+    "increase": ["{", "("],
+    "decrease": ["}", ")"]
+  },
+  
+  "completions": {
+    "if": "if $1 {\n    $2\n}",
+    "else": "else {\n    $1\n}",
+    "else if": "else if $1 {\n    $2\n}",
+    "match": "match $1 {\n    $2 => $3,\n    _ => $4,\n}",
+    "for": "for $1 in $2 {\n    $3\n}",
+    "while": "while $1 {\n    $2\n}",
+    "loop": "loop {\n    $1\n    break;\n}",
+    "fn": "fn $1($2) -> $3 {\n    $4\n    $5\n}",
+    "pub fn": "pub fn $1($2) -> $3 {\n    $4\n    $5\n}",
+    "impl": "impl $1 {\n    fn new($2) -> Self {\n        Self {\n            $3\n        }\n    }\n    \n    $4\n}",
+    "trait": "trait $1 {\n    fn $2(&self) -> $3;\n}",
+    "impl trait": "impl $1 for $2 {\n    fn $3(&self) -> $4 {\n        $5\n    }\n}",
+    "struct": "struct $1 {\n    $2: $3,\n}",
+    "enum": "enum $1 {\n    $2,\n    $3,\n}",
+    "use": "use $1;",
+    "mod": "mod $1;",
+    "pub mod": "pub mod $1;",
+    "extern": "extern crate $1;",
+    "type": "type $1 = $2;",
+    "let": "let $1: $2 = $3;",
+    "mut": "let mut $1: $2 = $3;",
+    "return": "return $1;",
+    "Ok": "Ok($1)",
+    "Err": "Err($1)",
+    "Some": "Some($1)",
+    "None": "None",
+    "panic": "panic!(\"$1\");",
+    "println": "println!(\"$1\", $2);",
+    "format": "format!(\"$1\", $2)",
+    "vec": "vec![$1]",
+    "hashmap": "let mut map: HashMap<$1, $2> = HashMap::new();",
+    "main": "fn main() {\n    $1\n}",
+    "test": "#[test]\nfn $1() {\n    $2\n}"
+  },
+  
+  "libraries": {
+    "use std": "",
+    "use serde": "-lserde",
+    "use serde_json": "-lserde_json",
+    "use tokio": "-ltokio",
+    "use tokio::": "-ltokio",
+    "use async_std": "-lasync-std",
+    "use actix_web": "-lactix-web",
+    "use rocket": "-lrocket",
+    "use warp": "-lwarp",
+    "use diesel": "-ldiesel",
+    "use sqlx": "-lsqlx",
+    "use reqwest": "-lreqwest",
+    "use hyper": "-lhyper",
+    "use clap": "-lclap",
+    "use structopt": "-lstructopt",
+    "use anyhow": "-lanyhow",
+    "use thiserror": "-lthiserror",
+    "use rand": "-lrand",
+    "use regex": "-lregex",
+    "use chrono": "-lchrono",
+    "use log": "-llog",
+    "use env_logger": "-lenv_logger",
+    "use serde::Deserialize": "-lserde",
+    "use serde::Serialize": "-lserde",
+    "use crossbeam": "-lcrossbeam"
+  },
+  
+  "compile": {
+    "build": "cargo build 2> compile_errors.txt",
+    "run": "cargo run",
+    "check": "cargo check"
+  },
+  
+  "template": [
+    "fn main() {",
+    "    println!(\"Hello, world!\");",
+    "}"
+  ],
+  
+  "help": {
+    "short": "Rust: F7=Check F8=Run",
+    "long": "Rust files (.rs)\nF7: Check with cargo check\nF8: Run with cargo run\nTab: Auto-completion for Rust idioms"
+  }
+}

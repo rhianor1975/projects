@@ -1,0 +1,153 @@
+{
+  "name": "Java",
+  "extensions": [".java"],
+  
+  "keywords": [
+    "abstract", "assert", "boolean", "break", "byte", "case",
+    "catch", "char", "class", "const", "continue", "default",
+    "do", "double", "else", "enum", "extends", "final",
+    "finally", "float", "for", "goto", "if", "implements",
+    "import", "instanceof", "int", "interface", "long",
+    "native", "new", "package", "private", "protected",
+    "public", "return", "short", "static", "strictfp",
+    "super", "switch", "synchronized", "this", "throw",
+    "throws", "transient", "try", "void", "volatile", "while"
+  ],
+  
+  "types": [
+    "Object", "String", "Integer", "Double", "Float", "Long",
+    "Short", "Byte", "Character", "Boolean", "Void", "Number",
+    "List", "ArrayList", "LinkedList", "Vector", "Stack",
+    "Set", "HashSet", "TreeSet", "LinkedHashSet", "Map",
+    "HashMap", "TreeMap", "LinkedHashMap", "Hashtable",
+    "Queue", "PriorityQueue", "Deque", "ArrayDeque",
+    "Iterator", "ListIterator", "Enumeration", "Collection",
+    "Collections", "Arrays", "Comparator", "Comparable",
+    "Runnable", "Callable", "Thread", "Exception", "RuntimeException",
+    "NullPointerException", "IOException", "File", "FileReader",
+    "FileWriter", "BufferedReader", "BufferedWriter",
+    "PrintWriter", "Scanner", "Random", "Date", "Calendar",
+    "SimpleDateFormat", "URL", "URLConnection", "Socket",
+    "ServerSocket", "Class", "ClassLoader", "System", "Runtime",
+    "Process", "ProcessBuilder", "Math", "StringBuilder",
+    "StringBuffer", "Stream", "Optional", "OptionalInt",
+    "OptionalLong", "OptionalDouble", "Collectors"
+  ],
+  
+  "builtins": [
+    "System", "out", "in", "err", "currentTimeMillis",
+    "nanoTime", "arraycopy", "identityHashCode", "gc",
+    "runFinalization", "load", "loadLibrary", "getProperty",
+    "setProperty", "getProperties", "setProperties",
+    "getenv", "lineSeparator", "clearProperty"
+  ],
+  
+  "preprocessor": [
+    "@Override", "@Deprecated", "@SuppressWarnings",
+    "@SafeVarargs", "@FunctionalInterface", "@Retention",
+    "@Target", "@Documented", "@Inherited", "@Repeatable"
+  ],
+  
+  "comments": {
+    "single": "//",
+    "multi_start": "/*",
+    "multi_end": "*/"
+  },
+  
+  "brackets": {
+    "auto_close": ["(", "[", "{", "\"", "'"]
+  },
+  
+  "indent": {
+    "increase": ["{"],
+    "decrease": ["}"]
+  },
+  
+  "completions": {
+    "if": "if ($1) {\n    $2\n}",
+    "else": "else {\n    $1\n}",
+    "else if": "else if ($1) {\n    $2\n}",
+    "for": "for (int $1 = 0; $1 < $2; $1++) {\n    $3\n}",
+    "for each": "for ($1 $2 : $3) {\n    $4\n}",
+    "while": "while ($1) {\n    $2\n}",
+    "do": "do {\n    $1\n} while ($2);",
+    "switch": "switch ($1) {\n    case $2:\n        $3\n        break;\n    default:\n        $4\n        break;\n}",
+    "case": "case $1:\n    $2\n    break;",
+    "default": "default:\n    $1\n    break;",
+    "try": "try {\n    $1\n} catch ($2 e) {\n    $3\n} finally {\n    $4\n}",
+    "catch": "catch ($1 e) {\n    $2\n}",
+    "finally": "finally {\n    $1\n}",
+    "throw": "throw new $1(\"$2\");",
+    "return": "return $1;",
+    "class": "public class $1 {\n    $2\n}",
+    "interface": "public interface $1 {\n    $2\n}",
+    "enum": "public enum $1 {\n    $2,\n    $3;\n    \n    $4\n}",
+    "abstract class": "public abstract class $1 {\n    $2\n}",
+    "method": "public $1 $2($3) {\n    $4\n    return $5;\n}",
+    "private method": "private $1 $2($3) {\n    $4\n    return $5;\n}",
+    "static method": "public static $1 $2($3) {\n    $4\n    return $5;\n}",
+    "getter": "public $1 get$2() {\n    return this.$3;\n}",
+    "setter": "public void set$1($2 $3) {\n    this.$4 = $3;\n}",
+    "constructor": "public $1($2) {\n    $3\n}",
+    "main": "public static void main(String[] args) {\n    $1\n}",
+    "import": "import $1.$2;",
+    "package": "package $1;",
+    "new": "new $1($2)",
+    "System.out.println": "System.out.println($1);",
+    "System.out.print": "System.out.print($1);",
+    "System.err.println": "System.err.println($1);",
+    "Scanner": "Scanner $1 = new Scanner(System.in);",
+    "ArrayList": "ArrayList<$1> $2 = new ArrayList<>();",
+    "HashMap": "HashMap<$1, $2> $3 = new HashMap<>();",
+    "StringBuilder": "StringBuilder $1 = new StringBuilder(\"$2\");",
+    "synchronized": "synchronized($1) {\n    $2\n}"
+  },
+  
+  "libraries": {
+    "import java.util.*": "",
+    "import java.io.*": "",
+    "import java.net.*": "",
+    "import java.nio.*": "",
+    "import java.time.*": "",
+    "import java.util.stream.*": "",
+    "import java.util.function.*": "",
+    "import javax.swing.*": "",
+    "import java.awt.*": "",
+    "import java.awt.event.*": "",
+    "import javax.swing.event.*": "",
+    "import java.sql.*": "-lsqlite-jdbc",
+    "import org.junit.*": "-ljunit",
+    "import org.junit.jupiter.api.*": "-ljunit-jupiter",
+    "import org.mockito.*": "-lmockito",
+    "import javax.servlet.*": "-lservlet-api",
+    "import javax.servlet.http.*": "-lservlet-api",
+    "import org.springframework.*": "-lspring",
+    "import org.springframework.boot.*": "-lspring-boot",
+    "import com.google.gson.*": "-lgson",
+    "import com.fasterxml.jackson.*": "-ljackson",
+    "import org.apache.commons.*": "-lcommons-lang3",
+    "import org.apache.http.*": "-lhttpclient",
+    "import org.slf4j.*": "-lslf4j-api",
+    "import org.apache.logging.log4j.*": "-llog4j-core",
+    "import org.openqa.selenium.*": "-lselenium-java"
+  },
+  
+  "compile": {
+    "build": "javac -d . {file} 2> compile_errors.txt",
+    "run": "java {output}",
+    "check": "javac -Xlint {file}"
+  },
+  
+  "template": [
+    "public class Main {",
+    "    public static void main(String[] args) {",
+    "        System.out.println(\"Hello, world!\");",
+    "    }",
+    "}"
+  ],
+  
+  "help": {
+    "short": "Java: F7=Compile F8=Run",
+    "long": "Java files (.java)\nF7: Compile with javac\nF8: Run with java\nTab: Auto-completion for Java features"
+  }
+}

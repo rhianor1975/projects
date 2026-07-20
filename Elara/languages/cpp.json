@@ -1,0 +1,165 @@
+{
+  "name": "C++",
+  "extensions": [".cpp", ".cc", ".cxx", ".c++", ".hpp", ".hh", ".hxx", ".h++"],
+  
+  "keywords": [
+    "alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand",
+    "bitor", "bool", "break", "case", "catch", "char", "char8_t",
+    "char16_t", "char32_t", "class", "compl", "concept", "const",
+    "constexpr", "const_cast", "continue", "co_await", "co_return",
+    "co_yield", "decltype", "default", "delete", "do", "double",
+    "dynamic_cast", "else", "enum", "explicit", "export", "extern",
+    "false", "float", "for", "friend", "goto", "if", "inline", "int",
+    "long", "mutable", "namespace", "new", "noexcept", "not", "not_eq",
+    "nullptr", "operator", "or", "or_eq", "private", "protected",
+    "public", "register", "reinterpret_cast", "requires", "return",
+    "short", "signed", "sizeof", "static", "static_assert", "static_cast",
+    "struct", "switch", "template", "this", "thread_local", "throw",
+    "true", "try", "typedef", "typeid", "typename", "union", "unsigned",
+    "using", "virtual", "void", "volatile", "wchar_t", "while", "xor", "xor_eq"
+  ],
+  
+  "types": [
+    "string", "vector", "map", "set", "list", "deque", "array",
+    "shared_ptr", "unique_ptr", "weak_ptr", "function", "pair",
+    "tuple", "optional", "variant", "any", "span", "string_view",
+    "fstream", "ifstream", "ofstream", "iostream", "istream", "ostream",
+    "auto_ptr", "mutex", "lock_guard", "unique_lock", "shared_lock",
+    "thread", "future", "promise", "packaged_task", "condition_variable",
+    "atomic", "chrono", "complex", "valarray", "bitset", "queue",
+    "stack", "priority_queue", "forward_list", "unordered_map",
+    "unordered_set", "unordered_multimap", "unordered_multiset"
+  ],
+  
+  "builtins": [
+    "std", "cout", "cin", "cerr", "clog", "endl", "flush",
+    "make_shared", "make_unique", "move", "forward", "swap",
+    "begin", "end", "rbegin", "rend", "cbegin", "cend",
+    "crbegin", "crend", "back_inserter", "front_inserter",
+    "inserter", "make_pair", "make_tuple", "tie", "ignore",
+    "get", "apply", "visit", "holds_alternative", "get_if",
+    "unique_ptr", "shared_ptr", "weak_ptr", "enable_shared_from_this",
+    "make_shared", "make_unique", "allocate_shared", "allocate_unique"
+  ],
+  
+  "preprocessor": [
+    "#include", "#define", "#undef", "#ifdef", "#ifndef",
+    "#if", "#else", "#elif", "#endif", "#error", "#pragma",
+    "#line", "#warning", "#define", "#if defined"
+  ],
+  
+  "comments": {
+    "single": "//",
+    "multi_start": "/*",
+    "multi_end": "*/"
+  },
+  
+  "brackets": {
+    "auto_close": ["(", "[", "{", "\"", "'"]
+  },
+  
+  "indent": {
+    "increase": ["{"],
+    "decrease": ["}"]
+  },
+  
+  "completions": {
+    "#ifdef": "#ifdef $1\n    $2\n#endif",
+    "#ifndef": "#ifndef $1\n    $2\n#endif",
+    "#include": "#include <$1>",
+    "struct": "struct $1 {\n    $2\n};",
+    "class": "class $1 {\npublic:\n    $2\nprivate:\n    $3\n};",
+    "namespace": "namespace $1 {\n    $2\n}",
+    "template": "template<typename $1>\n$2",
+    "operator": "operator $1() {\n    $2\n}",
+    "switch": "switch ($1) {\n    case $2:\n        $3\n        break;\n    default:\n        $4\n}",
+    "case": "case $1:\n    $2\n    break;",
+    "default": "default:\n    $1\n    break;",
+    "for": "for (int $1 = 0; $1 < $2; $1++) {\n    $3\n}",
+    "while": "while ($1) {\n    $2\n}",
+    "do": "do {\n    $1\n} while ($2);",
+    "if": "if ($1) {\n    $2\n}",
+    "else": "else {\n    $1\n}",
+    "else if": "else if ($1) {\n    $2\n}",
+    "return": "return $1;",
+    "main": "int main(int argc, char *argv[]) {\n    $1\n    return 0;\n}",
+    "cout": "std::cout << $1 << std::endl;",
+    "cin": "std::cin >> $1;",
+    "string": "std::string $1 = \"$2\";",
+    "vector": "std::vector<$1> $2;",
+    "map": "std::map<$1, $2> $3;",
+    "auto_ptr": "std::auto_ptr<$1> $2(new $1($3));",
+    "shared_ptr": "std::shared_ptr<$1> $2 = std::make_shared<$1>($3);",
+    "unique_ptr": "std::unique_ptr<$1> $2 = std::make_unique<$1>($3);",
+    "lambda": "[$1]($2) -> $3 {\n    $4\n}",
+    "try": "try {\n    $1\n} catch ($2) {\n    $3\n}",
+    "throw": "throw $1;",
+    "using": "using $1 = $2;",
+    "typedef": "typedef $1 $2;"
+  },
+  
+  "libraries": {
+    "#include <iostream>": "",
+    "#include <string>": "",
+    "#include <vector>": "",
+    "#include <map>": "",
+    "#include <set>": "",
+    "#include <algorithm>": "",
+    "#include <numeric>": "",
+    "#include <iterator>": "",
+    "#include <functional>": "",
+    "#include <memory>": "",
+    "#include <thread>": "-pthread",
+    "#include <mutex>": "-pthread",
+    "#include <future>": "-pthread",
+    "#include <condition_variable>": "-pthread",
+    "#include <ncurses.h>": "-lncurses",
+    "#include <curses.h>": "-lncurses",
+    "initscr(": "-lncurses",
+    "endwin(": "-lncurses",
+    "#include <math.h>": "-lm",
+    "sqrt(": "-lm",
+    "pow(": "-lm",
+    "sin(": "-lm",
+    "cos(": "-lm",
+    "tan(": "-lm",
+    "#include <pthread.h>": "-lpthread",
+    "pthread_create(": "-lpthread",
+    "pthread_join(": "-lpthread",
+    "#include <GL/gl.h>": "-lGL -lGLU -lglut",
+    "#include <GL/glut.h>": "-lGL -lGLU -lglut",
+    "glBegin(": "-lGL -lGLU -lglut",
+    "#include <SDL2/SDL.h>": "-lSDL2",
+    "#include <gtk/gtk.h>": "`pkg-config --cflags --libs gtk+-3.0`",
+    "#include <curl/curl.h>": "-lcurl",
+    "#include <openssl/ssl.h>": "-lssl -lcrypto",
+    "#include <openssl/crypto.h>": "-lssl -lcrypto",
+    "#include <libxml/parser.h>": "`xml2-config --cflags --libs`",
+    "#include <sqlite3.h>": "-lsqlite3",
+    "#include <readline/readline.h>": "-lreadline",
+    "#include <boost/asio.hpp>": "-lboost_system -lboost_thread",
+    "#include <boost/filesystem.hpp>": "-lboost_filesystem",
+    "#include <boost/algorithm/string.hpp>": "-lboost_regex"
+  },
+  
+  "compile": {
+    "build": "g++ -Wall -Wextra -std=c++17 -o {output} {file} {libraries} 2> compile_errors.txt",
+    "run": "./{output}",
+    "error_parser": "g++"
+  },
+  
+  "template": [
+    "#include <iostream>",
+    "#include <cstdlib>",
+    "",
+    "int main(int argc, char *argv[]) {",
+    "    std::cout << \"Hello, world!\" << std::endl;",
+    "    return 0;",
+    "}"
+  ],
+  
+  "help": {
+    "short": "C++: F7=Compile F8=Run",
+    "long": "C++ files (.cpp, .cc, .cxx, .hpp, .hh)\nF7: Compile with g++ -std=c++17 (auto-detects libraries)\nF8: Run the compiled program\nTab: Auto-completion for keywords and STL"
+  }
+}

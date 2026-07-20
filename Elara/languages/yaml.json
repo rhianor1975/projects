@@ -1,0 +1,74 @@
+{
+  "name": "YAML",
+  "extensions": [".yaml", ".yml"],
+  
+  "keywords": [
+    "true", "false", "null", "yes", "no", "on", "off",
+    "---", "...", "%YAML", "%TAG", "!!", "&", "*", "<<"
+  ],
+  
+  "types": [],
+  
+  "builtins": [],
+  
+  "preprocessor": [
+    "---", "...", "%YAML", "%TAG"
+  ],
+  
+  "comments": {
+    "single": "#",
+    "multi_start": "",
+    "multi_end": ""
+  },
+  
+  "brackets": {
+    "auto_close": ["[", "{", "\"", "'"]
+  },
+  
+  "indent": {
+    "increase": [":"],
+    "decrease": []
+  },
+  
+  "completions": {
+    "key": "$1: $2",
+    "object": "$1:\n    $2: $3\n    $4: $5",
+    "array": "$1:\n    - $2\n    - $3",
+    "list": "- $1",
+    "nested": "$1:\n    - $2:\n        $3: $4",
+    "true": "$1: true",
+    "false": "$1: false",
+    "null": "$1: null",
+    "string": "$1: \"$2\"",
+    "multiline": "$1: |\n    $2",
+    "multiline fold": "$1: >\n    $2",
+    "anchor": "&$1",
+    "alias": "*$1",
+    "tag": "!!$1",
+    "merge": "<<: *$1",
+    "environment": "$1: $2",
+    "dash": "---\n$1",
+    "date": "$1: $2-$3-$4",
+    "datetime": "$1: $2-$3-$4T$5:$6:$7Z"
+  },
+  
+  "libraries": {},
+  
+  "compile": {
+    "build": "yamllint {file} 2> compile_errors.txt",
+    "run": "python3 -c \"import yaml; yaml.safe_load(open('{file}'))\"",
+    "check": "yamllint {file}"
+  },
+  
+  "template": [
+    "---",
+    "name: Hello World",
+    "version: 1.0",
+    "---"
+  ],
+  
+  "help": {
+    "short": "YAML: F7=Lint F8=Validate",
+    "long": "YAML files (.yaml, .yml)\nF7: Lint with yamllint\nF8: Validate with Python yaml\nTab: Auto-completion for YAML syntax"
+  }
+}

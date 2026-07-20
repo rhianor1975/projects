@@ -1,0 +1,155 @@
+{
+  "name": "TypeScript",
+  "extensions": [".ts", ".tsx"],
+  
+  "keywords": [
+    "abstract", "any", "as", "asserts", "bigint", "boolean",
+    "break", "case", "catch", "class", "const", "continue",
+    "debugger", "declare", "default", "delete", "do", "else",
+    "enum", "export", "extends", "false", "finally", "for",
+    "from", "function", "if", "implements", "import", "in",
+    "infer", "instanceof", "interface", "is", "keyof", "let",
+    "namespace", "never", "new", "null", "number", "object",
+    "package", "private", "protected", "public", "readonly",
+    "require", "return", "super", "switch", "symbol", "this",
+    "throw", "true", "try", "type", "typeof", "undefined",
+    "unique", "unknown", "var", "void", "while", "with", "yield"
+  ],
+  
+  "types": [
+    "string", "number", "boolean", "symbol", "void", "undefined",
+    "null", "any", "unknown", "never", "object", "Array",
+    "Promise", "Map", "Set", "WeakMap", "WeakSet", "Date",
+    "RegExp", "Error", "Function", "Record", "Partial", "Required",
+    "Readonly", "Pick", "Omit", "Exclude", "Extract", "NonNullable",
+    "ReturnType", "InstanceType", "ThisType", "Parameters",
+    "ConstructorParameters", "Uppercase", "Lowercase", "Capitalize",
+    "Uncapitalize", "Iterable", "Iterator", "Generator"
+  ],
+  
+  "builtins": [
+    "console", "process", "require", "module", "exports",
+    "setTimeout", "setInterval", "clearTimeout", "clearInterval",
+    "setImmediate", "clearImmediate", "decodeURI", "decodeURIComponent",
+    "encodeURI", "encodeURIComponent", "isNaN", "isFinite",
+    "parseInt", "parseFloat", "JSON", "Math", "Object", "Array",
+    "String", "Number", "Boolean", "Function", "Date", "RegExp",
+    "Error", "Promise", "Symbol", "Map", "Set", "WeakMap",
+    "WeakSet", "Buffer", "URL", "URLSearchParams"
+  ],
+  
+  "preprocessor": [
+    "@", "@decorator", "@Component", "@Injectable", "@NgModule",
+    "@Directive", "@Pipe", "@Input", "@Output", "@HostListener",
+    "@HostBinding", "@ViewChild", "@ViewChildren", "@ContentChild",
+    "@ContentChildren", "@SkipSelf", "@Optional", "@Self"
+  ],
+  
+  "comments": {
+    "single": "//",
+    "multi_start": "/*",
+    "multi_end": "*/"
+  },
+  
+  "brackets": {
+    "auto_close": ["(", "[", "{", "\"", "'", "`"]
+  },
+  
+  "indent": {
+    "increase": ["{", "("],
+    "decrease": ["}", ")"]
+  },
+  
+  "completions": {
+    "interface": "interface $1 {\n    $2: $3;\n    $4?: $5;\n}",
+    "type": "type $1 = $2;",
+    "class": "class $1 {\n    private $2: $3;\n    \n    constructor($4: $5) {\n        this.$2 = $4;\n    }\n    \n    $6(): $7 {\n        return this.$2;\n    }\n}",
+    "abstract class": "abstract class $1 {\n    abstract $2(): $3;\n    \n    $4(): $5 {\n        $6\n    }\n}",
+    "enum": "enum $1 {\n    $2 = '$3',\n    $4 = '$5',\n}",
+    "namespace": "namespace $1 {\n    export $2\n}",
+    "module": "module '$1' {\n    export $2\n}",
+    "import": "import { $1 } from '$2';",
+    "import default": "import $1 from '$2';",
+    "import all": "import * as $1 from '$2';",
+    "export": "export const $1 = $2;",
+    "export default": "export default $1;",
+    "export interface": "export interface $1 {\n    $2\n}",
+    "function": "function $1($2: $3): $4 {\n    $5\n    return $6;\n}",
+    "arrow": "const $1 = ($2: $3): $4 => {\n    $5\n    return $6;\n}",
+    "async": "async function $1($2: $3): Promise<$4> {\n    $5\n    return $6;\n}",
+    "await": "const $1 = await $2;",
+    "promise": "new Promise<$1>((resolve, reject) => {\n    $2\n});",
+    "if": "if ($1) {\n    $2\n}",
+    "else": "else {\n    $1\n}",
+    "for": "for (let $1 = 0; $1 < $2; $1++) {\n    $3\n}",
+    "for in": "for (const $1 in $2) {\n    $3\n}",
+    "for of": "for (const $1 of $2) {\n    $3\n}",
+    "while": "while ($1) {\n    $2\n}",
+    "switch": "switch ($1) {\n    case $2:\n        $3\n        break;\n    default:\n        $4\n}",
+    "try": "try {\n    $1\n} catch ($2: $3) {\n    $4\n} finally {\n    $5\n}",
+    "throw": "throw new $1('$2');",
+    "return": "return $1;",
+    "const": "const $1: $2 = $3;",
+    "let": "let $1: $2 = $3;",
+    "var": "var $1: $2 = $3;",
+    "get": "get $1(): $2 {\n    return this._$1;\n}",
+    "set": "set $1($2: $3) {\n    this._$1 = $2;\n}",
+    "decorator": "@$1\nexport class $2 {\n    $3\n}",
+    "component": "@Component({\n    selector: '$1',\n    templateUrl: './$2.html',\n    styleUrls: ['./$3.css']\n})\nexport class $4 {\n    $5\n}",
+    "injectable": "@Injectable({\n    providedIn: 'root'\n})\nexport class $1 {\n    constructor($2) {\n        $3\n    }\n    \n    $4(): $5 {\n        return $6;\n    }\n}",
+    "pipe": "@Pipe({\n    name: '$1'\n})\nexport class $2Pipe implements PipeTransform {\n    transform(value: $3, args: $4): $5 {\n        $6\n        return value;\n    }\n}",
+    "directive": "@Directive({\n    selector: '[app$1]'\n})\nexport class $2Directive {\n    constructor($3) {\n        $4\n    }\n}",
+    "guard": "@Injectable({\n    providedIn: 'root'\n})\nexport class $1Guard implements CanActivate {\n    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {\n        $2\n        return true;\n    }\n}",
+    "service": "@Injectable({\n    providedIn: 'root'\n})\nexport class $1Service {\n    constructor($2) {\n        $3\n    }\n    \n    $4(): $5 {\n        $6\n        return $7;\n    }\n}"
+  },
+  
+  "libraries": {
+    "import * as React": "-lreact",
+    "import * as ReactDOM": "-lreact-dom",
+    "import { Angular": "-langular",
+    "import { Vue": "-lvue",
+    "import * as express": "-lexpress",
+    "import * as mongoose": "-lmongoose",
+    "import * as lodash": "-llodash",
+    "import * as moment": "-lmoment",
+    "import * as axios": "-laxios",
+    "import * as rxjs": "-lrxjs",
+    "import * as http": "",
+    "import * as fs": "",
+    "import * as path": "",
+    "import * as crypto": "",
+    "import * as child_process": "",
+    "import * as os": "",
+    "import * as util": "",
+    "import * as stream": "",
+    "import * as events": "",
+    "import * as zlib": "",
+    "import * as net": "",
+    "import * as dns": "",
+    "import * as tls": "",
+    "import * as https": "",
+    "import * as http2": "",
+    "import * as readline": "",
+    "import * as cluster": "",
+    "import * as worker_threads": ""
+  },
+  
+  "compile": {
+    "build": "tsc --noEmit {file} 2> compile_errors.txt",
+    "run": "node {file}",
+    "check": "tsc --noEmit {file}"
+  },
+  
+  "template": [
+    "const main = (): void => {",
+    "    console.log('Hello, world!');",
+    "};",
+    "",
+    "main();"
+  ],
+  
+  "help": {
+    "short": "TypeScript: F7=Check F8=Run",
+    "long": "TypeScript files (.ts, .tsx)\nF7: Check with tsc --noEmit\nF8: Run with node\nTab: Auto-completion for TypeScript features"
+  }
+}

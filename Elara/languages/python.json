@@ -1,0 +1,130 @@
+{
+  "name": "Python",
+  "extensions": [".py", ".pyw", ".pyx"],
+  
+  "keywords": [
+    "False", "None", "True", "and", "as", "assert", "async", "await",
+    "break", "class", "continue", "def", "del", "elif", "else",
+    "except", "finally", "for", "from", "global", "if", "import",
+    "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise",
+    "return", "try", "while", "with", "yield"
+  ],
+  
+  "types": [
+    "int", "float", "complex", "bool", "str", "bytes", "bytearray",
+    "list", "tuple", "dict", "set", "frozenset", "range",
+    "memoryview", "NoneType", "type", "object", "Ellipsis",
+    "Generator", "Callable", "Iterable", "Iterator", "Sequence",
+    "MutableSequence", "Hashable", "Sized", "Container", "Awaitable",
+    "Coroutine", "AsyncIterable", "AsyncIterator", "ContextManager"
+  ],
+  
+  "builtins": [
+    "abs", "all", "any", "ascii", "bin", "bool", "breakpoint",
+    "bytearray", "bytes", "callable", "chr", "classmethod",
+    "compile", "complex", "delattr", "dict", "dir", "divmod",
+    "enumerate", "eval", "exec", "filter", "float", "format",
+    "frozenset", "getattr", "globals", "hasattr", "hash", "help",
+    "hex", "id", "input", "int", "isinstance", "issubclass",
+    "iter", "len", "list", "locals", "map", "max", "memoryview",
+    "min", "next", "object", "oct", "open", "ord", "pow", "print",
+    "property", "range", "repr", "reversed", "round", "set",
+    "setattr", "slice", "sorted", "staticmethod", "str", "sum",
+    "super", "tuple", "type", "vars", "zip", "__import__"
+  ],
+  
+  "preprocessor": [
+    "#!", "# -*- coding:", "# encoding:"
+  ],
+  
+  "comments": {
+    "single": "#",
+    "multi_start": "\"\"\"",
+    "multi_end": "\"\"\""
+  },
+  
+  "brackets": {
+    "auto_close": ["(", "[", "{", "\"", "'"]
+  },
+  
+  "indent": {
+    "increase": [":"],
+    "decrease": []
+  },
+  
+  "completions": {
+    "if": "if $1:\n    $2",
+    "elif": "elif $1:\n    $2",
+    "else": "else:\n    $1",
+    "for": "for $1 in $2:\n    $3",
+    "while": "while $1:\n    $2",
+    "def": "def $1($2):\n    \"\"\"$3\"\"\"\n    $4\n    return $5",
+    "class": "class $1:\n    \"\"\"$2\"\"\"\n    \n    def __init__(self, $3):\n        $4\n    \n    def $5(self):\n        $6",
+    "try": "try:\n    $1\nexcept $2 as $3:\n    $4\nfinally:\n    $5",
+    "with": "with $1 as $2:\n    $3",
+    "lambda": "lambda $1: $2",
+    "list": "[$1]",
+    "dict": "{$1: $2}",
+    "set": "{$1}",
+    "tuple": "($1)",
+    "range": "range($1)",
+    "len": "len($1)",
+    "enumerate": "enumerate($1)",
+    "zip": "zip($1)",
+    "import": "import $1",
+    "from": "from $1 import $2",
+    "main": "if __name__ == \"__main__\":\n    $1",
+    "open": "with open('$1', '$2') as f:\n    $3",
+    "classmethod": "@classmethod\ndef $1(cls, $2):\n    $3",
+    "staticmethod": "@staticmethod\ndef $1($2):\n    $3",
+    "property": "@property\ndef $1(self):\n    $2",
+    "setter": "@$1.setter\ndef $1(self, $2):\n    $3",
+    "__init__": "def __init__(self, $1):\n    super().__init__($2)\n    $3",
+    "__str__": "def __str__(self):\n    return f\"$1\"",
+    "__repr__": "def __repr__(self):\n    return f\"$1\""
+  },
+  
+  "libraries": {
+    "import numpy": "-lnumpy",
+    "import pandas": "-lpandas",
+    "import matplotlib": "-lmatplotlib",
+    "import scipy": "-lscipy",
+    "import tensorflow": "-ltensorflow",
+    "import torch": "-ltorch",
+    "import torchvision": "-ltorchvision",
+    "import requests": "-lrequests",
+    "import flask": "-lflask",
+    "import django": "-ldjango",
+    "import sqlite3": "-lsqlite3",
+    "import psycopg2": "-lpsycopg2",
+    "import pymysql": "-lpymysql",
+    "import redis": "-lredis",
+    "import celery": "-lcelery",
+    "import pytest": "-lpytest",
+    "import unittest": "-lunittest",
+    "import asyncio": "-lasyncio",
+    "import aiohttp": "-laiohttp"
+  },
+  
+  "compile": {
+    "build": "python3 -m py_compile {file} 2> compile_errors.txt",
+    "run": "python3 {file}",
+    "check": "python3 -m pyflakes {file}"
+  },
+  
+  "template": [
+    "#!/usr/bin/env python3",
+    "# -*- coding: utf-8 -*-",
+    "",
+    "def main():",
+    "    print(\"Hello, world!\")",
+    "",
+    "if __name__ == \"__main__\":",
+    "    main()"
+  ],
+  
+  "help": {
+    "short": "Python: F7=Lint F8=Run",
+    "long": "Python files (.py, .pyw)\nF7: Check syntax with py_compile\nF8: Run the script\nTab: Auto-completion for Python constructs"
+  }
+}

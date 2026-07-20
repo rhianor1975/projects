@@ -1,0 +1,138 @@
+{
+  "name": "Go",
+  "extensions": [".go"],
+  
+  "keywords": [
+    "break", "case", "chan", "const", "continue", "default",
+    "defer", "else", "fallthrough", "for", "func", "go",
+    "goto", "if", "import", "interface", "map", "package",
+    "range", "return", "select", "struct", "switch", "type", "var"
+  ],
+  
+  "types": [
+    "string", "int", "int8", "int16", "int32", "int64",
+    "uint", "uint8", "uint16", "uint32", "uint64", "uintptr",
+    "byte", "rune", "float32", "float64", "complex64", "complex128",
+    "bool", "error", "nil", "slice", "array", "map", "chan",
+    "interface", "struct", "func", "Context", "Writer", "Reader",
+    "Closer", "Seeker", "Scanner", "Mutex", "RWMutex", "WaitGroup",
+    "Once", "Atomic", "Time", "Duration", "Timer", "Ticker"
+  ],
+  
+  "builtins": [
+    "append", "cap", "close", "complex", "copy", "delete",
+    "imag", "len", "make", "new", "panic", "print", "println",
+    "real", "recover", "println", "delete", "close", "copy",
+    "append", "make", "new", "complex", "imag", "real"
+  ],
+  
+  "preprocessor": [
+    "go:embed", "go:generate", "go:linkname", "go:noescape",
+    "go:nosplit", "go:noinline", "go:notinheap", "go:nowritebarrier",
+    "go:nowritebarrierrec", "go:yeswritebarrierrec", "go:uintptrescapes",
+    "go:wasmimport", "go:wasmexport"
+  ],
+  
+  "comments": {
+    "single": "//",
+    "multi_start": "/*",
+    "multi_end": "*/"
+  },
+  
+  "brackets": {
+    "auto_close": ["(", "[", "{", "\"", "'", "`"]
+  },
+  
+  "indent": {
+    "increase": ["{"],
+    "decrease": ["}"]
+  },
+  
+  "completions": {
+    "if": "if $1 {\n    $2\n}",
+    "else": "else {\n    $1\n}",
+    "else if": "else if $1 {\n    $2\n}",
+    "for": "for $1 := 0; $1 < $2; $1++ {\n    $3\n}",
+    "for range": "for _, $1 := range $2 {\n    $3\n}",
+    "for range key": "for $1, $2 := range $3 {\n    $4\n}",
+    "switch": "switch $1 {\ncase $2:\n    $3\ncase $4:\n    $5\ndefault:\n    $6\n}",
+    "case": "case $1:\n    $2",
+    "default": "default:\n    $1",
+    "func": "func $1($2) $3 {\n    $4\n    return $5\n}",
+    "func with error": "func $1($2) ($3, error) {\n    $4\n    return $5, nil\n}",
+    "struct": "type $1 struct {\n    $2 $3\n    $4 $5\n}",
+    "interface": "type $1 interface {\n    $2($3) $4\n}",
+    "method": "func (r $1) $2($3) $4 {\n    $5\n    return $6\n}",
+    "type": "type $1 $2",
+    "var": "var $1 $2",
+    "const": "const $1 = $2",
+    "package": "package $1",
+    "import": "import \"$1\"",
+    "import alias": "import $1 \"$2\"",
+    "import group": "import (\n    \"$1\"\n    \"$2\"\n)",
+    "main": "func main() {\n    $1\n}",
+    "defer": "defer $1()",
+    "go": "go $1()",
+    "make": "make($1, $2)",
+    "new": "new($1)",
+    "panic": "panic($1)",
+    "recover": "recover()",
+    "select": "select {\ncase $1 <- $2:\n    $3\ncase $4 := <-$5:\n    $6\ndefault:\n    $7\n}",
+    "chan": "make(chan $1)",
+    "context": "context.Background()"
+  },
+  
+  "libraries": {
+    "import \"fmt\"": "",
+    "import \"net/http\"": "",
+    "import \"encoding/json\"": "",
+    "import \"encoding/json\"": "",
+    "import \"io\"": "",
+    "import \"os\"": "",
+    "import \"flag\"": "",
+    "import \"strings\"": "",
+    "import \"strconv\"": "",
+    "import \"time\"": "",
+    "import \"sync\"": "",
+    "import \"testing\"": "",
+    "import \"log\"": "",
+    "import \"errors\"": "",
+    "import \"crypto/md5\"": "",
+    "import \"crypto/sha256\"": "",
+    "import \"database/sql\"": "-lsqlite3",
+    "import \"github.com/gorilla/mux\"": "-lgorilla/mux",
+    "import \"github.com/gin-gonic/gin\"": "-lgin-gonic/gin",
+    "import \"github.com/stretchr/testify\"": "-ltestify",
+    "import \"github.com/go-sql-driver/mysql\"": "-lmysql",
+    "import \"github.com/lib/pq\"": "-lpq",
+    "import \"github.com/jinzhu/gorm\"": "-lgorm",
+    "import \"github.com/spf13/cobra\"": "-lcobra",
+    "import \"github.com/spf13/viper\"": "-lviper",
+    "import \"github.com/sirupsen/logrus\"": "-llogrus",
+    "import \"github.com/gorilla/websocket\"": "-lwebsocket",
+    "import \"github.com/go-redis/redis\"": "-lredis",
+    "import \"github.com/jmoiron/sqlx\"": "-lsqlx",
+    "import \"github.com/Masterminds/squirrel\"": "-lsquirrel"
+  },
+  
+  "compile": {
+    "build": "go build -o {output} {file} 2> compile_errors.txt",
+    "run": "./{output}",
+    "check": "go vet {file}"
+  },
+  
+  "template": [
+    "package main",
+    "",
+    "import \"fmt\"",
+    "",
+    "func main() {",
+    "    fmt.Println(\"Hello, world!\")",
+    "}"
+  ],
+  
+  "help": {
+    "short": "Go: F7=Build F8=Run",
+    "long": "Go files (.go)\nF7: Build with go build\nF8: Run the program\nTab: Auto-completion for Go idioms"
+  }
+}

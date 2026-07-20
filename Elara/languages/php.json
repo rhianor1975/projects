@@ -1,0 +1,153 @@
+{
+  "name": "PHP",
+  "extensions": [".php", ".php3", ".php4", ".php5", ".phps"],
+  
+  "keywords": [
+    "abstract", "and", "array", "as", "break", "case", "catch",
+    "class", "clone", "const", "continue", "declare", "default",
+    "die", "do", "echo", "else", "elseif", "enddeclare", "endfor",
+    "endforeach", "endif", "endswitch", "endwhile", "extends",
+    "final", "finally", "for", "foreach", "function", "global",
+    "goto", "if", "implements", "include", "include_once",
+    "instanceof", "insteadof", "interface", "list", "namespace",
+    "new", "or", "print", "private", "protected", "public",
+    "require", "require_once", "return", "static", "switch",
+    "throw", "trait", "try", "use", "var", "while", "xor",
+    "yield", "yield from"
+  ],
+  
+  "types": [
+    "int", "integer", "float", "double", "string", "bool",
+    "boolean", "array", "object", "null", "resource", "mixed",
+    "void", "callable", "iterable", "self", "parent", "static",
+    "stdClass", "Exception", "Throwable", "Error", "RuntimeException",
+    "LogicException", "InvalidArgumentException", "PDO"
+  ],
+  
+  "builtins": [
+    "echo", "print", "die", "exit", "isset", "unset", "empty",
+    "var_dump", "print_r", "var_export", "debug_zval_dump",
+    "gettype", "settype", "is_array", "is_bool", "is_callable",
+    "is_float", "is_int", "is_null", "is_numeric", "is_object",
+    "is_resource", "is_scalar", "is_string", "count", "sizeof",
+    "strlen", "strpos", "strrpos", "strstr", "str_replace",
+    "preg_match", "preg_replace", "explode", "implode", "join",
+    "json_encode", "json_decode", "serialize", "unserialize",
+    "md5", "sha1", "hash", "password_hash", "password_verify",
+    "date", "time", "strtotime", "gmdate", "date_default_timezone_set",
+    "file_exists", "is_file", "is_dir", "fopen", "fclose",
+    "fread", "fwrite", "feof", "file_get_contents", "file_put_contents",
+    "mkdir", "rmdir", "unlink", "rename", "copy", "move_uploaded_file",
+    "header", "session_start", "session_destroy", "setcookie",
+    "phpinfo", "phpversion", "ini_get", "ini_set"
+  ],
+  
+  "preprocessor": [
+    "declare", "strict_types", "ticks", "encoding"
+  ],
+  
+  "comments": {
+    "single": "//",
+    "multi_start": "/*",
+    "multi_end": "*/"
+  },
+  
+  "brackets": {
+    "auto_close": ["(", "[", "{", "\"", "'"]
+  },
+  
+  "indent": {
+    "increase": ["{", "("],
+    "decrease": ["}", ")"]
+  },
+  
+  "completions": {
+    "if": "if ($1) {\n    $2\n}",
+    "else": "else {\n    $1\n}",
+    "elseif": "elseif ($1) {\n    $2\n}",
+    "for": "for ($1 = 0; $1 < $2; $1++) {\n    $3\n}",
+    "foreach": "foreach ($1 as $2) {\n    $3\n}",
+    "foreach key": "foreach ($1 as $2 => $3) {\n    $4\n}",
+    "while": "while ($1) {\n    $2\n}",
+    "do": "do {\n    $1\n} while ($2);",
+    "switch": "switch ($1) {\n    case $2:\n        $3\n        break;\n    default:\n        $4\n        break;\n}",
+    "case": "case $1:\n    $2\n    break;",
+    "default": "default:\n    $1\n    break;",
+    "try": "try {\n    $1\n} catch ($2 \$e) {\n    $3\n} finally {\n    $4\n}",
+    "throw": "throw new $1('$2');",
+    "return": "return $1;",
+    "class": "class $1 {\n    private $$2;\n    \n    public function __construct($3) {\n        $this->$2 = $3;\n    }\n    \n    public function $4(): $5 {\n        return $this->$2;\n    }\n}",
+    "interface": "interface $1 {\n    public function $2($3): $4;\n}",
+    "trait": "trait $1 {\n    $2\n}",
+    "abstract class": "abstract class $1 {\n    abstract protected function $2(): $3;\n    \n    public function $4(): $5 {\n        $6\n    }\n}",
+    "function": "function $1($2): $3 {\n    $4\n    return $5;\n}",
+    "public function": "public function $1($2): $3 {\n    $4\n    return $5;\n}",
+    "private function": "private function $1($2): $3 {\n    $4\n    return $5;\n}",
+    "protected function": "protected function $1($2): $3 {\n    $4\n    return $5;\n}",
+    "static function": "public static function $1($2): $3 {\n    $4\n    return $5;\n}",
+    "constructor": "public function __construct($1) {\n    $2\n}",
+    "destructor": "public function __destruct() {\n    $1\n}",
+    "getter": "public function get$1(): $2 {\n    return $this->$3;\n}",
+    "setter": "public function set$1($2 $3): void {\n    $this->$4 = $3;\n}",
+    "namespace": "namespace $1;",
+    "use": "use $1\\$2;",
+    "use alias": "use $1\\$2 as $3;",
+    "include": "include '$1';",
+    "require": "require '$1';",
+    "include_once": "include_once '$1';",
+    "require_once": "require_once '$1';",
+    "echo": "echo $1;",
+    "var_dump": "var_dump($1);",
+    "array": "$$1 = [$2 => $3];",
+    "string": "$$1 = '$2';",
+    "int": "$$1 = $2;",
+    "bool": "$$1 = $2;",
+    "null": "$$1 = null;",
+    "instanceof": "if ($1 instanceof $2) {\n    $3\n}"
+  },
+  
+  "libraries": {
+    "use PDO": "-lpdo_mysql",
+    "use PDOStatement": "-lpdo_mysql",
+    "new PDO(": "-lpdo_mysql",
+    "mysqli_": "-lmysqli",
+    "mysql_": "-lmysql",
+    "new mysqli(": "-lmysqli",
+    "new MongoClient(": "-lmongodb",
+    "new MongoDB\\Client": "-lmongodb",
+    "use Guzzle": "-lguzzle",
+    "use Symfony": "-lsymfony",
+    "use Illuminate": "-llaravel",
+    "use Illuminate\\": "-llaravel",
+    "use Laravel": "-llaravel",
+    "use Doctrine": "-ldoctrine",
+    "use PHPMailer": "-lphpmailer",
+    "use Monolog": "-lmonolog",
+    "use Twig": "-ltwig",
+    "use Smarty": "-lsmarty",
+    "use PHPUnit": "-lphpunit",
+    "use Mockery": "-lmockery",
+    "use Laravel\\Tinker": "-ltinker",
+    "use Laravel\\Horizon": "-lhorizon",
+    "use Laravel\\Nova": "-lnova",
+    "use Spatie": "-lspatie"
+  },
+  
+  "compile": {
+    "build": "php -l {file} 2> compile_errors.txt",
+    "run": "php {file}",
+    "check": "php -l {file}"
+  },
+  
+  "template": [
+    "<?php",
+    "",
+    "echo 'Hello, world!';",
+    "?>"
+  ],
+  
+  "help": {
+    "short": "PHP: F7=Check F8=Run",
+    "long": "PHP files (.php)\nF7: Check syntax with php -l\nF8: Run with php\nTab: Auto-completion for PHP features"
+  }
+}
