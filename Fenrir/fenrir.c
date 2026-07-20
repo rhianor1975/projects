@@ -1121,7 +1121,7 @@ void drain_mpv_socket(void) {
         buffer[n] = '\0';
         size_t remaining = SOCKET_BUFFER_SIZE - socket_buffer_len - 1;
         if (remaining > 0) {
-            size_t to_copy = (n < remaining) ? n : remaining;
+            size_t to_copy = ((size_t)n < remaining) ? (size_t)n : remaining;
             memcpy(socket_buffer + socket_buffer_len, buffer, to_copy);
             socket_buffer_len += to_copy;
             socket_buffer[socket_buffer_len] = '\0';
