@@ -46,7 +46,7 @@ To launch the editor:
 | :--- | :--- |
 | **F2 / Ctrl+S** | Save file |
 | **F3 / Ctrl+O** | Open file browser |
-| **F4** | Save as |
+| **F4 / Alt+A** | Save as |
 | **F10 / Ctrl+X** | Close tab / Quit |
 
 ### Tabs
@@ -55,7 +55,7 @@ To launch the editor:
 | :--- | :--- |
 | **Ctrl+N** | New tab |
 | **Ctrl+\\** | Next tab |
-| **F12** | Open file in new tab |
+| **F12 / Alt+O** | Open file in new tab |
 | **Alt+1..9 / Esc 1..9** | Jump to tab 1-9 |
 
 ### Editing
@@ -78,12 +78,12 @@ To launch the editor:
 | Key | Action |
 | :--- | :--- |
 | **Arrow Keys** | Move cursor |
-| **Ctrl+Left/Right** | Jump between words |
+| **Ctrl+Left/Right / Option+Left/Right** | Jump between words |
 | **Home / End** | Start / end of line |
 | **Page Up/Down** | Scroll page |
 | **Mouse Wheel** | Scroll (mouse ON) |
 | **Ctrl+G** | Go to line number |
-| **F5** | Toggle line numbers |
+| **F5 / Alt+N** | Toggle line numbers |
 
 ### Search & Replace
 
@@ -102,15 +102,17 @@ To launch the editor:
 | :--- | :--- |
 | **F6** | Cycle themes |
 | **Ctrl+T** | Theme picker |
-| **F9** | Cycle wrap modes (OFF → Character → Word) |
-| **F7** | Compile / Check (if supported) |
-| **F8** | Run (if supported) |
+| **F9 / Alt+W** | Cycle wrap modes (OFF → Character → Word) |
+| **F7 / Alt+C** | Compile / Check (if supported) |
+| **F8 / Alt+R** | Run (if supported) |
 | **F11 / Ctrl+U** | Insert template (if defined) |
 | **Ctrl+L** | Change language |
 | **Ctrl+J** | Toggle mouse |
 | **Ctrl+Q** | Toggle reading mode |
 | **Ctrl+]** | Toggle UTF-8 mode |
-| **F1** | Help |
+| **F1 / Alt+H** | Help |
+
+On macOS, the Alt+letter fallbacks above need "Use Option as Meta Key" enabled in Terminal's profile settings (Keyboard tab) — otherwise Option+letter types an accented character instead. If your keyboard needs Fn held for F-keys, these give you a way around that. (Option+Left/Right for word-jump works out of the box, no setting needed — Terminal.app special-cases it.)
 
 ## Configuration
 

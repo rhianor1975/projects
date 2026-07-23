@@ -1178,6 +1178,8 @@ int get_wrapped_line_count(Editor *ed, int line_idx);
 char get_matching_close(char open_char);
 char* detect_libraries(Editor *ed);
 void toggle_mouse(Editor *ed);
+void toggle_line_numbers(Editor *ed);
+void cycle_wrap_mode(Editor *ed);
 void show_file_browser(Editor *ed);
 void draw_file_browser(FileBrowser *fb, int rows, int cols);
 void free_file_browser(FileBrowser *fb);
@@ -1279,6 +1281,36 @@ int utf8_column_to_byte(const char *text, int screen_col) {
 void toggle_utf8(Editor *ed) {
     utf8_enabled = !utf8_enabled;
     status_message(ed, "UTF-8 Mode: %s", utf8_enabled ? "ON" : "OFF");
+}
+
+// Shared by the F5 case and its Alt+N fallback (Mac F-keys need Fn held
+// unless "Use F1, F2, etc. as standard function keys" is on).
+void toggle_line_numbers(Editor *ed) {
+    ed->show_line_numbers = !ed->show_line_numbers;
+    editor_config.show_line_numbers = ed->show_line_numbers;
+    status_message(ed, "Line numbers: %s", ed->show_line_numbers ? "ON" : "OFF");
+    save_config(ed);
+}
+
+// Shared by the F9 case and its Alt+W fallback - see toggle_line_numbers.
+void cycle_wrap_mode(Editor *ed) {
+    if (!ed->wrap_text) {
+        ed->wrap_text = 1;
+        ed->wrap_mode = 0;
+        status_message(ed, "Wrap mode: Character");
+    } else if (ed->wrap_mode == 0) {
+        ed->wrap_mode = 1;
+        status_message(ed, "Wrap mode: Word");
+    } else {
+        ed->wrap_text = 0;
+        ed->wrap_mode = 0;
+        status_message(ed, "Text wrapping disabled");
+    }
+    editor_config.wrap_text = ed->wrap_text;
+    editor_config.wrap_mode = ed->wrap_mode;
+    invalidate_caches(ed);
+    clear();
+    save_config(ed);
 }
 
 // ==================== OPTIMIZED LINE MANAGEMENT ====================
@@ -3480,6 +3512,7 @@ void handle_input(Editor *ed, int ch) {
 
         case KEY_BACKSPACE:
         case 8:
+        case 127:
             if (ed->has_selection) {
                 delete_selection(ed);
             } else {
@@ -6578,18 +6611,69 @@ int main(int argc, char *argv[]) {
                             code = params[2]; modifier = params[1];        
                         }
                         
-                        if (code >= '1' && code <= '9' && modifier == 5) { 
+                        if (code >= '1' && code <= '9' && modifier == 5) {
                             int target = code - '1';
                             if (target < tab_count) {
                                 current_tab = target;
                                 status_message(&tabs[current_tab], "Switched to tab %d", current_tab + 1);
                             }
                         }
+
+                        // Option/Alt+Left/Right ("\033[1;3D" / "\033[1;3C"):
+                        // the CSI form some terminals (e.g. iTerm2 in xterm
+                        // modifyOtherKeys mode) send for Option+Arrow. This
+                        // is the Mac-native word-jump gesture and isn't
+                        // intercepted by macOS the way Ctrl+Left/Right is
+                        // (Mission Control claims that combo for Spaces
+                        // before the terminal ever sees it), so it needs its
+                        // own binding rather than relying on ctrl_left_key/
+                        // ctrl_right_key above.
+                        if (finalch == 'D' && modifier == 3) {
+                            move_cursor_word(ed, -1);
+                        } else if (finalch == 'C' && modifier == 3) {
+                            move_cursor_word(ed, 1);
+                        }
                     }
                     break;
                 }
-                
-                wtimeout(stdscr, -1); 
+
+                wtimeout(stdscr, -1);
+
+                // Option/Alt+Left/Right, Terminal.app's default style
+                // ("\033b" / "\033f", the classic Emacs meta+b/meta+f
+                // backward-word/forward-word escape): same Mac-native
+                // word-jump gesture as the CSI form handled above, just a
+                // different encoding depending on terminal/profile.
+                if (next == 'b') {
+                    move_cursor_word(ed, -1);
+                    break;
+                }
+                if (next == 'f') {
+                    move_cursor_word(ed, 1);
+                    break;
+                }
+
+                // Alt+letter fallbacks for F-keys that otherwise need Fn
+                // held on a Mac keyboard (or the "Use F1, F2, etc. as
+                // standard function keys" system setting). Requires
+                // Terminal's "Use Option as Meta Key" to be on, unlike the
+                // word-jump keys above which Terminal.app special-cases
+                // regardless of that setting.
+                if (next == 'h' || next == 'H') { show_help(ed); break; }
+                if (next == 'a' || next == 'A') { save_as(ed); break; }
+                if (next == 'n' || next == 'N') { toggle_line_numbers(ed); break; }
+                if (next == 'c' || next == 'C') { compile_file(ed); break; }
+                if (next == 'r' || next == 'R') { run_program(ed); break; }
+                if (next == 'w' || next == 'W') { cycle_wrap_mode(ed); break; }
+                if (next == 'o' || next == 'O') {
+                    if (tab_count >= MAX_TABS) {
+                        status_message(ed, "Tab limit reached (%d max)", MAX_TABS);
+                    } else if (open_new_tab(tabs, &tab_count, &current_tab, NULL)) {
+                        show_file_browser(&tabs[current_tab]);
+                    }
+                    break;
+                }
+
                 if (next >= '1' && next <= '9') {
                     int target = next - '1';
                     if (target < tab_count) {
@@ -6642,10 +6726,7 @@ int main(int argc, char *argv[]) {
                 break;
                 
             case KEY_F(5):
-                ed->show_line_numbers = !ed->show_line_numbers;
-                editor_config.show_line_numbers = ed->show_line_numbers;
-                status_message(ed, "Line numbers: %s", ed->show_line_numbers ? "ON" : "OFF");
-                save_config(ed);
+                toggle_line_numbers(ed);
                 break;
                 
             case KEY_F(6):
@@ -6668,29 +6749,8 @@ int main(int argc, char *argv[]) {
                 run_program(ed);
                 break;
                 
-            case KEY_F(9):  
-                if (!ed->wrap_text) {
-                    ed->wrap_text = 1;
-                    ed->wrap_mode = 0;
-                    status_message(ed, "Wrap mode: Character");
-                } else if (ed->wrap_mode == 0) {
-                    ed->wrap_mode = 1;
-                    status_message(ed, "Wrap mode: Word");
-                } else {
-                    ed->wrap_text = 0;
-                    ed->wrap_mode = 0;
-                    status_message(ed, "Text wrapping disabled");
-                }
-                editor_config.wrap_text = ed->wrap_text;
-                editor_config.wrap_mode = ed->wrap_mode;
-                
-                // Force layout cache recalculation
-                invalidate_caches(ed); 
-                
-                // FIX: Force a global ncurses repaint to render the new wrapped heights cleanly
-                clear(); 
-                
-                save_config(ed);
+            case KEY_F(9):
+                cycle_wrap_mode(ed);
                 break;
                 
             case KEY_F(10):
