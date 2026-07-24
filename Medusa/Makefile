@@ -15,4 +15,7 @@ $(TARGET): $(OBJS)
 clean:
 	rm -f $(OBJS) $(TARGET) medusa-debug.log medusa-debug-item.json
 
-.PHONY: clean
+install: $(TARGET)
+	cp $(TARGET) /usr/local/bin/
+
+.PHONY: clean install
