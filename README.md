@@ -43,6 +43,22 @@ A full-featured terminal text editor with syntax highlighting, tabs, themes, and
 
 ---
 
+### ♟️ [Fidhcheall](./Fidhcheall/) – Chess Engine Tester
+
+A single self-contained C file that plays matches, round-robins, and gauntlets between UCI chess engines and reports Elo, LOS, and SPRT results.
+
+* Round-robin and gauntlet tournaments over any number of engines
+* Its own arbiter (legal moves, mate/draw detection, SAN) — no external chess library
+* Paired openings (seeded random plies, or a curated EPD/PGN opening book), shared across every pairing
+* Elo ± 95% CI, LOS, and SPRT early-stopping from pentanomial statistics
+* PGN output, per-engine UCI options, `--config FILE` for large fields
+* No dependencies beyond a C compiler and libm
+
+**Build:** cd Fidhcheall && make  
+**Run:** ./fidch -r 100 -e1 ./engineA -e2 ./engineB
+
+---
+
 ## 🔧 Dependencies
 
 ### Common
@@ -57,6 +73,9 @@ A full-featured terminal text editor with syntax highlighting, tabs, themes, and
 ### Elara (Text Editor)
 * `ncurses` – UI library
 * `pthread` – Threading
+
+### Fidhcheall (Chess Engine Tester)
+* `libm` – math library (linked with `-lm`), no UI dependency
 
 ---
 
@@ -86,6 +105,10 @@ cd fenrir && make
 cd Elara && make
 ./elara myfile.c
 
+### Fidhcheall (chess engine tester):
+cd Fidhcheall && make
+./fidch -r 20 -e1 ./engineA -e2 ./engineB
+
 ---
 
 ## 📂 Folder Structure
@@ -106,6 +129,10 @@ projects/
 │       ├── c.json
 │       ├── python.json
 │       └── ...
+├── Fidhcheall/         # ♟️ Chess engine tester
+│   ├── fidhcheall.c
+│   ├── Makefile
+│   └── README.md
 └── (future projects)
 </pre>
 

@@ -6,6 +6,7 @@
 # Project executables
 /Fenrir
 /Elara
+/Fidhcheall/fidch
 
 # State files (saved preferences)
 .tunecurses_state
