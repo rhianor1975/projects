@@ -51,6 +51,20 @@ static void debug_log_response(const char* url, const char* body) {
     fclose(f);
 }
 
+// Logs an outgoing POST (what we sent) and what the server replied with -
+// separate from debug_log_response since these calls (session/progress
+// reporting) don't return an items list to log, and their success/failure
+// is otherwise invisible even with --debug on.
+static void debug_log_post(const char* url, const char* request_body, long status, const char* response_body) {
+    if (!debug_mode) return;
+    FILE* f = fopen(DEBUG_LOG_PATH, "a");
+    if (!f) return;
+    fprintf(f, "==== POST %s ====\n> %s\n< HTTP %ld: %s\n\n",
+            url, request_body ? request_body : "(empty)", status,
+            (response_body && response_body[0]) ? response_body : "(empty)");
+    fclose(f);
+}
+
 void api_init(void) {
     curl_global_init(CURL_GLOBAL_DEFAULT);
 }
@@ -371,6 +385,7 @@ static bool post_session_event(const Config* cfg, const char* path, const char* 
     Buffer buf = {0};
     long status = 0;
     bool ok = http_request("POST", url, NULL, cfg->access_token, body, &buf, &status, err, err_sz);
+    debug_log_post(url, body, status, buf.data);
     if (ok && (status < 200 || status >= 300)) {
         ok = false;
         snprintf(err, err_sz, "server returned HTTP %ld", status);

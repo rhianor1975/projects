@@ -912,8 +912,12 @@ static bool play_item(Config* cfg, MpvPlayer* mpv, bool is_first, ApiItem* item,
 
     // Resume where we left off. Ignore a saved position that's implausibly
     // close to (or past) the end - that's effectively "finished", not a
-    // real resume point.
-    double resume_seconds = item->playback_position_ticks > 0
+    // real resume point. This resume courtesy is only for the episode the
+    // user explicitly chose to play (is_first) - an auto-advanced episode
+    // always starts from 0, even if it has old partial-watch progress from
+    // some unrelated earlier viewing; jumping into the middle of a episode
+    // you didn't ask for isn't what "next episode" should mean mid-binge.
+    double resume_seconds = (is_first && item->playback_position_ticks > 0)
                                  ? (double)item->playback_position_ticks / 10000000.0
                                  : 0;
     if (known_duration > 0 && resume_seconds > known_duration - 10) resume_seconds = 0;
@@ -935,7 +939,16 @@ static bool play_item(Config* cfg, MpvPlayer* mpv, bool is_first, ApiItem* item,
         mpv_wait_for_file_loaded(mpv, 5000); // so track selection below has real tracks to work with
     } else {
         mpv_load_file(mpv, stream_url);
-        if (mpv_wait_for_file_loaded(mpv, 5000) && resume_seconds > 0) {
+        if (mpv_wait_for_file_loaded(mpv, 5000)) {
+            // mpv's "--start" option (set once, at the very first mpv_start
+            // launch) turns out to be sticky: it silently re-seeks every
+            // SUBSEQUENT loadfile back to that same position too, moments
+            // after file-loaded fires. Confirmed by direct testing: seeking
+            // immediately gets raced and overridden by that internal
+            // re-seek; a short settle delay first lets it happen, so our
+            // explicit seek (always, even to 0 for an unwatched episode)
+            // then sticks instead of being clobbered.
+            usleep(500000);
             mpv_seek_absolute(mpv, resume_seconds);
         }
         // "pause" is player-wide, not per-file: if the previous episode
