@@ -7,9 +7,12 @@
 /Fenrir
 /Elara
 /Fidhcheall/fidch
+/Medusa/medusa
 
 # State files (saved preferences)
 .tunecurses_state
+/Medusa/medusa-debug.log
+/Medusa/medusa-debug-item.json
 
 # Temporary files
 *.tmp

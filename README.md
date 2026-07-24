@@ -59,6 +59,23 @@ A single self-contained C file that plays matches, round-robins, and gauntlets b
 
 ---
 
+### 🪼 [Medusa](./Medusa/) – Terminal Client for Jellyfin
+
+A lightweight terminal client for Jellyfin media servers: browse libraries, drill into shows/seasons, and play movies/episodes through `mpv`. No ncurses — raw `termios` and ANSI escapes.
+
+* UDP server discovery on your LAN, no manual server URL needed
+* Movies/TV browsing with Series → Season → Episode drill-down, sorting, pagination
+* Continue Watching & Search reconstruct the real library path before playing
+* One mpv window persists across a whole binge session — episodes auto-advance in place
+* Audio/subtitle track selection, remembered by language across episodes and sessions
+* Watched/unwatched toggle that cascades correctly through Series → Season → Episode
+* Hand-rolled JSON parser, no vendored dependency
+
+**Build:** cd Medusa && make  
+**Run:** ./medusa
+
+---
+
 ## 🔧 Dependencies
 
 ### Common
@@ -77,6 +94,10 @@ A single self-contained C file that plays matches, round-robins, and gauntlets b
 ### Fidhcheall (Chess Engine Tester)
 * `libm` – math library (linked with `-lm`), no UI dependency
 
+### Medusa (Jellyfin Client)
+* `libcurl` – HTTP client for the Jellyfin REST API
+* `mpv` – playback engine, driven over its JSON IPC socket
+
 ---
 
 ## 📦 Installation
@@ -89,6 +110,8 @@ cd projects
 cd fenrir && make
 # or
 cd Elara && make
+# or
+cd Medusa && make
 
 ### Install system-wide
 sudo make install
@@ -108,6 +131,10 @@ cd Elara && make
 ### Fidhcheall (chess engine tester):
 cd Fidhcheall && make
 ./fidch -r 20 -e1 ./engineA -e2 ./engineB
+
+### Medusa (Jellyfin client):
+cd Medusa && make
+./medusa
 
 ---
 
@@ -131,6 +158,15 @@ projects/
 │       └── ...
 ├── Fidhcheall/         # ♟️ Chess engine tester
 │   ├── fidhcheall.c
+│   ├── Makefile
+│   └── README.md
+├── Medusa/             # 🪼 Jellyfin terminal client
+│   ├── main.c
+│   ├── ui.c / ui.h
+│   ├── api.c / api.h
+│   ├── mpv.c / mpv.h
+│   ├── json.c / json.h
+│   ├── config.c / config.h
 │   ├── Makefile
 │   └── README.md
 └── (future projects)
