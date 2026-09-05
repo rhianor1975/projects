@@ -1,10 +1,10 @@
 # My Projects
 
-**Tags:** #portfolio #c-programming #terminal-ui #ncurses #open-source #linux #cli
+**Tags:** #portfolio #c-programming #terminal-ui #ncurses #open-source #linux #cli #boardgames
 
 ---
 
-A collection of terminal-based tools and applications built in C.
+A collection of terminal-based tools, applications and board games built in C.
 
 ---
 
@@ -76,6 +76,36 @@ A lightweight terminal client for Jellyfin media servers: browse libraries, dril
 
 ---
 
+### 🗡️ [Talisman](./Talisman/) – Talisman, 2nd Edition
+
+The board game in a terminal, with computer opponents that plan on the board rather than searching it. Three concentric regions drawn as the perimeters of one 7x7 grid — 24 + 16 + 8 + 1 = 49, so every cell is a real space.
+
+* Every expansion shuffled in, plus three optional rules: the six Alternative Endings, Henchmen, and the Chaos Bloodbath
+* Cards and characters transcribed from the real rulebook, not approximated
+* Headless autoplay with seeded replay, so any game can be reproduced exactly
+* Rules invariants checked as the game runs — a batch that prints nothing is a batch with no rules bugs
+* Fits an 86x29 terminal; the layout grows into whatever it is given
+
+**Build:** cd Talisman && make
+**Run:** ./talisman — or ./talisman --watch to let four computer players get on with it
+
+---
+
+### 🐉 [Prophecy](./Prophecy/) – Prophecy, 2nd Edition
+
+Walk a ring of twenty spaces, build a hero, and take four of the five Artifacts from the Astral Planes. The ring is the border of a 6x6 grid, because its perimeter is exactly the twenty spaces the rulebook specifies.
+
+* The complete 2nd-edition base game: 63 Adventure cards, 50 Guild Abilities, 61 Items, 10 Guardians, 5 Artifacts
+* Both expansion worlds as playable subsystems — the Dragon Realm's three climbing paths, and the Water Realm's Bubbles, 4x6 grid and the -1-per-hand penalty that makes carrying less the better choice
+* The Ancient Races, with their advantages and their costs
+* Every card marked as printed, expansion or house rule, since Prophecy has a Czech original that differs from the English and no shortage of fan material
+* Modes combine freely: `PROPHECY_CANON=1` deals the printed deck alone
+
+**Build:** cd Prophecy && make
+**Run:** ./prophecy
+
+---
+
 ## 🔧 Dependencies
 
 ### Common
@@ -97,6 +127,9 @@ A lightweight terminal client for Jellyfin media servers: browse libraries, dril
 ### Medusa (Jellyfin Client)
 * `libcurl` – HTTP client for the Jellyfin REST API
 * `mpv` – playback engine, driven over its JSON IPC socket
+
+### Talisman and Prophecy (board games)
+* `ncurses` – UI library. Nothing else: the cards are compiled in
 
 ---
 
@@ -136,6 +169,14 @@ cd Fidhcheall && make
 cd Medusa && make
 ./medusa
 
+### Talisman (board game):
+cd Talisman && make
+./talisman --watch
+
+### Prophecy (board game):
+cd Prophecy && make
+PROPHECY_RACES=1 PROPHECY_DRAGON=1 PROPHECY_WATER=1 ./prophecy
+
 ---
 
 ## 📂 Folder Structure
@@ -167,6 +208,14 @@ projects/
 │   ├── mpv.c / mpv.h
 │   ├── json.c / json.h
 │   ├── config.c / config.h
+│   ├── Makefile
+│   └── README.md
+├── Talisman/           # 🗡️ Talisman, 2nd edition
+│   ├── src/
+│   ├── Makefile
+│   └── README.md
+├── Prophecy/           # 🐉 Prophecy, 2nd edition
+│   ├── src/
 │   ├── Makefile
 │   └── README.md
 └── (future projects)
