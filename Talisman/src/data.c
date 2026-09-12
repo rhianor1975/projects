@@ -2,14 +2,19 @@
 
 const char *ending_name[END_COUNT] = {
     "the Crown of Command", "the Demon Lord", "Pandora's Box",
-    "the Belt of Hercules", "a Horrible Black Void", "the Dragon King"
+    "the Belt of Hercules", "a Horrible Black Void", "the Dragon King",
+    /* The Nether Realm's three.  Its "Pandora's Box" is a different card
+     * from the chest above -- same name, different product -- so it is
+     * named for what it actually does. */
+    "the Gauntlet", "the Opened Box", "the Hunt"
 };
 
 const char *set_name[SET_COUNT] = {
     "Base Game", "The Reaper", "The Frostmarch", "The Sacred Pool",
     "The Blood Moon", "The Firelands", "The Cataclysm", "The Dungeon",
     "The Highland", "The Woodland", "The Harbinger",
-    "City deck", "Timescape deck"
+    "City deck", "Timescape deck", "Nether deck",
+    "The Dragon", "Varthrax deck", "Grilipus deck", "Cadorus deck"
 };
 
 
@@ -27,7 +32,7 @@ const Space outer_ring[OUTER_N] = {
     {"Graveyard",  SP_GRAVE,    0},
     {"Hills",      SP_ADV,      2},
     {"Forest",     SP_ADV,      1},
-    {"Cave",       SP_ADV,      2},
+    {"Cave",       SP_WARLOCK,  0},
     {"City",       SP_CITY,     0},
     {"Plains",     SP_ADV,      1},
     {"Fields",     SP_ADV,      1},
@@ -92,6 +97,8 @@ const Space city_ring[CITY_N] = {
     {"High Temple",SP_C_TEMPLE,      0},
     {"FlaskStreet",SP_ADV,           1},
     {"Apothecary", SP_C_APOTHECARY,  0},
+    {"Rat Run",    SP_BRIDGE,        0},
+    {"Old Sewers", SP_TUNNEL,        0},
     {"Gold Lane",  SP_ADV,           1},
     {"The Bank",   SP_C_BANK,        0},
     {"ImperialAve",SP_ADV,           1},
@@ -166,8 +173,9 @@ const Space dungeon_path[DUNGEON_N] = {
     /* --- the outer lap, anticlockwise from the door --- */
     {"ENTRANCE",   SP_D_ENTRANCE, 0},
     {"Corridor",   SP_ADV,        1},
-    {"Cavern",     SP_ADV,        1},
+    {"Catacombs",  SP_TUNNEL,     0},
     {"Corridor",   SP_ADV,        1},
+    {"SkullPass",  SP_BRIDGE,     0},
     {"Guard Room", SP_D_GUARD,    0},
     {"Corridor",   SP_ADV,        1},
     {"Corridor",   SP_ADV,        1},
@@ -197,6 +205,35 @@ const Space dungeon_path[DUNGEON_N] = {
  * and the values below are exactly what the old hand-written space_id()
  * switch produced -- 0, 24, 40, 48 -- so no resident card, gold pile or
  * dropped Talisman moves as a result of this table existing. */
+/* The Highland: "effectively a linear journey upward toward the Eyrie", so
+ * a PATH like the Dungeon rather than a ring.  It hangs off the Crags. */
+const Space highland_path[HIGH_N] = {
+    {"Foothills",   SP_ADV,     1},
+    {"Glen",        SP_ADV,     1},
+    {"Loch",        SP_ADV,     1},
+    {"Standing Stones", SP_ADV, 2},
+    {"Old Road",    SP_ADV,     1},
+    {"Cairn",       SP_ADV,     2},
+    {"Crevasse",    SP_ADV,     1},
+    {"High Pass",   SP_ADV,     2},
+    {"Snowline",    SP_ADV,     1},
+    {"EYRIE",       SP_EYRIE,   0},
+};
+
+/* The Woodland: "a directed path" inward, with the Crossroads partway and
+ * the Meeting with Destiny at its heart. */
+const Space woodland_path[WOOD_N] = {
+    {"Woodland Edge", SP_ADV,        1},
+    {"Tanglewood",    SP_ADV,        1},
+    {"Faerie Trod",   SP_ADV,        2},
+    {"CROSSROADS",    SP_CROSSROADS, 0},
+    {"Deep Thicket",  SP_ADV,        1},
+    {"Hollow Oak",    SP_ADV,        2},
+    {"Standing Ring", SP_ADV,        1},
+    {"Whispering Glade", SP_ADV,     1},
+    {"MEETING",       SP_DESTINY,    0},
+};
+
 const RegionDef region_tbl[] = {
     {"Outer",  outer_ring,   OUTER_N,  TOPO_RING,  0,                        0},
     {"Middle", middle_ring,  MIDDLE_N, TOPO_RING,  OUTER_N,                  0},
@@ -208,6 +245,10 @@ const RegionDef region_tbl[] = {
     {"City",    city_ring,    CITY_N,    TOPO_RING, MAINBOARD_N + DUNGEON_N, 2},
     {"Donjon",  &donjon_space, 1,        TOPO_RING, MAINBOARD_N + DUNGEON_N + CITY_N, 2},
     {"Timescape", time_scape, TIME_N, TOPO_WARP, MAINBOARD_N + DUNGEON_N + CITY_N + 1, 3},
+    {"Highland", highland_path, HIGH_N, TOPO_PATH,
+     MAINBOARD_N + DUNGEON_N + CITY_N + 1 + TIME_N, 4},
+    {"Woodland", woodland_path, WOOD_N, TOPO_PATH,
+     MAINBOARD_N + DUNGEON_N + CITY_N + 1 + TIME_N + HIGH_N, 5},
 };
 const int region_count = (int)(sizeof region_tbl / sizeof region_tbl[0]);
 
@@ -218,6 +259,8 @@ const BoardDef board_tbl[] = {
     {"The Dungeon", REG_DUNGEON, 1, GRID, GRID},
     {"The City",    REG_CITY,    2, GRID, GRID},
     {"The Timescape", REG_TIME,  1, GRID, GRID},
+    {"The Highland",  REG_HIGHLAND, 1, GRID, GRID},
+    {"The Woodland",  REG_WOODLAND, 1, GRID, GRID},
 };
 const int board_count = (int)(sizeof board_tbl / sizeof board_tbl[0]);
 
@@ -985,6 +1028,61 @@ const Card deck_proto[] = {
     {.name="Magic Gateway", .type=C_EVENT, .d_gold=2, .copies=1, .set=SET_HIGHLAND, .text="+2 Gold"},
     {.name="Mountain Trail", .type=C_PLACE, .place=PLACE_FOUNTAIN, .copies=2, .set=SET_HIGHLAND, .text="stays here: wisdom is offered"},
     {.name="Rune Gate", .type=C_PLACE, .place=PLACE_PORTAL, .copies=2, .set=SET_HIGHLAND, .text="stays here: it moves you"},
+
+    /* ---- The Dragon: three decks, one per Draconic Lord. Varthrax is
+       fire and followers, Grilipus is magic, Cadorus takes what you own. --- */
+    {.name="Varthrax Whelp",   .type=C_ENEMY, .power=5, .copies=3, .set=SET_DRAGON_V},
+    {.name="Fire Drake",       .type=C_ENEMY, .power=6, .copies=2, .set=SET_DRAGON_V},
+    {.name="Scaled Champion",  .type=C_ENEMY, .power=7, .copies=2, .set=SET_DRAGON_V},
+    {.name="Ember Hound",      .type=C_ENEMY, .animal=1, .power=4, .copies=3, .set=SET_DRAGON_V},
+    {.name="Dragon's Blood",   .type=C_OBJECT, .d_str=1, .copies=2, .set=SET_DRAGON_V,
+     .text="+1 Strength"},
+    {.name="Burning Brand",    .type=C_EVENT, .d_life=-1, .copies=2, .set=SET_DRAGON_V,
+     .text="the fire finds you"},
+
+    {.name="Grilipus Spawn",   .type=C_ENEMY, .craftfight=1, .power=5, .copies=3, .set=SET_DRAGON_G},
+    {.name="Rune Serpent",     .type=C_ENEMY, .craftfight=1, .power=6, .copies=2, .set=SET_DRAGON_G},
+    {.name="Mage of the Coil", .type=C_ENEMY, .craftfight=1, .power=7, .copies=2, .set=SET_DRAGON_G},
+    {.name="Spell Eater",      .type=C_ENEMY, .craftfight=1, .power=4, .copies=3, .set=SET_DRAGON_G},
+    {.name="Scale of Wisdom",  .type=C_OBJECT, .d_craft=1, .copies=2, .set=SET_DRAGON_G,
+     .text="+1 Craft"},
+    {.name="Wyrm's Riddle",    .type=C_EVENT, .d_craft=-1, .copies=2, .set=SET_DRAGON_G,
+     .text="it takes a thought from you"},
+
+    {.name="Cadorus Brood",    .type=C_ENEMY, .power=5, .copies=3, .set=SET_DRAGON_C},
+    {.name="Hoard Guardian",   .type=C_ENEMY, .power=6, .copies=2, .set=SET_DRAGON_C},
+    {.name="Thief of Scales",  .type=C_ENEMY, .power=7, .copies=2, .set=SET_DRAGON_C},
+    {.name="Gilded Wyrm",      .type=C_ENEMY, .power=4, .copies=3, .set=SET_DRAGON_C},
+    {.name="Dragon Hoard",     .type=C_GOLD, .d_gold=4, .copies=2, .set=SET_DRAGON_C,
+     .text="4 Gold from the pile"},
+    {.name="Cadorus Levy",     .type=C_EVENT, .d_gold=-3, .copies=2, .set=SET_DRAGON_C,
+     .text="he takes his tithe"},
+
+    /* ---- SET_NETHER: "36 extremely dangerous encounter cards", kept out
+       of the ordinary Adventure deck and reached only by the Nether Realm's
+       own endings. They are harder than anything else in the game. ---- */
+    {.name="Soul Eater",      .type=C_ENEMY, .power=7, .copies=2, .set=SET_NETHER},
+    {.name="Thing of Nothing",.type=C_ENEMY, .craftfight=1, .power=7, .copies=2, .set=SET_NETHER},
+    {.name="Gaunt Horror",    .type=C_ENEMY, .power=6, .copies=3, .set=SET_NETHER},
+    {.name="Whisperer in Dark",.type=C_ENEMY, .craftfight=1, .power=6, .copies=3, .set=SET_NETHER},
+    {.name="Bone Legion",     .type=C_ENEMY, .power=8, .copies=2, .set=SET_NETHER},
+    {.name="Faceless One",    .type=C_ENEMY, .craftfight=1, .power=8, .copies=2, .set=SET_NETHER},
+    {.name="Hound of Tindalos",.type=C_ENEMY, .power=5, .copies=3, .set=SET_NETHER},
+    {.name="Drowned Choir",   .type=C_ENEMY, .craftfight=1, .power=5, .copies=3, .set=SET_NETHER},
+    {.name="The Flayed",      .type=C_ENEMY, .power=9, .copies=1, .set=SET_NETHER},
+
+    {.name="Nether Wind",     .type=C_EVENT, .d_life=-1, .copies=3, .set=SET_NETHER,
+     .text="it strips a life away"},
+    {.name="Cold Beyond",     .type=C_EVENT, .d_craft=-1, .copies=3, .set=SET_NETHER,
+     .text="something is forgotten"},
+    {.name="Black Bargain",   .type=C_EVENT, .d_gold=-3, .d_craft=1, .copies=3, .set=SET_NETHER,
+     .text="gold for knowledge, and a bad rate"},
+    {.name="Last Rites",      .type=C_OBJECT, .d_life=1, .copies=2, .set=SET_NETHER,
+     .text="+1 max Life"},
+    {.name="Grave Token",     .type=C_OBJECT, .d_str=1, .copies=2, .set=SET_NETHER,
+     .text="+1 Strength"},
+    {.name="Pale Lantern",    .type=C_OBJECT, .d_craft=1, .copies=2, .set=SET_NETHER,
+     .text="+1 Craft"},
 
     /* ---- SET_WOODLAND ---- */
     {.name="Faerie Host", .type=C_EVENT, .miss=1, .copies=2, .set=SET_WOODLAND, .text="you lose your way"},

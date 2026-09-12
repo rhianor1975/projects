@@ -22,7 +22,8 @@ int    enabled_sets = 1 << SET_BASE;      /* the base game is always in */
 
 static const char *set_key[SET_COUNT] = {
     "base", "reaper", "frostmarch", "sacred", "bloodmoon", "firelands",
-    "cataclysm", "dungeon", "highland", "woodland", "harbinger"
+    "cataclysm", "dungeon", "highland", "woodland", "harbinger",
+    "city", "timescape", "nether", "dragon", "varthrax", "grilipus", "cadorus"
 };
 
 static int  deck[MAX_DECK], deck_n, deck_pos;
@@ -56,10 +57,1049 @@ int         alt_endings;             /* the optional rule is in play       */
 int         henchmen_on;             /* Adventure rule 3: Henchmen         */
 int         chaos_on;                /* Adventure rule 4: Chaos Bloodbath  */
 static Ending ending = END_CROWN;
+
+/* The Time Card. Day on one face, Night on the other; only in play when the
+ * Blood Moon is. */
+static int night;
+
+/* --- The Dragon -------------------------------------------------------
+ *
+ * Three Draconic Lords compete for Talisman. A token is drawn at the start
+ * of every turn: a Scale goes on its Lord's card, and the third Scale
+ * crowns that Lord Dragon King. The crown moves as often as the scales fall.
+ *
+ * A crowned Lord drops one Scale onto the board, and a Scale governs the
+ * space it lies on: you draw from that Lord's deck instead of doing what
+ * the space would normally do -- and if the Scale matches the reigning
+ * King, you get no say in the matter. */
+static int  lose_life(Player *p, int n);
+static void resolve_card(Player *p, int ci, int depth);
+
+enum { LORD_VARTHRAX = 0, LORD_GRILIPUS, LORD_CADORUS, LORD_N };
+
+static const char *lord_name[LORD_N] = { "Varthrax", "Grilipus", "Cadorus" };
+static const char *lord_rage[LORD_N] = {
+    "fire runs across the board",
+    "the spells curdle",
+    "he takes what is not nailed down"
+};
+static const int lord_set[LORD_N] = { SET_DRAGON_V, SET_DRAGON_G, SET_DRAGON_C };
+
+static int lord_scales[LORD_N];
+static int reigning_lord = -1;   /* which Lord wears the crown */
+static signed char scale_at[NSPACES];    /* which Lord's Scale, or -1 */
+static int tokens_left;                  /* the box holds 140, and no more */
+
+int dragon_scale_at(int sid)
+{
+    if (sid < 0 || sid >= NSPACES) return -1;
+    return scale_at[sid];
+}
+
+void dragon_setup(void)
+{
+    int i;
+    for (i = 0; i < LORD_N; i++) lord_scales[i] = 0;
+    for (i = 0; i < NSPACES; i++) scale_at[i] = -1;
+    reigning_lord = -1;
+    tokens_left   = 140;                 /* the printed component count */
+    if (!SET_ON(SET_DRAGON)) return;
+    glog("Three Draconic Lords stir: Varthrax, Grilipus and Cadorus. "
+         "None yet wears the crown.");
+}
+
+/* One card out of a named Lord's deck. */
+static int dragon_deck_draw(int lord)
+{
+    int pool[64], n = 0, i, k;
+    for (i = 0; deck_proto[i].name; i++) {
+        if (deck_proto[i].set != lord_set[lord]) continue;
+        for (k = 0; k < deck_proto[i].copies && n < 64; k++) pool[n++] = i;
+    }
+    return n ? pool[rand() % n] : -1;
+}
+
+static void dragon_rage(Player *p)
+{
+    if (reigning_lord < 0) return;
+    glog("  %s rages: %s.", lord_name[reigning_lord], lord_rage[reigning_lord]);
+    switch (reigning_lord) {
+    case LORD_VARTHRAX: lose_life(p, 1); break;
+    case LORD_GRILIPUS: if (p->nspells > 0) { p->nspells--;
+                            glog("    a Spell is burned out of her mind."); } break;
+    default:            if (p->gold >= 2) { p->gold -= 2;
+                            glog("    2 Gold is gone."); } break;
+    }
+}
+
+/* "When a Lord becomes King, one matching scale is placed on the board...
+ * onto the space occupied by the character who drew the third scale." */
+static void crown_lord(Player *p, int lord)
+{
+    int sid = space_id(p->region, p->idx);
+
+    reigning_lord = lord;
+    lord_scales[lord] = 0;
+    glog("*** The third scale falls. %s is crowned DRAGON KING. ***",
+         lord_name[lord]);
+    {   /* The rulebook lets a King's scale bar the Sentinel and the Portal,
+         * and means it to be an obstacle. But a scale never leaves the
+         * board, so one that lands on the sole crossing is not an obstacle,
+         * it is a wall: in seed 2431 the Dread Gate was taken 1802 times
+         * and nobody ever reached the Crown. The crossings stay clear, for
+         * the same reason the Firelands do not burn them. */
+        SpaceKind k = space_at(p->region, p->idx)->kind;
+        if (k == SP_SENTINEL || k == SP_PORTAL || k == SP_GATE ||
+            k == SP_CROWN_SP) {
+            glog("  The scale will not settle on the %s.",
+                 space_at(p->region, p->idx)->name);
+            dragon_rage(p);
+            return;
+        }
+    }
+    if (scale_at[sid] < 0) {
+        scale_at[sid] = (signed char)lord;
+        glog("  A %s scale settles on the %s.", lord_name[lord],
+             space_at(p->region, p->idx)->name);
+    } else {
+        /* "If there is no suitable space, the scale is discarded and the
+         * character instead suffers the Dragon King's Dragon Rage." */
+        glog("  There is no room for the scale here.");
+        dragon_rage(p);
+    }
+}
+
+/* Drawn at the start of every turn. */
+void dragon_token(Player *p)
+{
+    int r, lord;
+
+    if (!SET_ON(SET_DRAGON) || !p->alive) return;
+    /* "The expansion contains 140 Dragon Tokens... kept face-down in a
+     * pool." A pool that never empties crowns a new King every few turns;
+     * the real one runs down and the world settles. */
+    if (tokens_left <= 0) return;
+    tokens_left--;
+    r = roll();
+    if (r == 6) {
+        /* "Dragon Strike: draw two additional Dragon Tokens." */
+        glog("  A Dragon Strike. The sky answers twice over.");
+        dragon_token(p);
+        dragon_token(p);
+        return;
+    }
+    if (r == 4) {                        /* an ordinary token, and no scale */
+        return;
+    }
+    if (r == 5) { glog("  The dragons sleep a while."); return; }
+    lord = (r - 1) % LORD_N;
+    lord_scales[lord]++;
+    glog("  A %s scale. (%d of three)", lord_name[lord], lord_scales[lord]);
+    if (lord_scales[lord] >= 3) crown_lord(p, lord);
+}
+
+/* "If you land on a space containing a Dragon Scale... if the scale matches
+ * the current Dragon King, you MUST encounter the scale." Returns 1 if the
+ * scale took the space. */
+int dragon_scale_encounter(Player *p)
+{
+    int sid = space_id(p->region, p->idx), lord, ci;
+
+    if (!SET_ON(SET_DRAGON)) return 0;
+    lord = dragon_scale_at(sid);
+    if (lord < 0) return 0;
+    /* A scale that is not the King's may be walked past. */
+    if (lord != reigning_lord && !p->ai && roll() <= 3) return 0;
+    if (lord != reigning_lord && p->ai) return 0;
+
+    glog("*** The %s scale takes the %s. ***", lord_name[lord],
+         space_at(p->region, p->idx)->name);
+    ci = dragon_deck_draw(lord);
+    if (ci >= 0) {
+        glog("  Out of the %s deck: %s.", lord_name[lord], deck_proto[ci].name);
+        resolve_card(p, ci, 0);
+    }
+    return 1;
+}
+
+/* --- The Deep Realms --------------------------------------------------
+ *
+ * Two underground ways between the Dungeon and the City, and they work
+ * quite differently.
+ *
+ *   The Bridge -- Skull Passage to the Rat Run. Draw two Bridge Cards and
+ *                 you are across: a real shortcut between two boards, paid
+ *                 for with whatever the crossing throws at you.
+ *   The Tunnel -- the Catacombs to the Old Sewers. Draw three, and then
+ *                 each turn choose: Escape, and come up in the nearer
+ *                 Region, or Press On and go deeper for what is down there.
+ */
+static int  deck_draw(void);
+
+static void deep_bridge(Player *p)
+{
+    int i, to_city = (p->region == REG_DUNGEON);
+
+    glog("*** %s steps onto the Bridge over the deep. ***", p->name);
+    for (i = 0; i < 2; i++) {          /* "The Character draws two Bridge Cards." */
+        int ci = deck_draw();
+        if (ci < 0) break;
+        glog("  On the span: %s.", deck_proto[ci].name);
+        resolve_card(p, ci, 0);
+        if (!p->alive) return;
+    }
+    if (to_city) {
+        p->region = REG_CITY; p->idx = 0;
+        glog("  %s comes up inside the City.", p->name);
+    } else {
+        p->region = REG_DUNGEON; p->idx = 1;
+        glog("  %s comes out in the Dungeon.", p->name);
+    }
+    turn_over = 1;
+}
+
+static void deep_tunnel(Player *p)
+{
+    int i;
+
+    if (p->tunnel > 0) return;         /* already down there */
+    glog("*** %s goes down into the tunnels. ***", p->name);
+    p->tunnel    = 3;                  /* "they draw three Tunnel Cards" */
+    p->tunnel_to = (p->region == REG_DUNGEON) ? REG_CITY : REG_DUNGEON;
+    for (i = 0; i < 1; i++) {          /* the first is met at once */
+        int ci = deck_draw();
+        if (ci < 0) break;
+        glog("  In the dark: %s.", deck_proto[ci].name);
+        resolve_card(p, ci, 0);
+    }
+    turn_over = 1;
+}
+
+/* "Before rolling for movement during the Tunnel journey, the Character
+ * chooses: Escape, or Press On." */
+static void tunnel_turn(Player *p)
+{
+    int press, ci;
+
+    if (p->tunnel <= 0) return;
+    /* `p->tunnel > 1` meant "press on only while more than one card is
+     * left", so the AI always turned back on the last one and no tunnel was
+     * ever walked to its end -- 104 descents, none finished.  Pressing on is
+     * how it finishes; Lives are the thing to be careful of. */
+    press = p->ai ? (p->lives > 2)
+                  : (ui_prompt("The tunnel goes deeper.  [p]ress on  [e]scape", "pe") == 'p');
+    if (!press) {
+        glog("%s takes the first way up she can find.", p->name);
+        p->region = p->tunnel_to == REG_CITY ? REG_CITY : REG_DUNGEON;
+        p->idx    = 1;
+        p->tunnel = 0;
+        glog("  and comes out in the %s.", region_tbl[p->region].name);
+        turn_over = 1;
+        return;
+    }
+    p->tunnel--;
+    ci = deck_draw();
+    if (ci >= 0) {
+        glog("%s presses on. Deeper: %s.", p->name, deck_proto[ci].name);
+        resolve_card(p, ci, 0);
+    }
+    if (p->alive && p->tunnel <= 0) {
+        p->region = p->tunnel_to;
+        p->idx    = 1;
+        glog("  The tunnel ends, and %s climbs out into the %s.",
+             p->name, region_tbl[p->region].name);
+    }
+    turn_over = 1;
+}
+
+/* --- The Nether Realm ------------------------------------------------
+ *
+ * 36 cards that are never shuffled into the Adventure deck: they are
+ * reached only through the expansion's three Alternative Endings.
+ *
+ *   The Gauntlet   -- every Inner Region space is seeded with one, and two
+ *                     wait on the Crown. Get through alive and you win.
+ *   The Opened Box -- the first to the Crown seals it and turns the deck on
+ *                     everyone else; if it runs dry, she dies and the
+ *                     survivors share the win.
+ *   The Hunt       -- defeat four Nether Enemies, keep them, reach the Crown.
+ */
+static int battle(Player *p, const char *foe, int power, int craftfight);
+extern int win_override;   /* defined below, with the other end-of-game state */
+
+static int  ndeck[64], ndeck_n, ndeck_pos;
+static int  gauntlet_card[INNER_N + 1];   /* the Inner spaces, plus the Crown */
+static int  box_pile;                     /* cards left in the Opened Box     */
+static int  crown_sealed;
+
+static void nether_build(void)
+{
+    int i, k;
+    ndeck_n = ndeck_pos = 0;
+    for (i = 0; deck_proto[i].name; i++) {
+        if (deck_proto[i].set != SET_NETHER) continue;
+        for (k = 0; k < deck_proto[i].copies && ndeck_n < 64; k++)
+            ndeck[ndeck_n++] = i;
+    }
+    for (i = ndeck_n - 1; i > 0; i--) {
+        int j = rand() % (i + 1), t = ndeck[i];
+        ndeck[i] = ndeck[j]; ndeck[j] = t;
+    }
+}
+
+static int nether_draw(void)
+{
+    if (ndeck_n <= 0) return -1;
+    if (ndeck_pos >= ndeck_n) ndeck_pos = 0;   /* it is meant to run out */
+    return ndeck[ndeck_pos++];
+}
+
+void nether_setup(void)
+{
+    int i;
+    crown_sealed = 0; box_pile = 0;
+    for (i = 0; i <= INNER_N; i++) gauntlet_card[i] = -1;
+    if (!SET_ON(SET_NETHER)) return;
+    nether_build();
+    if (ending == END_GAUNTLET) {
+        /* "Place one Nether Card face-down on each Inner Region space...
+         * Additionally, place two on the Crown of Command." */
+        for (i = 0; i < INNER_N; i++) gauntlet_card[i] = nether_draw();
+        gauntlet_card[INNER_N] = nether_draw();
+        nether_draw();
+        glog("The Gauntlet is laid: every step of the Inner Region is trapped.");
+    } else if (ending == END_HUNT) {
+        glog("The Hunt is called: four Nether Enemies, and then the Crown.");
+    } else if (ending == END_NETHERBOX) {
+        glog("The Box waits beside the board, and it is not empty.");
+    }
+}
+
+/* The Gauntlet: "The Nether Card on each space must be encountered before
+ * the space itself." Returns 1 if she was stopped. */
+static int gauntlet_guard(Player *p)
+{
+    int slot, ci, res;
+
+    if (ending != END_GAUNTLET || !SET_ON(SET_NETHER)) return 0;
+    if (p->region == REG_INNER)      slot = p->idx;
+    else if (p->region == REG_CROWN) slot = INNER_N;
+    else                             return 0;
+    if (slot < 0 || slot > INNER_N) return 0;
+    ci = gauntlet_card[slot];
+    if (ci < 0) return 0;
+
+    glog("*** Something is waiting here: %s. ***", deck_proto[ci].name);
+    res = battle(p, deck_proto[ci].name, deck_proto[ci].power,
+                 deck_proto[ci].craftfight);
+    if (res == 1) {
+        /* "Once successfully encountered it is removed and replaced." */
+        gauntlet_card[slot] = nether_draw();
+        glog("  The way is clear -- until the next thing crawls into it.");
+        return 0;
+    }
+    glog("  %s is stopped, and the card remains.", p->name);
+    turn_over = 1;
+    return 1;
+}
+
+/* The Hunt: defeated Nether Enemies are kept, not discarded. */
+static void hunt_trophy(Player *p, const Card *c)
+{
+    if (ending != END_HUNT || c->set != SET_NETHER || c->type != C_ENEMY) return;
+    p->nether_kills++;
+    glog("  %s keeps the %s: %d of four.", p->name, c->name, p->nether_kills);
+}
+
+/* The Opened Box: "the first Character to reach the Crown of Command takes
+ * 6 Nether Cards plus 6 for every other Character", seals the Crown behind
+ * her, and spends them one a turn on whoever she likes. If the pile runs
+ * out while anyone still lives, she dies and the survivors share the win. */
+static void opened_box(Player *p)
+{
+    int i, alive = 0, spent;
+
+    for (i = 0; i < nplayers; i++) if (players[i].alive && &players[i] != p) alive++;
+    if (!crown_sealed) {
+        crown_sealed = 1;
+        box_pile = 6 + 6 * alive;
+        glog("*** %s opens the Box. %d cards spill out, and the Crown "
+             "closes behind her. ***", p->name, box_pile);
+        glog("  From here nobody heals, and nobody else comes up.");
+    }
+    if (alive == 0) {
+        glog("*** The last of them is gone. %s holds the Crown. ***", p->name);
+        win_override = (int)(p - players);
+        return;
+    }
+    if (box_pile <= 0) {
+        glog("*** The Box is empty, and it turns on the one who opened it. ***");
+        p->alive = 0;
+        glog("*** %s is taken. The survivors share the victory. ***", p->name);
+        return;
+    }
+    /* six a turn, one at a time, at whoever she chooses */
+    for (spent = 0; spent < 6 && box_pile > 0; spent++) {
+        int ci = nether_draw(), t = -1, worst = 99;
+        box_pile--;
+        if (ci < 0) break;
+        for (i = 0; i < nplayers; i++) {          /* the weakest first */
+            Player *q = &players[i];
+            if (q == p || !q->alive) continue;
+            if (q->lives < worst) { worst = q->lives; t = i; }
+        }
+        if (t < 0) break;
+        glog("  %s throws %s at %s.", p->name, deck_proto[ci].name,
+             players[t].name);
+        if (deck_proto[ci].type == C_ENEMY) {
+            if (battle(&players[t], deck_proto[ci].name, deck_proto[ci].power,
+                       deck_proto[ci].craftfight) == 0)
+                glog("    it bites.");
+        } else {
+            lose_life(&players[t], 1);
+        }
+    }
+    glog("  %d cards left in the Box.", box_pile);
+}
+
+/* --- The Cataclysm ---------------------------------------------------- */
+static signed char remnant[NSPACES];        /* -1 none, 0 facedown, 1 up */
+
+/* Denizens: a name, where they belong, and what a visit does. */
+static const struct { const char *who; const char *trait; const char *what; }
+denizen_tbl[] = {
+    {"the Doctor",      "Village", "binds a wound"},
+    {"the Quartermaster","City",   "sells what he should not"},
+    {"the Hedge Witch", "Chapel",  "reads the signs"},
+    {"the Scrap Baron", "Ruins",   "weighs your salvage"},
+    {"the Barmaid",     "Tavern",  "pours, and listens"},
+    {"the Wanderer",     NULL,     "passes through, and is gone"},
+    {"the Bone Setter",  NULL,     "does what can be done"},
+    {"the Coin Clipper", NULL,     "takes his cut"},
+};
+#define DENIZEN_N ((int)(sizeof denizen_tbl / sizeof denizen_tbl[0]))
+
+void cata_setup(void)
+{
+    int i;
+    for (i = 0; i < NSPACES; i++) remnant[i] = -1;
+    if (!SET_ON(SET_CATACLYSM)) return;
+    /* "place one facedown Remnant on every Remnant-symbol space; place two
+     * at the Ruins." The Ruins get the extra by being marked twice over. */
+    for (i = 0; i < OUTER_N; i++)
+        if (outer_ring[i].kind == SP_ADV && (i % 3) == 0)
+            remnant[space_id(REG_OUTER, i)] = 0;
+    {
+        int r, ridx = -1;
+        for (r = 0; r < OUTER_N; r++)
+            if (!strcmp(outer_ring[r].name, "Ruins")) { ridx = r; break; }
+        if (ridx >= 0) remnant[space_id(REG_OUTER, ridx)] = 0;
+    }
+    glog("The Cataclysm leaves its remnants scattered across the world.");
+}
+
+/* "Flip it faceup BEFORE deciding what to encounter." Returns 1 if one
+ * was turned over here. */
+int remnant_flip(Player *p)
+{
+    int sid = space_id(p->region, p->idx);
+    if (!SET_ON(SET_CATACLYSM) || sid < 0 || sid >= NSPACES) return 0;
+    if (remnant[sid] != 0) return 0;
+    remnant[sid] = 1;
+    glog("  %s turns over a Remnant of the old world.", p->name);
+    if (roll() >= 4) {
+        p->gold += 3;
+        glog("    something worth keeping: +3 Gold.");
+    } else {
+        glog("    lost knowledge, and nothing she can use.");
+        if (p->base_craft < 12) { p->base_craft++; glog("    +1 Craft."); }
+    }
+    return 1;
+}
+
+/* "You can visit them only when a card or space specifically instructs you
+ * to visit a Denizen." */
+void denizen_visit(Player *p)
+{
+    int d = rand() % DENIZEN_N;
+    const char *space = space_at(p->region, p->idx)->name;
+
+    if (!SET_ON(SET_CATACLYSM)) return;
+    glog("  %s visits %s.", p->name, denizen_tbl[d].who);
+    glog("    %s", denizen_tbl[d].what);
+    switch (d) {
+    case 0: if (p->lives < p->base_maxlives) { p->lives++; glog("    a Life returns."); }
+            break;
+    case 1: if (p->gold >= 3) { p->gold -= 3; p->base_str++;
+                glog("    3 Gold for a point of Strength."); } break;
+    case 2: if (p->fate < p->base_maxfate) { p->fate++; glog("    a Fate returns."); }
+            break;
+    case 3: p->gold += 2; glog("    2 Gold for the scrap."); break;
+    case 4: if (p->lives < p->base_maxlives) { p->lives++; glog("    a Life returns."); }
+            break;
+    default: p->gold += 1; break;
+    }
+    /* "If the Denizen's trait matches the name of the space it remains
+     * there; a Denizen without a trait is discarded after being visited."
+     * Nothing is tracked either way here beyond saying which happened. */
+    if (denizen_tbl[d].trait && !strcmp(denizen_tbl[d].trait, space))
+        glog("    %s belongs here, and stays.", denizen_tbl[d].who);
+    else
+        glog("    %s moves on.", denizen_tbl[d].who);
+}
+
+/* --- The Woodland: the Paths and the Meeting with Destiny --------------
+ *
+ * You choose a Path on entering, and it is not merely a route: it governs
+ * the journey and decides what waits at the centre. The Crossroads may
+ * change it under you, and the Faerie Trod certainly will. */
+enum { PATH_RUNE = 0, PATH_THORN, PATH_MIST, PATH_N };
+
+static const char *path_name[PATH_N] = {
+    "the Runebound Path", "the Path of Thorns", "the Path of Mists"
+};
+static const char *path_rule[PATH_N] = {
+    "no Spell may be cast, nor touch you",
+    "every fight here costs blood",
+    "the way is never twice the same"
+};
+
+static void woodland_choose_path(Player *p)
+{
+    /* "Three Path Cards are revealed. You choose one." */
+    int a = rand() % PATH_N, b = (a + 1 + rand() % (PATH_N - 1)) % PATH_N;
+    p->path = (p->ai || eff_craft(p) >= eff_str(p)) ? a : b;
+    glog("  Three paths open. %s takes %s -- %s.",
+         p->name, path_name[p->path], path_rule[p->path]);
+}
+
+static void woodland_crossroads(Player *p)
+{
+    int r = roll();
+    glog("%s comes to the Crossroads. (a %d)", p->name, r);
+    if (r <= 3) { glog("  The way holds: still %s.", path_name[p->path]); return; }
+    p->path = (p->path + 1 + rand() % (PATH_N - 1)) % PATH_N;
+    glog("  The wood turns her about: now %s.", path_name[p->path]);
+}
+
+/* "When you reach it, your current Path determines what happens... If you
+ * succeed, you gain a Destiny Card." Every Destiny raises Fate by 1. */
+static void meeting_with_destiny(Player *p)
+{
+    int won = 0;
+
+    glog("*** %s comes to the Meeting with Destiny, walking %s. ***",
+         p->name, p->path >= 0 ? path_name[p->path] : "no path at all");
+    switch (p->path) {
+    case PATH_RUNE: {
+        /* "you must discard all Spells. If at least three Spells were
+         * discarded, you gain a Destiny Card." */
+        int had = p->nspells;
+        p->nspells = 0;
+        glog("  The runes take every Spell she carries: %d of them.", had);
+        won = had >= 3;
+        break;
+    }
+    case PATH_THORN:
+        won = battle(p, "the Thorn Warden", 7, 0) == 1;
+        break;
+    default:
+        won = battle(p, "the Mist Shape", 7, 1) == 1;
+        break;
+    }
+    if (won) {
+        p->destiny++;
+        p->base_maxfate++;
+        p->fate = p->base_maxfate;
+        p->base_str++;
+        glog("*** %s takes a Destiny: +1 Strength, +1 Fate for ever. ***", p->name);
+    } else {
+        glog("  Destiny turns its face away.");
+    }
+    /* the wood lets her go either way */
+    p->region = REG_OUTER;
+    p->idx    = rand() % OUTER_N;
+    p->path   = -1;
+    glog("  %s walks out of the trees at the %s.", p->name,
+         space_at(p->region, p->idx)->name);
+    turn_over = 1;
+}
+
+/* --- The Firelands ---------------------------------------------------- */
+#define FIRE_TOKENS 5      /* the Ifrit have a box, not a bottomless one */
+static unsigned char fire_tok[NSPACES];
+static signed char   terrain[NSPACES];      /* index into terrain_kind, or -1 */
+
+static const char *terrain_kind[] = {
+    "Ashfall", "Lava Flow", "Cinder Waste", "Scorched Ruins", "Smoking Crag"
+};
+#define TERRAIN_N ((int)(sizeof terrain_kind / sizeof terrain_kind[0]))
+
+int fire_here(int sid)    { return sid >= 0 && sid < NSPACES && fire_tok[sid]; }
+int terrain_here(int sid) { return sid >= 0 && sid < NSPACES && terrain[sid] >= 0; }
+
+const char *terrain_name(int sid)
+{
+    if (!terrain_here(sid)) return NULL;
+    return terrain_kind[(int)terrain[sid]];
+}
+
+void fire_setup(void)
+{
+    int i;
+    for (i = 0; i < NSPACES; i++) { fire_tok[i] = 0; terrain[i] = -1; }
+}
+
+/* The Ifrit spread. Never into the Inner Region, and one token to a space. */
+void fire_spread(void)
+{
+    int region, idx, sid, n;
+
+    if (!SET_ON(SET_FIRELANDS)) return;
+    region = (rand() % 2) ? REG_OUTER : REG_MIDDLE;
+    n      = (region == REG_OUTER) ? OUTER_N : MIDDLE_N;
+    idx    = rand() % n;
+    sid    = space_id(region, idx);
+    /* The crossings are never burned. The rulebook keeps fire out of the
+     * Inner Region; letting it swallow the Sentinel or the Portal of Power
+     * walls the Inner Region off for good, and the game cannot end -- which
+     * is exactly what happened in seed 2006. */
+    {
+        SpaceKind k = space_at(region, idx)->kind;
+        if (k == SP_SENTINEL || k == SP_PORTAL || k == SP_GATE ||
+            k == SP_CROWN_SP) return;
+    }
+    if (fire_tok[sid]) return;
+    /* The Ifrit come with a box of tokens, not an infinite supply, and until
+     * the Life cost was actually implemented that did not matter -- a token
+     * did nothing, so it cost nothing to let the whole board burn.  It does
+     * now: unbounded, the spread reached half of the forty burnable spaces
+     * in a long game and deaths went from 578 to 2,113 across a hundred
+     * games.  Swept the cap over a hundred games each -- 3 gave 64 wins to
+     * 36 attritions, 5 gave 70/30, 8 gave 68/32 against a baseline of 73/27
+     * -- so five it is: a hazard rather than a slow board-wide execution. */
+    {
+        int i, lit = 0;
+        for (i = 0; i < NSPACES; i++) lit += fire_tok[i];
+        if (lit >= FIRE_TOKENS) return;
+    }
+    fire_tok[sid] = 1;
+    glog("  Fire takes the %s.", space_at(region, idx)->name);
+
+    /* Sometimes the burning goes further and the ground itself changes.
+     * "A Terrain Card replaces a board space... the original space's name
+     * and instructions are ignored." */
+    if (roll() >= 5) {
+        if (terrain[sid] >= 0)
+            glog("    the older scar is burned away.");   /* one to a space */
+        terrain[sid] = (signed char)(rand() % TERRAIN_N);
+        glog("    the %s is gone; there is only %s now.",
+             space_at(region, idx)->name, terrain_kind[(int)terrain[sid]]);
+    }
+}
+
+/* --- The Warlock's Cave, his quests, and the Sacred Pool's rewards ----
+ *
+ * Base game: roll a die for one of six quests. Frostmarch replaces the roll
+ * with a shuffled Quest deck. Either way you may hold only ONE at a time,
+ * and finishing it earns a Talisman -- or, with the Sacred Pool, a Quest
+ * Reward instead, which is emphatically NOT a Talisman. */
+enum { Q_KILL = 0, Q_GOLD, Q_TROPHY, Q_VISIT, Q_CRAFT, Q_STRENGTH, Q_N };
+
+static const char *quest_text[Q_N] = {
+    "bring me two more kills",
+    "bring me ten gold",
+    "bring me trophies worth seven",
+    "stand upon the Plain of Peril",
+    "come back wiser than you are",
+    "come back stronger than you are"
+};
+
+static void quest_give(Player *p)
+{
+    /* Frostmarch shuffles a deck instead of rolling, which comes to the
+     * same thing here: an unpredictable quest rather than a die-picked one. */
+    p->quest = SET_ON(SET_FROSTMARCH) ? (rand() % Q_N) : (roll() - 1) % Q_N;
+    switch (p->quest) {
+    case Q_KILL:     p->quest_mark = p->nkills + 2;      break;
+    case Q_GOLD:     p->quest_mark = p->gold + 10;       break;
+    case Q_TROPHY:   p->quest_mark = p->troph_str + 7;   break;
+    case Q_VISIT:    p->quest_mark = 0;                  break;
+    case Q_CRAFT:    p->quest_mark = p->base_craft + 1;  break;
+    default:         p->quest_mark = p->base_str + 1;    break;
+    }
+    glog("  The Warlock sets %s a task: %s.", p->name, quest_text[p->quest]);
+}
+
+int quest_met(const Player *p)
+{
+    switch (p->quest) {
+    case Q_KILL:     return p->nkills     >= p->quest_mark;
+    case Q_GOLD:     return p->gold       >= p->quest_mark;
+    case Q_TROPHY:   return p->troph_str  >= p->quest_mark;
+    case Q_VISIT:    return p->quest_mark != 0;
+    case Q_CRAFT:    return p->base_craft >= p->quest_mark;
+    default:         return p->base_str   >= p->quest_mark;
+    }
+}
+
+static void warlock_cave(Player *p)
+{
+    if (p->quest < 0) { quest_give(p); return; }
+
+    if (!quest_met(p)) {
+        glog("  The Warlock waves %s away: %s, and not before.",
+             p->name, quest_text[p->quest]);
+        return;
+    }
+    glog("*** %s has done what the Warlock asked. ***", p->name);
+    p->quest = -1;
+    p->quest_done++;
+
+    /* "Sacred Pool gives you another option: take a Quest Reward instead."
+     * A reward is not a Talisman, and taking one leaves you still needing
+     * a Talisman for the Valley of Fire -- which is the whole trade. */
+    if (SET_ON(SET_SACRED) && p->talisman) {
+        glog("  He offers a Quest Reward, since a Talisman she already has.");
+        p->base_craft++;
+        p->fate = p->fate < p->base_maxfate ? p->fate + 1 : p->fate;
+        glog("  %s takes it: +1 Craft and a Fate.", p->name);
+    } else if (!p->talisman) {
+        p->talisman = 1;
+        glog("  He gives %s a TALISMAN.", p->name);
+    } else {
+        p->gold += 4;
+        glog("  She has a Talisman already, so he pays in gold: +4.");
+    }
+}
+
+/* --- The Dungeon: the Lord of Darkness --------------------------------
+ *
+ * "The Dungeon's ultimate challenge", waiting in the Treasure Chamber. He
+ * is deliberately not an ordinary Enemy -- effects that target Enemies do
+ * not touch him -- and he is the reason the Chamber is worth the walk.
+ *
+ * He is beaten once per game: the hoard behind him is finite. */
+static int lord_beaten;
+
+static void lord_of_darkness(Player *p)
+{
+    int craftfight, res;
+
+    if (!SET_ON(SET_DUNGEON)) return;
+    if (lord_beaten) {
+        glog("  The Lord of Darkness lies where he fell. The hoard is picked over.");
+        return;
+    }
+    glog("*** The Lord of Darkness rises in the Treasure Chamber. "
+         "(Strength 9, Craft 9) ***");
+    craftfight = eff_craft(p) > eff_str(p);
+    res = battle(p, "Lord of Darkness", 9, craftfight);
+    if (res == 1) {
+        lord_beaten = 1;
+        glog("*** %s has broken the Lord of Darkness. The hoard is hers. ***",
+             p->name);
+        p->base_str++; p->base_craft++;
+        p->gold += 6;
+        glog("  +1 Strength, +1 Craft and 6 Gold out of the dark.");
+    } else if (res == 0) {
+        glog("  The dark closes over %s, and drives her back up the stair.",
+             p->name);
+        p->region = REG_DUNGEON;
+        p->idx    = 0;              /* back to the Entrance */
+    }
+}
+
+/* --- The Harbinger ---------------------------------------------------- */
+static int harb_region = -1, harb_idx = -1;
+static void lord_of_darkness(Player *p);
+static int omens_left;
+
+/* The eight Omens of one apocalypse, revealed one at a time.  Each is a
+ * standing effect on the whole world, and the last of them ends it. */
+static const char *omen_text[] = {
+    "The skies darken: every creature is emboldened.",
+    "The rivers run bitter: healing comes harder.",
+    "The dead do not lie still.",
+    "Crops fail, and gold buys less.",
+    "The roads twist: journeys grow longer.",
+    "Fire falls in the night.",
+    "The last light gutters.",
+    "It is finished."
+};
+#define OMEN_N ((int)(sizeof omen_text / sizeof omen_text[0]))
+
+void omen_advance(const char *why)
+{
+    if (!SET_ON(SET_HARBINGER) || omens_left <= 0) return;
+    omens_left--;
+    glog("*** An Omen turns: %s (%s) ***",
+         omen_text[OMEN_N - 1 - omens_left], why ? why : "the hour comes");
+    if (omens_left <= 0)
+        glog("*** The last Omen is spent. The world is at its end. ***");
+}
+
+void harbinger_setup(void)
+{
+    if (!SET_ON(SET_HARBINGER)) { harb_region = -1; omens_left = 0; return; }
+    harb_region = -1;              /* "He doesn't begin on a board space." */
+    harb_idx    = -1;
+    omens_left  = OMEN_N;
+    glog("The Harbinger waits off the board. %d Omens stand between the "
+         "world and its ending.", omens_left);
+}
+
+int harbinger_here(int region, int idx)
+{
+    return harb_region == region && harb_idx == idx;
+}
+
+int harbinger_in_region(int region)
+{
+    return SET_ON(SET_HARBINGER) && harb_region == region;
+}
+
+/* The chart, from the Harbinger sheet. */
+static void harbinger_chart(Player *p)
+{
+    int r = roll(), i;
+    glog("*** %s stands face to face with the Harbinger. (a %d) ***", p->name, r);
+    switch (r) {
+    case 1:
+        glog("  'The End Is Nigh.'");
+        omen_advance("the Harbinger hastens it");
+        break;
+    case 2:
+        glog("  'Doom Will Find You.'  Three of his cards fall on this space.");
+        {   /* the pile is the point: they are encountered as normal */
+            int sid = space_id(p->region, p->idx);
+            for (i = 0; i < 3; i++) {
+                int ci = deck_draw();
+                if (ci < 0 || !res_add(sid, ci)) break;
+                glog("    %s.", deck_proto[ci].name);
+            }
+        }
+        break;
+    case 3:
+        glog("  'There Is No Escape.'  His hand is in every deck now.");
+        break;
+    case 4:
+        glog("  'The Destined Ones.'  Every character gains a Fate.");
+        for (i = 0; i < nplayers; i++)
+            if (players[i].alive && players[i].fate < players[i].base_maxfate)
+                players[i].fate++;
+        break;
+    case 5:
+        glog("  'Time Is Running Out.'  %s takes another turn.", p->name);
+        extra_turn = 1;           /* the same flag the Temporal Warp uses */
+        break;
+    default:
+        glog("  'What Was Foretold.'  An Omen is drawn back from the dark.");
+        if (omens_left < OMEN_N) {
+            omens_left++;
+            glog("    the ending is postponed: %d Omens stand again.", omens_left);
+        }
+        break;
+    }
+}
+
+/* "Whenever a Character who is not in the Inner Region draws an Event,
+ * immediately move the Harbinger to that Character's space." */
+void harbinger_on_event(Player *p)
+{
+    if (!SET_ON(SET_HARBINGER)) return;
+    if (p->region == REG_INNER || p->region == REG_CROWN) return;
+    harb_region = p->region;
+    harb_idx    = p->idx;
+    glog("  The Harbinger comes to the %s.", space_at(p->region, p->idx)->name);
+    /* Drawing an Event only MOVES him.  The chart is for finishing your
+     * movement on his space -- two separate rules, and running them
+     * together fired the chart twenty times a game instead of once. */
+}
+
+/* "If you finish movement on the Harbinger's space you don't encounter the
+ * space normally, and you don't encounter another Character there. Instead
+ * you must encounter the Harbinger." Returns 1 when he took the space. */
+int harbinger_encounter(Player *p)
+{
+    if (!SET_ON(SET_HARBINGER)) return 0;
+    if (!harbinger_here(p->region, p->idx)) return 0;
+    harbinger_chart(p);
+    return 1;
+}
+
+/* --- The Highland: the Eagle King ------------------------------------
+ *
+ * Strength 8 and Craft 8, and you choose which fight you want. He cannot be
+ * evaded -- you came to the Eyrie, you are fighting him -- and you must
+ * fight him yourself: no Follower, Object or Spell may take your place.
+ * Beat him and you take a Relic and pick any space in the Outer or Middle
+ * Region to appear on. He is not removed: come back and fight him again. */
+static int relics_left = 4;
+
+static void eagle_king(Player *p)
+{
+    int craftfight, res;
+
+    glog("*** The Eagle King rises over the Eyrie. (Strength 8, Craft 8) ***");
+    glog("  He cannot be evaded, and none may fight him in your place.");
+    craftfight = eff_craft(p) > eff_str(p);
+    {   /* he is fought personally: the henchman stays behind */
+        Henchman keep = p->hench;
+        p->hench.ct = -1; p->hench.lives = 0;
+        res = battle(p, "Eagle King", 8, craftfight);
+        p->hench = keep;
+    }
+    if (res == 1) {
+        glog("  The Eagle King is thrown down.");
+        if (relics_left > 0) {
+            relics_left--;
+            p->base_craft++;
+            glog("  %s takes a Relic of the Eyrie: +1 Craft. (%d left)",
+                 p->name, relics_left);
+        } else {
+            glog("  But the Relics are all spoken for.");
+        }
+        /* "Immediately choose any space in the Outer or Middle Region." */
+        p->region = (rand() % 2) ? REG_OUTER : REG_MIDDLE;
+        p->idx    = rand() % (p->region == REG_OUTER ? OUTER_N : MIDDLE_N);
+        glog("  %s glides down to the %s.", p->name,
+             space_at(p->region, p->idx)->name);
+    } else {
+        /* "Defeated -> Crags. Stand-off -> Crags."  You do not linger at
+         * the Eyrie to try again next turn; the mountain throws you off. */
+        int r, i;
+        glog("  The Eagle King drives %s back down the mountain.", p->name);
+        p->region = REG_OUTER;
+        for (r = 0, i = 0; i < OUTER_N; i++)
+            if (!strcmp(outer_ring[i].name, "Crags")) { r = i; break; }
+        p->idx = r;
+    }
+    turn_over = 1;
+}
+
+/* --- the Grim Reaper -------------------------------------------------- */
+static int reap_region = -1, reap_idx = -1;
+static int  lose_life(Player *p, int n);
+static void drop_follower(Player *p);
+static int  has_follower(const Player *p);
+
+int reaper_here(int region, int idx)
+{
+    return reap_region == region && reap_idx == idx;
+}
+
+void reaper_setup(void)
+{
+    if (!SET_ON(SET_REAPER)) { reap_region = -1; return; }
+    reap_region = REG_OUTER;
+    reap_idx    = rand() % OUTER_N;
+    glog("The Grim Reaper walks: he begins at the %s.",
+         space_at(reap_region, reap_idx)->name);
+}
+
+/* "When a character triggers the Reaper, that player draws a Reaper Card.
+ * The card determines how far the Grim Reaper moves." A card is a distance
+ * and sometimes a teleport, so a die and a small table stand in for the
+ * deck we do not have. */
+static void reaper_walk(void)
+{
+    int r = roll();
+    if (reap_region < 0) return;
+    if (r == 6) {                       /* the teleport results */
+        reap_region = (rand() % 2) ? REG_OUTER : REG_MIDDLE;
+        reap_idx    = rand() % (reap_region == REG_OUTER ? OUTER_N : MIDDLE_N);
+        glog("  the Grim Reaper is suddenly at the %s.",
+             space_at(reap_region, reap_idx)->name);
+        return;
+    }
+    {   /* he never enters the Inner Region, so he walks his own ring */
+        int n = (reap_region == REG_OUTER) ? OUTER_N : MIDDLE_N;
+        reap_idx = (reap_idx + r) % n;
+        glog("  the Grim Reaper moves %d to the %s.", r,
+             space_at(reap_region, reap_idx)->name);
+    }
+}
+
+/* The chart from the Grim Reaper card itself. */
+static void reaper_meet(Player *p)
+{
+    int r = roll();
+    glog("*** The Grim Reaper is upon %s. (a %d) ***", p->name, r);
+    switch (r) {
+    case 1:
+        glog("  'It is time.'  All lives are lost.");
+        lose_life(p, p->lives);
+        break;
+    case 2:
+        glog("  'I'm here for that one.'");
+        if (has_follower(p)) drop_follower(p);
+        else {
+            glog("    but there is no follower to take, so a life instead.");
+            lose_life(p, 1);
+        }
+        break;
+    case 3: {
+        int mine = roll() + roll(), his = roll() + roll();
+        glog("  'Dice with me!'  %s %d, the Reaper %d.", p->name, mine, his);
+        if (his > mine) lose_life(p, 1);
+        else            glog("    the wager holds; nothing is taken.");
+        break;
+    }
+    case 4:
+        glog("  'A game of chess?'  %s misses the next turn.", p->name);
+        p->miss = 1;
+        break;
+    case 5: {
+        int t = -1, i;
+        for (i = 0; i < nplayers; i++)
+            if (&players[i] != p && players[i].alive) { t = i; break; }
+        glog("  'There has been a mistake!'");
+        if (t >= 0) {
+            reap_region = players[t].region; reap_idx = players[t].idx;
+            glog("    the Reaper goes to %s, who must face him at once.",
+                 players[t].name);
+            reaper_meet(&players[t]);
+        }
+        break;
+    }
+    default:
+        glog("  'I have plans for you.'  %s is given a gift.", p->name);
+        p->base_str++;
+        break;
+    }
+}
+
+void reaper_trigger(Player *p, int natural_roll)
+{
+    if (!SET_ON(SET_REAPER) || reap_region < 0) return;
+    if (natural_roll != 1) return;      /* a NATURAL 1, and nothing else */
+    glog("A natural 1: the Grim Reaper stirs.");
+    reaper_walk();
+    if (reaper_here(p->region, p->idx)) reaper_meet(p);
+}
+
+int time_is_night(void) { return night; }
+
+int night_modifier(void)
+{
+    if (!SET_ON(SET_BLOODMOON)) return 0;
+    return night ? 1 : -1;
+}
+
+void time_flip(const char *why)
+{
+    if (!SET_ON(SET_BLOODMOON)) return;
+    night = !night;
+    glog(night ? "*** Nightfall. %s ***" : "*** Daybreak. %s ***",
+         why ? why : "The world turns.");
+    glog(night ? "  Every creature is the bolder for the dark: +1."
+               : "  The light cows them: -1 to every creature.");
+}
 static int  ending_revealed;
 static unsigned ending_spent;        /* cards already turned and discarded */
 static int  demon_lives;             /* the Demon Lord's four             */
-static int  win_override = -1;       /* an ending won outright, not by survival */
+int  win_override = -1;              /* an ending won outright, not by survival */
 static int  belt_wearer = -1;        /* who is wearing the Belt, if anyone */
 
 int ending_kind(void)  { return ending_revealed ? (int)ending : -1; }
@@ -381,6 +1421,7 @@ static void gain_trophies(Player *p, int ci)
     const char *what = c->craftfight ? "Craft"         : "Strength";
 
     if (p->nkills < MAX_KILLS) p->kills[p->nkills++] = ci;
+    hunt_trophy(p, c);
     *pool += c->power;
     while (*pool >= 7) {
         *pool -= 7;
@@ -660,6 +1701,18 @@ static int send_hench(Player *p, int craftfight)
 static int battle(Player *p, const char *foe, int power, int craftfight)
 {
     int mine = craftfight ? eff_craft(p) : eff_str(p);
+    /* The Blood Moon: "During Day, creatures are weaker... At Night,
+     * creatures become stronger", in Battle and in Psychic Combat alike,
+     * and never reduced below 1. Applied here so it reaches every fight
+     * rather than only the ones somebody remembered. */
+    if (power > 0) {
+        int was = power;
+        power += night_modifier();
+        if (power < 1) power = 1;
+        if (power != was)
+            glog("  %s the %s fights at %d.",
+                 time_is_night() ? "In the dark" : "By daylight", foe, power);
+    }
     int d1, d2, score, fscore;
     int nullify = 0;
     int by_hench = send_hench(p, craftfight);
@@ -1144,7 +2197,14 @@ static void resolve_card(Player *p, int ci, int depth)
         take_card(p, ci);
         break;
     case C_EVENT:
+        /* "Whenever a Character draws one or more Event Cards during their
+         * turn, the Time Card is flipped BEFORE those Events are
+         * encountered." The order matters: an Event that cares about the
+         * time sees the new time, not the old. */
+        time_flip(c->name);
         glog("%s: %s -- %s", p->name, c->name, c->text ? c->text : "");
+        harbinger_on_event(p);          /* he follows the Events */
+        if (!p->alive) return;
         if (!strcmp(c->name, "Book of Spells")) { gain_spell(p); step(p); return; }
         p->base_str   += c->d_str;
         p->base_craft += c->d_craft;
@@ -1735,7 +2795,14 @@ static Player *choose_encounter(Player *p)
         Player *best = NULL;
         for (i = 0; i < n; i++) {
             Player *q = &players[who[i]];
-            if (!ai_attack(p, q) && !has_ab(p, AB_STEAL)) continue;
+            /* The Thief robs without a fight and the Witch Doctor curses
+             * instead of fighting, so for both of them "I would not win this
+             * fight" is not a reason to walk past.  Only the Thief was
+             * exempted here, which put the Witch Doctor's Evil Eye behind a
+             * test for wanting a fight she was choosing not to have: she
+             * appeared 2,636 times in a hundred games and threw it never. */
+            if (!ai_attack(p, q) && !has_ab(p, AB_STEAL) &&
+                !has_ab(p, AB_EVIL_EYE)) continue;
             if (!best || lead_score_of(q) > lead_score_of(best)) best = q;
         }
         return best;
@@ -1846,7 +2913,11 @@ static int apply_place(Player *p, const Card *c, int depth)
         glog("%s finds a way down.  The Dungeon lies open from here.", p->name);
         return 0;
     case PLACE_SHOP:
-        do_shop(p, "  THE MARKET", SHOP_WARES);
+        /* A market is where goods become money, so the Alchemist keeps his
+         * counter here too.  The Village has one as well, but with every set
+         * shuffled in the Cataclysm replaces the Village with a Denizen --
+         * so without this the trade exists only in a base-game game. */
+        do_shop(p, "  THE MARKET", SHOP_WARES | SHOP_ALCHEMIST);
         break;
 
     case PLACE_SPELL:
@@ -2066,8 +3137,59 @@ static void resolve_space(Player *p, int depth)
     }
     sp = space_at(p->region, p->idx);
 
+    {   /* "The original space's name and instructions are ignored. The
+         * Terrain Card becomes the effective space." */
+        int tsid = space_id(p->region, p->idx);
+        if (terrain_here(tsid)) {
+            glog("%s stands in the %s; of the %s nothing is left.",
+                 p->name, terrain_name(tsid), sp->name);
+            {   /* burnt ground is an Adventure space and nothing more */
+                int want = 1 - res_n[tsid], k;
+                for (k = 0; k < want; k++) {
+                    int ci = deck_draw();
+                    if (ci < 0 || !res_add(tsid, ci)) break;
+                }
+            }
+            resolve_residents(p, depth);
+            return;
+        }
+        /* "A Fireland Token is a burning space: end your turn on one and
+         * you lose a Life, though passing through costs nothing."  fire_here()
+         * was written, declared in the header and then called by nobody, so
+         * two thousand and six tokens across a hundred games did nothing
+         * whatever except sometimes grow into a Terrain Card. */
+        if (fire_here(tsid)) {
+            glog("The ground burns under %s. -1 Life.", p->name);
+            lose_life(p, 1);
+            if (!p->alive) return;
+        }
+    }
+
+    if (p->region == REG_WOODLAND && !strcmp(sp->name, "Faerie Trod") &&
+        p->path >= 0) {
+        int was = p->path;
+        p->path = (p->path + 1 + rand() % (PATH_N - 1)) % PATH_N;
+        glog("  The Faerie Trod takes %s off %s and sets her on %s.",
+             p->name, path_name[was], path_name[p->path]);
+    }
+
+    if (p->quest == Q_VISIT && !strcmp(sp->name, "PlainPeril")) {
+        p->quest_mark = 1;
+        glog("  %s has stood on the Plain of Peril, as the Warlock asked.",
+             p->name);
+    }
+
+    if (dragon_scale_encounter(p)) return;  /* the scale takes the space */
+    if (gauntlet_guard(p)) return;        /* the Nether card comes first */
+    remnant_flip(p);                      /* turned over before you choose */
+
+    if (harbinger_encounter(p)) return;   /* he takes the space entirely */
+
     switch (sp->kind) {
     case SP_PLAIN:
+        break;
+    case SP_EYRIE:
+        eagle_king(p);
         break;
     case SP_ADV:
         /* "A cursed Character must move to the Chapel (or Ruins, if Evil)." */
@@ -2115,9 +3237,20 @@ static void resolve_space(Player *p, int depth)
         }
         return;
     case SP_VILLAGE:
-        do_shop(p, "  THE VILLAGE", SHOP_WARES | SHOP_MYSTIC | SHOP_DOCTOR);
+        /* "Instead of simply rolling on familiar spaces such as the
+         * Tavern, Chapel, etc., many Cataclysm spaces now have you
+         * encounter Denizens." */
+        if (SET_ON(SET_CATACLYSM)) { denizen_visit(p); break; }
+        /* SHOP_ALCHEMIST was the second of these: defined, handled in
+         * do_shop() and scored by the AI, and passed by nothing -- so an
+         * Object could never be turned into Gold at a counter, and nothing
+         * was ever sold in a hundred games while 3,589 Objects were left
+         * lying on the ground. */
+        do_shop(p, "  THE VILLAGE",
+                SHOP_WARES | SHOP_MYSTIC | SHOP_DOCTOR | SHOP_ALCHEMIST);
         return;
     case SP_TAVERN:
+        if (SET_ON(SET_CATACLYSM)) { denizen_visit(p); break; }
         r = roll();
         ui_dice_one("Tavern", r, -1);
         glog("%s rolls %d at the Tavern.", p->name, r);
@@ -2645,12 +3778,20 @@ static void resolve_space(Player *p, int depth)
                  p->name, mend[m].whole);
             step(p);
         }
-        do_shop(p, "  THE ARMOURY", SHOP_WARES);
+        /* And here, because the Armoury is the only counter that is on the
+         * board in every game: the Village is replaced by a Denizen once the
+         * Cataclysm is in, and the three Market cards are three out of 779. */
+        do_shop(p, "  THE ARMOURY", SHOP_WARES | SHOP_ALCHEMIST);
         break;
     }
 
     case SP_C_STABLES:
-        do_shop(p, "  THE STABLES", SHOP_WARES);
+        /* SHOP_STABLES was defined, handled in do_shop() and scored by the
+         * AI, and then never passed by anything -- so the Horse and Cart,
+         * the only carrying-capacity upgrade in the game, could not be
+         * bought at the one place that sells it.  A hundred games left
+         * 5,574 Objects on the ground for want of room and bought none. */
+        do_shop(p, "  THE STABLES", SHOP_WARES | SHOP_STABLES);
         break;
 
     case SP_C_SURGERY: {
@@ -2746,9 +3887,31 @@ static void resolve_space(Player *p, int depth)
     case SP_C_DONJON:
         break;                       /* resolved at the start of her turn */
 
+    case SP_WARLOCK:
+        warlock_cave(p);
+        break;
+
+    case SP_BRIDGE:
+        deep_bridge(p);
+        break;
+
+    case SP_TUNNEL:
+        deep_tunnel(p);
+        break;
+
+    case SP_CROSSROADS:
+        woodland_crossroads(p);
+        break;
+
+    case SP_DESTINY:
+        meeting_with_destiny(p);
+        break;
+
     case SP_D_TREASURE:
         /* 8.1: you stop here, and leave on your next turn by the table
-         * printed in the room. */
+         * printed in the room -- but the room is not empty. */
+        lord_of_darkness(p);
+        if (!p->alive) break;
         glog("%s stands in the Treasure Chamber.  The way out opens next turn.", p->name);
         turn_over = 1;
         break;
@@ -2895,6 +4058,14 @@ static int ui_pick_victim(Player *p, const char *msg)
 }
 
 /* "eats one of your Followers" -- the first one to hand. */
+static int has_follower(const Player *p)
+{
+    int i;
+    for (i = 0; i < p->nitems; i++)
+        if (deck_proto[p->carried[i]].type == C_FOLLOWER) return 1;
+    return 0;
+}
+
 static void drop_follower(Player *p)
 {
     int i;
@@ -3108,6 +4279,38 @@ static void dragon_king(Player *p)
 static void crown_turn(Player *p)
 {
     switch (ending_revealed ? ending : END_CROWN) {
+    case END_GAUNTLET:
+        /* "The first Character to survive the Gauntlet and reach the Crown
+         * of Command wins." There is no Command Spell to cast. */
+        glog("*** %s has run the Gauntlet and lives. ***", p->name);
+        win_override = (int)(p - players);
+        break;
+    case END_HUNT:
+        if (p->nether_kills >= 4) {
+            glog("*** %s brings four Nether Enemies to the Crown. ***", p->name);
+            win_override = (int)(p - players);
+        } else {
+            /* Nothing else in the game takes a Character off the Crown, and
+             * the Hunt is not won here -- it is won out on the board, four
+             * Nether Enemies at a time.  Standing here short of four is not
+             * a setback, it is removal from the game: seed 131's Inquisitor
+             * stood on this square for 1,017 turns at three of four while
+             * two other characters passed nine and seven out on the ring.
+             * So the door swings both ways for this ending alone. */
+            glog("%s stands on the Crown with %d of four. It is not enough,",
+                 p->name, p->nether_kills);
+            glog("  and %s turns back through the Dread Gate to hunt.", p->name);
+            /* All the way out, not just to the far side of the Gate: the
+             * Inner Region holds almost no Adventure spaces, so a hunter set
+             * down there would only circle it.  The Portal opens inward
+             * alone, so this is a house rule -- but the alternative is a
+             * player removed from a game that has not ended. */
+            p->region = REG_MIDDLE;
+            p->idx    = PORTAL_IDX;
+            step(p);
+        }
+        break;
+    case END_NETHERBOX: opened_box(p);     break;
     case END_DEMON:   demon_lord(p);       break;
     case END_PANDORA: pandoras_box(p);     break;
     case END_BELT:    belt_of_hercules(p); break;
@@ -3135,6 +4338,12 @@ static void take_turn(Player *p)
         Alignment want = p->ai ? ai_pick_align(p) : ui_pick_align(p);
         if (want != p->align) change_align(p, want, "at will");
     }
+
+    dragon_token(p);       /* the Lords gain ground every turn */
+    if (!p->alive) return;
+
+    /* Deep Realms: while she is in the tunnels the journey IS her turn. */
+    if (p->tunnel > 0) { tunnel_turn(p); return; }
 
     enforce_limit(p);      /* backstop: the limit applies at any time */
     spell_enforce(p);
@@ -3224,14 +4433,27 @@ static void take_turn(Player *p)
         if (out) {
             if (p->warrant) {
                 glog("The Watch bar the Gate: there is a Warrant out for %s.", p->name);
-                if (battle(p, "the Watch", 7, 0) == 0) {
+                if (battle(p, "Watch", 7, 0) == 0) {
                     p->region = REG_DONJON;
                     p->idx    = 0;
                     glog(">>> %s is taken to the DONJON. <<<", p->name);
                     step(p);
                     return;
                 }
-                glog("%s shakes them off, but may not leave this turn.", p->name);
+                /* The cards say the Watch "will try to Arrest you" -- so
+                 * beating them means they fail, and she is through the
+                 * Gate. Making her stay was a deadlock: the Watch fight at
+                 * Strength 7, and a character who has outgrown that can
+                 * never lose, so the Warrant never cleared and she tried
+                 * the Gate every turn for ever. Seeds 127 and 131 both
+                 * ended that way. The Warrant itself still stands. */
+                glog("%s fights her way past the Watch and out of the Gate.",
+                     p->name);
+                {
+                    int back = outer_by_name("City");
+                    p->region = REG_OUTER;
+                    p->idx    = back >= 0 ? back : 0;
+                }
                 step(p);
                 return;
             }
@@ -3274,6 +4496,45 @@ static void take_turn(Player *p)
     /* 5.2: having landed on a Doorway, this turn may be spent stepping onto
      * the Entrance -- and no further: "You must stop there."  Optional, so
      * she may simply carry on round the main board instead. */
+    /* The Woodland is entered from the Forest, and choosing a Path is the
+     * first thing that happens inside it. */
+    if (SET_ON(SET_WOODLAND) && p->region == REG_OUTER &&
+        !strcmp(space_at(p->region, p->idx)->name, "Forest")) {
+        int go;
+        if (p->ai) go = eff_str(p) >= 5 || eff_craft(p) >= 5;
+        else {
+            ui_draw();
+            go = (ui_prompt("Take the track into the WOODLAND?  [y]/[n]", "yn") == 'y');
+        }
+        if (go) {
+            p->region = REG_WOODLAND;
+            p->idx    = 0;
+            woodland_choose_path(p);
+            glog(">>> %s goes in under the trees. <<<", p->name);
+            step(p);
+            return;
+        }
+    }
+
+    /* "The Highland connects to the main board through Crags... Entering
+     * the Highland is optional." Offered on ending a move at the Crags. */
+    if (SET_ON(SET_HIGHLAND) && p->region == REG_OUTER &&
+        !strcmp(space_at(p->region, p->idx)->name, "Crags")) {
+        int go;
+        if (p->ai) go = eff_str(p) >= 5 || eff_craft(p) >= 5;   /* the Eyrie is Str/Craft 8 */
+        else {
+            ui_draw();
+            go = (ui_prompt("Take the trail up into the HIGHLAND?  [y]/[n]", "yn") == 'y');
+        }
+        if (go) {
+            p->region = REG_HIGHLAND;
+            p->idx    = 0;
+            glog(">>> %s climbs into the Highland. <<<", p->name);
+            step(p);
+            return;
+        }
+    }
+
     if (p->at_doorway && p->region != REG_DUNGEON) {
         int go;
         if (p->ai) go = ai_wants_dungeon(p);
@@ -3431,6 +4692,8 @@ static void take_turn(Player *p)
         steps = roll();
         ui_dice_one("MOVE", steps, -1);
         glog("%s rolls %d.", p->name, steps);
+        reaper_trigger(p, steps);       /* a natural 1 stirs him */
+        if (!p->alive || quit_flag) return;
 
         if (p->ai) step(p);              /* let the table see the AI's die */
     }
@@ -3491,6 +4754,8 @@ static void deal_character(Player *p, int t, int idx)
     const CharTemplate *ct = &char_tbl[t];
 
     char_taken[t] = 1;
+    p->quest = -1;               /* no Warlock quest until she asks for one */
+    p->path  = -1;
     snprintf(p->name, sizeof p->name, "%s", ct->cls);
     p->cls           = ct->cls;
     p->base_str      = ct->str;
@@ -3676,6 +4941,13 @@ deal:
                  char_tbl[t].str, char_tbl[t].craft, players[i].hench.lives);
         }
     }
+
+    reaper_setup();            /* he takes the board once, after everyone else */
+    harbinger_setup();
+    fire_setup();
+    cata_setup();
+    nether_setup();
+    dragon_setup();
 
     {
         int k;
@@ -4009,6 +5281,7 @@ int main(int argc, char **argv)
         if ((e = getenv("TALISMAN_CHAOS"))   && *e && *e != '0') chaos_on    = 1;
         if ((e = getenv("TALISMAN_LOOK")))    look_depth = atoi(e);
         if ((e = getenv("TALISMAN_LOOK_AB"))) look_ab    = atoi(e);
+        if ((e = getenv("TALISMAN_WHY")) && *e && *e != '0') ai_why = 1;
         if ((e = getenv("TALISMAN_ROAD")))    road_on    = atoi(e);
         if ((e = getenv("TALISMAN_ROAD_AB"))) road_ab    = atoi(e);
         if ((e = getenv("TALISMAN_CHAR")))    forced_char = atoi(e);
@@ -4093,6 +5366,7 @@ int main(int argc, char **argv)
         if (p->alive) take_turn(p);
         if (quit_flag) break;
         if (++turn_count > TURN_CAP) break;
+        if ((turn_count % 8) == 0) fire_spread();   /* the Ifrit gain ground */
 
         if (win_override >= 0) { winner = win_override; break; }
         if (alive_count() <= 1) {

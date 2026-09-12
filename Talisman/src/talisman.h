@@ -31,7 +31,7 @@
  * region table's total must fit inside.  board_init() checks that it does,
  * so adding a board that overflows fails loudly instead of scribbling. */
 #define MAX_BOARDS  6           /* the Kingdom, plus room for the expansions */
-#define NSPACES     128
+#define NSPACES     192         /* room for the expansion boards too */
 #define MAINBOARD_N (OUTER_N + MIDDLE_N + INNER_N + 1)   /* 49 */
 #define MAX_RES     16     /* things that can sit on one space at once */
 
@@ -52,10 +52,45 @@ typedef enum {
     /* Not expansions of the main deck but separate stacks, drawn only on
      * their own boards, so deck_build() leaves them out. */
     SET_CITYD, SET_TIMED,
+    /* The three Dragon decks are drawn only when a Scale says so. */
+    SET_DRAGON, SET_DRAGON_V, SET_DRAGON_G, SET_DRAGON_C,
+    /* The Nether Deck is likewise its own stack: "not simply mixed into
+     * the ordinary Adventure deck". */
+    SET_NETHER,
     SET_COUNT
 } CardSet;
 
 extern const char *set_name[SET_COUNT];
+
+/* --- The Blood Moon: the passage of time --------------------------------
+ *
+ * The Time Card is a single global bit, DAY on one face and NIGHT on the
+ * other, and it is the expansion's whole spine. It flips whenever a
+ * character draws an Event -- BEFORE the Event resolves, which the rulebook
+ * is emphatic about -- and creatures are a point weaker by day and a point
+ * stronger by night, each one counted separately when several are met at
+ * once.
+ *
+ * Lunar Events are the other half: they stay in play beside the Time Card
+ * instead of being discarded, and every one of them is swept away the
+ * moment the card turns. So their effects accumulate through a day and
+ * vanish at nightfall. */
+/* --- The Firelands: the Ifrit reshape the world ------------------------
+ *
+ * Two layers over the board. A Fireland Token is a burning space: end your
+ * turn on one and you lose a Life, though passing through costs nothing.
+ * A Terrain Card goes further -- it REPLACES the space, so a Temple under
+ * one is not a Temple any more, and an effect sending you to the Temple has
+ * nowhere to send you. Neither may touch the Inner Region. */
+void fire_setup(void);
+void fire_spread(void);
+int  fire_here(int sid);
+int  terrain_here(int sid);
+const char *terrain_name(int sid);
+
+int  time_is_night(void);
+void time_flip(const char *why);
+int  night_modifier(void);   /* +1 at night, -1 by day, 0 without the set */
 extern int enabled_sets;                 /* bitmask of (1 << CardSet) */
 #define SET_ON(s) (enabled_sets & (1 << (s)))
 
@@ -66,13 +101,14 @@ extern int enabled_sets;                 /* bitmask of (1 << CardSet) */
  * single grid.  The four below are the main board. */
 typedef enum { REG_OUTER = 0, REG_MIDDLE = 1, REG_INNER = 2, REG_CROWN = 3,
                REG_DUNGEON = 4, REG_CITY = 5, REG_DONJON = 6,
-               REG_TIME = 7 } Region;
+               REG_TIME = 7, REG_HIGHLAND = 8, REG_WOODLAND = 9 } Region;
 
 
 typedef enum {
     SP_PLAIN, SP_ADV, SP_CITY, SP_TAVERN, SP_CHAPEL, SP_GRAVE, SP_VILLAGE,
     SP_TEMPLE, SP_MINE, SP_DESERT, SP_PIT, SP_PITFIENDS, SP_WEREDEN, SP_FIRE, SP_CRYPT,
-    SP_SENTINEL, SP_PORTAL, SP_GATE, SP_CROWN_SP,
+    SP_SENTINEL, SP_PORTAL, SP_GATE, SP_CROWN_SP, SP_EYRIE, SP_WARLOCK,
+    SP_CROSSROADS, SP_DESTINY, SP_BRIDGE, SP_TUNNEL,
     /* the Dungeon's rooms, each with its own printed rule */
     SP_D_ENTRANCE, SP_D_GUARD, SP_D_LIBRARY, SP_D_CELL,
     SP_D_TORTURE, SP_D_KITCHEN, SP_D_DARK, SP_D_TREASURE,
@@ -85,9 +121,11 @@ typedef enum {
     SP_T_RADZONE, SP_T_DEATHWORLD, SP_T_FORTRESS, SP_T_SENTINEL, SP_T_DRAW
 } SpaceKind;
 
-#define DUNGEON_N   25          /* 16 outer + 8 inner + the Treasure Chamber */
-#define CITY_N      24          /* streets and Locations, turn and turn about */
+#define DUNGEON_N   26          /* + Skull Passage and the Catacombs, the Deep Realms doors */
+#define CITY_N      26          /* + the Rat Run and the Old Sewers */
 #define TIME_N      16          /* the realities of the Timescape             */
+#define HIGH_N      10          /* the trail up from Crags to the Eyrie        */
+#define WOOD_N       9          /* the Woodland, in to the Meeting with Destiny */
 
 typedef struct {
     const char *name;   /* <= 11 chars: it has to fit one board cell */
@@ -290,6 +328,15 @@ typedef struct {
     int region, idx;
     int alive, ai, colour;
     int talisman, miss;
+    /* The Warlock's Cave: one quest at a time, and its progress. */
+    int quest;       /* which quest, or -1 for none                       */
+    int quest_mark;  /* the count or flag the quest is measured against   */
+    int quest_done;  /* how many quests this character has finished       */
+    int path;        /* the Woodland Path she walks, or -1                */
+    int destiny;     /* Destiny Cards taken at the Meeting with Destiny   */
+    int nether_kills;/* The Hunt: Nether Enemies defeated and kept        */
+    int tunnel;      /* Deep Realms: turns left in the tunnel journey      */
+    int tunnel_to;   /* which Region the tunnel comes out in               */
     int belt;        /* wearing the Belt of Hercules (alternative ending) */
     int hedged;      /* turns spent letting somebody else cross first    */
     int gate_shut;   /* we looked at the Dread Gate and said not yet     */
@@ -325,6 +372,65 @@ typedef struct {
     int preserve;                 /* a Preservation spell is standing by     */
 } Player;
 
+/* --- The Reaper: the Grim Reaper himself ---------------------------------
+ *
+ * An NPC with no Strength, Craft, Life or Fate: you do not fight him and
+ * you cannot take him as a trophy. He walks the board and interferes.
+ *
+ * He moves on a NATURAL 1 for movement -- the die itself showing 1, not a
+ * modified result, and not one die of a two-die roll. He may travel the
+ * Outer and Middle Regions and the expansion boards, but never the Inner
+ * Region, even by teleport. */
+/* --- The Harbinger: the world is ending -------------------------------
+ *
+ * Two halves. The Omens are a global clock: reveal them one at a time and
+ * the world gets worse. The Harbinger himself is local danger -- he steps
+ * onto the space of whoever draws an Event outside the Inner Region, and
+ * while he shares your Region your board-space draws come from his deck
+ * instead of the Adventure deck. */
+/* --- The Cataclysm: Denizens and Remnants -----------------------------
+ *
+ * Denizens are the survivors returning to the ruined world. They are NOT
+ * Adventure Cards: they do not count toward a space's card total and may
+ * only be visited when a card or space says so. One with a trait matching
+ * its space stays there; one without is discarded after the visit.
+ *
+ * Remnants are what the old world left behind. They begin facedown on the
+ * marked spaces -- two at the Ruins -- and a facedown Remnant counts for
+ * nothing. Landing on one flips it face up BEFORE you decide what to
+ * encounter, and from then on it counts as an Adventure Card. */
+/* --- The Dragon: three Lords competing for the world -------------------
+ *
+ * Varthrax, Grilipus and Cadorus each have a Dragon deck and a Rage. A
+ * token is drawn at the start of every turn; a Scale goes on its Lord's
+ * card, and the third Scale crowns that Lord Dragon King -- which can
+ * happen again and again through a game.
+ *
+ * A crowned Lord puts one Scale on the board, and a Scale takes control of
+ * the space it sits on: land there and you draw from that Lord's deck
+ * instead of doing whatever the space normally does. If it matches the
+ * current King you have no choice about it. */
+void dragon_setup(void);
+void dragon_token(Player *p);
+int  dragon_scale_at(int sid);
+int  dragon_scale_encounter(Player *p);
+
+void cata_setup(void);
+void denizen_visit(Player *p);
+int  remnant_flip(Player *p);
+
+void harbinger_setup(void);
+void harbinger_on_event(Player *p);
+int  harbinger_here(int region, int idx);
+int  harbinger_in_region(int region);
+int  harbinger_encounter(Player *p);
+void omen_advance(const char *why);
+
+void reaper_setup(void);
+void reaper_trigger(Player *p, int natural_roll);
+int  reaper_here(int region, int idx);
+
+
 typedef struct { int region, idx; } CellRef;
 
 /* --- data.c ------------------------------------------------------- */
@@ -334,6 +440,8 @@ extern const Space  inner_ring[INNER_N];
 extern const Space  crown_space;
 extern const Space  dungeon_path[DUNGEON_N];
 extern const Space  city_ring[CITY_N];
+extern const Space  highland_path[HIGH_N];
+extern const Space  woodland_path[WOOD_N];
 extern const Space  donjon_space;
 extern const Space  time_scape[TIME_N];
 extern const int    warp_line[TIME_N][3];   /* where 1-2, 3-4 and 5-6 lead */
@@ -410,11 +518,23 @@ void ui_draw(void);
  * mismatched format is otherwise silent until it prints nonsense or reads
  * off the stack. */
 void glog(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+
+/* The decision trace.  glog() records what happened; wlog() records why --
+ * the option the AI took, the one it turned down, and by how much.  It goes
+ * to the trace file only, never to the on-screen log, and only when
+ * TALISMAN_WHY is set, because it is one line per turn and nobody playing
+ * wants to read it. */
+extern int ai_why;
+void wlog(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 /* so the in-game help can show what is actually in force, not just what
  * the switches are called */
 int      endgame(void);
 int      ending_kind(void);   /* the revealed ending, or -1 while face down */
 int      belt_holder(void);  /* player index wearing the Belt, or -1        */
+/* The Warlock will not take a Quest back before it is done, so the AI has
+ * to be able to ask the same question he does. */
+int  quest_met(const Player *p);
+
 extern int alt_endings;
 extern int henchmen_on;   /* the optional Henchmen rule is in play */
 extern int chaos_on;      /* Chaos Bloodbath: one Talisman, death is final */   /* has anyone reached the Crown? */
@@ -430,6 +550,10 @@ typedef enum {
     END_BELT,       /* the Belt of Hercules: go and duel them yourself  */
     END_VOID,       /* the first across the Bridge of Fire is annihilated */
     END_DRAGON,     /* the Dragon King, and a die that decides it all   */
+    /* --- The Nether Realm's three, which need its deck --- */
+    END_GAUNTLET,   /* every Inner space seeded with a Nether card      */
+    END_NETHERBOX,  /* Pandora's Box: NOT the chest above, but the deck */
+    END_HUNT,       /* four defeated Nether Enemies, then the Crown     */
     END_COUNT
 } Ending;
 extern const char *ending_name[END_COUNT];

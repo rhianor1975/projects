@@ -106,6 +106,21 @@ Walk a ring of twenty spaces, build a hero, and take four of the five Artifacts 
 
 ---
 
+### ⚔️ [Djarhun](./Djarhun/) – Djarhun: The Quest for the Book of Avrakar
+
+The print-and-play game in a terminal. Six lands — Frostburn, the Tar'ri Ocean, Durach, the desert of Aldun, the Abyss, and Urthe a thousand years on — and a wizard at the centre of the spiral holding the Book.
+
+* 1,158 cards read off the 79 print-and-play sheets, with the Foes' printed statistics intact
+* Not a d6 game: Strength says what you carry, Speed which die you move with and how you shoot, Sorcery how much magic you hold
+* Ranged battle, ships and the sea, Spells, Henchmen, Traps and the Places that stay on the board and count down
+* Four ways of drawing a board too big for a terminal, switched with `[v]` mid-game
+* Headless autoplay with seeded replay, rules invariants armed, and a decision trace that records what the computer players turned down as well as what they chose
+
+**Build:** cd Djarhun && make
+**Run:** ./djarhun — or DJARHUN_AUTO=1 ./djarhun to watch four heroes get on with it
+
+---
+
 ## 🔧 Dependencies
 
 ### Common
@@ -128,7 +143,7 @@ Walk a ring of twenty spaces, build a hero, and take four of the five Artifacts 
 * `libcurl` – HTTP client for the Jellyfin REST API
 * `mpv` – playback engine, driven over its JSON IPC socket
 
-### Talisman and Prophecy (board games)
+### Talisman, Prophecy and Djarhun (board games)
 * `ncurses` – UI library. Nothing else: the cards are compiled in
 
 ---
@@ -176,6 +191,10 @@ cd Talisman && make
 ### Prophecy (board game):
 cd Prophecy && make
 PROPHECY_RACES=1 PROPHECY_DRAGON=1 PROPHECY_WATER=1 ./prophecy
+
+### Djarhun (board game):
+cd Djarhun && make
+./djarhun
 
 ---
 

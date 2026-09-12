@@ -203,13 +203,13 @@ int item_worst(const Player *p)
         const Card *c = &deck_proto[p->carried[i]];
         int v;
         if (c->type != C_OBJECT) continue;             /* Followers are free */
-        v = obj_value(c);
         /* Armour, Helmet and Shield carry no stat bonus at all -- what they
-         * are worth is the roll that turns a blow aside, one time in three.
-         * Scored on stats alone they came out at zero, so they were always
-         * the first thing dropped for a trinket. */
-        if (c->kw & KW_ARMOUR) v += 5;
-        if (c->kw & KW_WEAPON) v += 2;
+         * are worth is the roll that turns a blow aside, one time in three --
+         * and obj_value() already pays them for it.  Paying them a second
+         * time here meant this function and item_best_swap() ranked the same
+         * two Objects differently, so the slot picked as "worst" was not the
+         * one the trade was then judged against. */
+        v = obj_value(c);
         if (v < wv) { wv = v; worst = i; }
     }
     return worst;

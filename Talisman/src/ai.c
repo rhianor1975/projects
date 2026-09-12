@@ -1,4 +1,5 @@
 #include "talisman.h"
+#include <stdlib.h>
 #include <string.h>
 
 /*
@@ -18,6 +19,7 @@ static int dist_dir(int from, int to, int len, int dir)
 static int lead_score(Player *q);
 int        lead_score_of(Player *q);
 static int space_appeal(Player *p, int idx);
+static int resident_appeal(Player *p, int sid);
 int        ai_attack(Player *att, Player *def);
 int        ai_flee_demon(Player *p, int demon_lives);
 
@@ -59,7 +61,8 @@ static int goes_psychic(Player *att)
 }
 
 static int combat_stat(Player *p) {
-    /* If the AI has the psychic attack ability and craft is higher, assume craft[cite: 5] */
+    /* Psychic Combat is fought with Craft, so a Character who can choose it
+     * fights with whichever stat is higher. */
     if (goes_psychic(p)) return eff_craft(p);
     return eff_str(p);
 }
@@ -85,18 +88,29 @@ static int defence_stat(Player *att, Player *def)
     return v;
 }
 
-/* A living character on this ring carrying a Talisman we could take. */
+/* A living character on this ring carrying a Talisman we could take -- and
+ * near enough that one roll could put us on them.
+ *
+ * Without the distance test this walked at the square somebody was standing
+ * on.  They move; next turn it aimed at the new square.  Over a hundred
+ * games that was 1,247 turns of chasing, a mean pursuit of 1.0 turns, 131
+ * arrivals and 44 Talismans -- against an eleven-turn walk to the Temple
+ * that arrives three times in four and was being pre-empted to do it.  Six
+ * spaces is the whole of a die, so within six there is a real chance of
+ * landing on them this turn and beyond it there is only trailing after. */
 static int carrier_on_ring(Player *p)
 {
-    int i;
+    int i, len = ring_len(p->region);
 
     for (i = 0; i < nplayers; i++) {
         Player *q = &players[i];
+        int cw, ccw;
         if (q == p || !q->alive || !q->talisman) continue;
         if (q->region != p->region) continue;
-        
-        /* Updated: Compare effective combat stats instead of strict strength */
-        if (combat_stat(q) > combat_stat(p) + 2) continue;        /* too strong to rob */
+        if (combat_stat(q) > combat_stat(p) + 2) continue;   /* too strong to rob */
+        cw  = dist_dir(p->idx, q->idx, len,  1);
+        ccw = dist_dir(p->idx, q->idx, len, -1);
+        if ((cw < ccw ? cw : ccw) > 6) continue;             /* out of one roll */
         return q->idx;
     }
     return -1;
@@ -173,13 +187,22 @@ static int talisman_on_ring(Player *p)
 /* How much this AI wants to land on a space, given what is sitting on it. */
 static int space_appeal(Player *p, int idx)
 {
-    int sid = space_id(p->region, idx), k;
+    int sid = space_id(p->region, idx);
     int v = space_at(p->region, idx)->draw;
 
     /* A wound is an inconvenience at four Lives and the end of the game at
      * one.  These penalties used to be flat, so a character on their last
      * Life walked into the Desert at exactly the same odds as a fresh one. */
     int frail = (p->lives <= 1) ? 6 : (p->lives <= 2) ? 2 : 1;
+
+    /* The Firelands lie on top of the board and this function used to look
+     * straight through them.  A Fire Token costs a Life to end a turn on;
+     * a Terrain Card goes further and REPLACES the space, so the Temple
+     * under one is not a Temple any more.  A fifth of every purposeful walk
+     * in the game is a walk to the Temple, and in a hundred games it was
+     * walked to after it had burned down four hundred and sixty-six times. */
+    if (fire_here(sid)) v -= 4 * frail;
+    if (terrain_here(sid)) return v + 1 + resident_appeal(p, sid);
 
     switch (space_at(p->region, idx)->kind) {
     case SP_FIRE:                       v -= 4 * frail; break;
@@ -193,17 +216,71 @@ static int space_appeal(Player *p, int idx)
     case SP_CITY:   v += (p->gold >= 3) ? 3 : 0; break;
     case SP_VILLAGE:                    v += 1; break;
     
-    /* Updated: Do not waste time walking to the Portal without a Talisman[cite: 5] */
+    /* No sense walking to the Portal without a Talisman: it will not open. */
     case SP_PORTAL: v += (!p->talisman) ? -50 : 10; break;
-    
+
+    /* --- the spaces the expansions added, none of which were scored -----
+     * Every one of these was read as open ground until now.  The Eyrie is
+     * the expensive one: the Eagle King fights at Strength and Craft 8, he
+     * cannot be evaded, and no Follower may take the fight in your place.
+     * Five hundred and sixty-seven landings, two hundred and twenty-four
+     * wins and fifty-eight deaths -- a tenth of every death in the game. */
+    /* Every one of these is a fight that can be had again next turn, so
+     * none of them may score positive.  best_grind() picks the highest
+     * space on the ring and walks back to it for as long as it stays the
+     * highest -- give a repeatable fight a reward and two characters will
+     * farm it until the turn cap.  Seed 169 did exactly that, 1,873 rounds
+     * of Pitfiends between two Strength-12 characters who could not lose.
+     * The convention the rest of this switch already keeps: hazards are
+     * priced at zero or below, and only services are worth walking to. */
+    case SP_EYRIE: {
+        int win = win_chance(best_stat(p), 8);
+        v += (win >= 65) ? 0 : (win >= WORTH_FIGHTING) ? -2 : -6 * frail;
+        break;
+    }
+    /* The Warlock trades a finished Quest for a Talisman, and a Talisman is
+     * the whole of what stands between the Outer Region and the Crown.  He
+     * waves you away if it is not done, so that trip is worth nothing. */
+    case SP_WARLOCK:
+        v += p->talisman        ? 0
+           : p->quest < 0       ? 5      /* go and be given one   */
+           : quest_met(p)       ? 12     /* go and be paid for it */
+           :                     -3;     /* he will only wave her off */
+        break;
+    /* Destiny is a fight at 7, either stat depending on the Path. */
+    case SP_DESTINY: {
+        int win = win_chance(best_stat(p), 7);
+        v += (win >= 65) ? 0 : (win >= WORTH_FIGHTING) ? -1 : -4 * frail;
+        break;
+    }
+    case SP_CROSSROADS: v -= 1; break;      /* it only shuffles your Path */
+    /* Both end the turn and carry you off to the City or the Dungeon. */
+    case SP_BRIDGE:     v -= 2; break;
+    case SP_TUNNEL:     v -= 3; break;
+    /* Up to six fights at Strength 3, ending when one of them lands. */
+    case SP_PITFIENDS:  v += (win_chance(eff_str(p), 3) >= 70) ? 0 : -3 * frail; break;
+    /* A Werewolf at a die roll of Strength: 3.5 on average. */
+    case SP_WEREDEN:
+        v += (win_chance(eff_str(p), 4) >= 60) ? 0 : -2 * frail; break;
+
     default: break;
     }
+    return v + resident_appeal(p, sid);
+}
+
+/* What is lying on a space, scored on its own -- burnt ground has no
+ * instructions left of its own but still holds whatever was dropped there. */
+static int resident_appeal(Player *p, int sid)
+{
+    int v = 0, k;
+
     if (res_tal[sid])  v += 8;
     if (res_gold[sid]) v += 2;
     for (k = 0; k < nplayers; k++) {          /* a robbable carrier standing there */
         Player *q = &players[k];
         if (q != p && q->alive && q->talisman && !p->talisman &&
-            q->region == p->region && q->idx == idx && combat_stat(q) <= combat_stat(p) + 2)
+            space_id(q->region, q->idx) == sid &&
+            combat_stat(q) <= combat_stat(p) + 2)
             v += 6;
     }
     for (k = 0; k < res_n[sid]; k++) {
@@ -249,12 +326,18 @@ static Player *crown_sitter(void);
 int            ai_flee_demon(Player *p, int demon_lives);
 int            ai_attack(Player *att, Player *def);
 
+/* Which rule in ai_target() picked the destination.  A goal that changes
+ * every single turn and a goal held for ten look the same in the trace
+ * unless it says which question produced it. */
+static const char *why_rule = "-";
+
 static int ai_target(Player *p)
 {
+    why_rule = "-";
     int loose, i;
     int crown_holder_exists = 0;
 
-    /* Check if someone has reached the Crown of Command Region[cite: 5] */
+    /* Has anyone reached the Crown of Command yet? */
     for (i = 0; i < nplayers; i++) {
         if (players[i].alive && players[i].region == REG_CROWN) {
             crown_holder_exists = 1;
@@ -271,12 +354,13 @@ static int ai_target(Player *p)
         /* ...but only if we can actually take them.  Walking up to a
          * superhuman you cannot beat is just handing over a Life. */
         if (w && w != p && w->region == p->region && ai_attack(p, w))
-            return w->idx;
+            { why_rule = "belt-wearer"; return w->idx; }
     }
 
     /* EMERGENCY OVERRIDE: Someone holds the Crown! Rush the end game --
      * but only for the endings where rushing is actually the answer. */
     if (crown_holder_exists && p->region != REG_CROWN && should_rush_crown(p)) {
+        why_rule = "rush-crown";
         if (p->region == REG_OUTER)  return SENTINEL_IDX;
         if (p->region == REG_MIDDLE) return PORTAL_IDX;
         if (p->region == REG_INNER)  return GATE_IDX;
@@ -287,16 +371,17 @@ static int ai_target(Player *p)
      * a human would go and find a Mystic first. */
     if (ending_kind() == END_DEMON && ai_flee_demon(p, 4)) {
         int foe;
-        if (p->region == REG_MIDDLE) return TEMPLE_IDX;   /* go find Craft */
+        if (p->region == REG_MIDDLE) { why_rule = "demon-craft"; return TEMPLE_IDX; }
         /* In the Inner Region there is no going back for Craft and no way
          * past the barrier, so the only thing left that can decide the game
          * is each other.  Orbiting the Gate forever is not patience, it is
          * a stalemate three players walked into together. */
-        if (p->region == REG_INNER && (foe = rival_on_ring(p)) >= 0) return foe;
+        if (p->region == REG_INNER && (foe = rival_on_ring(p)) >= 0)
+            { why_rule = "demon-rival"; return foe; }
     }
 
     /* Nobody has turned the card yet, and one in six is the Void. */
-    if (p->region == REG_INNER && ai_hedge_crossing(p)) return -1;
+    if (p->region == REG_INNER && ai_hedge_crossing(p)) { why_rule = "hedging"; return -1; }
 
     /* "The cursed Character must move by the fastest possible route to the
      * chapel.  Otherwise, all normal rules apply."  Nothing else changes --
@@ -306,21 +391,30 @@ static int ai_target(Player *p)
         int i, len = ring_len(p->region);
         const char *goal = (p->align == AL_EVIL) ? "Ruins" : "Chapel";
         for (i = 0; i < len; i++)
-            if (!strcmp(space_at(p->region, i)->name, goal)) return i;
+            if (!strcmp(space_at(p->region, i)->name, goal))
+                { why_rule = "cursed"; return i; }
     }
 
     switch (p->region) {
     case REG_OUTER:
-        if (!p->talisman && (loose = talisman_on_ring(p)) >= 0) return loose;
-        if (!p->talisman && (loose = carrier_on_ring(p))  >= 0) return loose;
+        if (!p->talisman && (loose = talisman_on_ring(p)) >= 0)
+            { why_rule = "loose-talisman"; return loose; }
+        if (!p->talisman && (loose = carrier_on_ring(p))  >= 0)
+            { why_rule = "chase-carrier"; return loose; }
         /* the Sentinel yields to either stat now, so use the better one */
-        if (ready_for(p, REG_MIDDLE)) return SENTINEL_IDX;
+        if (ready_for(p, REG_MIDDLE)) { why_rule = "ready"; return SENTINEL_IDX; }
         return -1;                                  /* grind adventures */
     case REG_MIDDLE:
-        if (!p->talisman && (loose = talisman_on_ring(p)) >= 0) return loose;
-        if (!p->talisman && (loose = carrier_on_ring(p))  >= 0) return loose;
-        if (!p->talisman) return TEMPLE_IDX;
-        if (ready_for(p, REG_INNER)) return PORTAL_IDX;
+        if (!p->talisman && (loose = talisman_on_ring(p)) >= 0)
+            { why_rule = "loose-talisman"; return loose; }
+        if (!p->talisman && (loose = carrier_on_ring(p))  >= 0)
+            { why_rule = "chase-carrier"; return loose; }
+        if (!p->talisman) { why_rule = "need-talisman"; return TEMPLE_IDX; }
+        /* Under the Hunt the Inner Region is not on the way to anything: the
+         * four are gathered out here, and the Portal only opens inward. */
+        if (ending_kind() == END_HUNT && p->nether_kills < 4)
+            { why_rule = "hunt-stay-out"; return -1; }
+        if (ready_for(p, REG_INNER)) { why_rule = "ready"; return PORTAL_IDX; }
         return -1;
     case REG_INNER:
         /* If we already looked at the Gate this game and turned away, there
@@ -330,8 +424,9 @@ static int ai_target(Player *p)
          * and only walk back to it once we actually are. */
         if (p->gate_shut && eff_craft(p) + 1 <= p->gate_shut) {
             int g = best_grind(p);
-            if (g >= 0) return g;
+            if (g >= 0) { why_rule = "gate-shut"; return g; }
         }
+        why_rule = "the-gate";
         return GATE_IDX;
     default:
         return -1;
@@ -353,6 +448,10 @@ static int path_pain(Player *p, int to, int dir)
 
     for (i = 1; i <= n; i++) {
         at = ((p->idx + dir * i) % len + len) % len;
+        /* A Fire Token only burns you if you END a turn on it, so it costs
+         * nothing to walk over -- except on the last step, which is where
+         * this walk stops. */
+        if (i == n && fire_here(space_id(p->region, at))) pain += 2 * frail;
         switch (space_at(p->region, at)->kind) {
         case SP_FIRE:   pain += 2 * frail; break;   /* certain wound */
         case SP_DESERT: pain += 1 * frail; break;   /* wound unless you shelter */
@@ -422,6 +521,12 @@ static int lookahead(Player *p, int at, int target, int len, int depth)
     return v + sum / 6 / 3;
 }
 
+/* The name of a space, for the decision trace. */
+static const char *why_name(Player *p, int idx)
+{
+    return (idx < 0) ? "grind" : space_at(p->region, idx)->name;
+}
+
 int ai_direction(Player *p, int steps)
 {
     int len = ring_len(p->region);
@@ -456,21 +561,48 @@ int ai_direction(Player *p, int steps)
              * in the Inner Region heals, and waiting loses just as surely. */
             if (burn_cw != burn_ccw && p->fire_shy < 20) {
                 p->fire_shy++;
+                wlog("  why %s  goal %s [%s]  steps around the fire  -> %s",
+                     p->name, why_name(p, dest), why_rule, burn_cw ? "ccw" : "cw");
                 return burn_cw ? -1 : 1;
             }
         }
         cw  = dist_dir(p->idx, dest, len,  1);
         ccw = dist_dir(p->idx, dest, len, -1);
-        if (cw + pain_cw != ccw + pain_ccw)
-            return (cw + pain_cw < ccw + pain_ccw) ? 1 : -1;
-        return (cw <= ccw) ? 1 : -1;
+        {   /* here the cost is steps plus what the road takes out of you,
+             * so the trace shows both halves rather than one total. */
+            int tot_cw  = cw  + pain_cw;
+            int tot_ccw = ccw + pain_ccw;
+            int take    = (tot_cw != tot_ccw) ? (tot_cw < tot_ccw ? 1 : -1)
+                                              : (cw <= ccw ? 1 : -1);
+            wlog("  why %s  goal %s [%s]  cw %s %d+%d  ccw %s %d+%d  -> %s by %d",
+                 p->name, why_name(p, dest), why_rule,
+                 why_name(p, nxt_cw),  cw,  pain_cw,
+                 why_name(p, nxt_ccw), ccw, pain_ccw,
+                 take > 0 ? "cw" : "ccw",
+                 tot_cw > tot_ccw ? tot_cw - tot_ccw : tot_ccw - tot_cw);
+            return take;
+        }
     }
 
     cwi  = ((p->idx + steps) % len + len) % len;
     ccwi = ((p->idx - steps) % len + len) % len;
     cw   = lookahead(p, cwi,  target, len, p->look);
     ccw  = lookahead(p, ccwi, target, len, p->look);
-    return (cw >= ccw) ? 1 : -1;
+    /* One decision in six scores an exact tie, and `cw >= ccw` sent every
+     * one of the 3,243 of them clockwise -- which is the whole of the
+     * board's 56.7/43.3 drift.  Four characters all circling the same way
+     * is not indifference, it is a bias nobody chose.  When the scoring
+     * genuinely cannot separate the two, toss for it. */
+    {
+        int take = (cw != ccw) ? (cw > ccw ? 1 : -1)
+                               : ((rand() & 1) ? 1 : -1);
+        wlog("  why %s  goal %s [%s]  cw %s %d  ccw %s %d  -> %s by %d",
+             p->name, why_name(p, target), why_rule,
+             why_name(p, cwi),  cw,
+             why_name(p, ccwi), ccw,
+             take > 0 ? "cw" : "ccw", cw > ccw ? cw - ccw : ccw - cw);
+        return take;
+    }
 }
 
 /* 0 = not yet, 1 = fight it with Strength, 2 = outwit it with Craft */
@@ -593,9 +725,15 @@ Alignment ai_pick_align(Player *p)
 {
     int sid = space_id(p->region, p->idx), k;
 
+    /* The test was inverted.  "A change would cost us this" is true of an
+     * Object that needs the Alignment we ALREADY have -- an Object needing
+     * one we do not have is a reason to change, not a reason to refuse.  As
+     * written, carrying a Good-only Object while Evil was what stopped the
+     * Druid becoming Good, and no character changed Alignment in either
+     * direction across a hundred games. */
     for (k = 0; k < p->nitems; k++) {
         unsigned need = deck_proto[p->carried[k]].needs;
-        if (need && need != NEEDS_ANY && !(need & align_bit(p->align)))
+        if (need && need != NEEDS_ANY && (need & align_bit(p->align)))
             return p->align;              /* a change would cost us this */
     }
     for (k = 0; k < res_n[sid]; k++) {
@@ -650,6 +788,19 @@ int ai_cross_gate(Player *p)
     p->hedged++;
 
     switch (ending_kind()) {
+    /* The Crown is a one-way door -- nothing in the game moves a Character
+     * off it -- and the Hunt is not won there but out on the board, four
+     * Nether Enemies at a time.  Crossing early removes you from the game
+     * without ending it: in eleven Hunt games the character on the Crown
+     * had none of the four in eight of them, and sat there for as many as
+     * 1,017 turns while somebody outside reached nine. */
+    case END_HUNT:
+        /* Four first -- but a Character already inside the Inner Region has
+         * nothing to gather there (Nether Enemies come out of the Adventure
+         * deck, and the inner ring holds almost no Adventure spaces) and no
+         * way back out except through the Crown, which now turns the short
+         * of four around.  So going in is refused and going on is the exit. */
+        return p->nether_kills >= 4 || p->region == REG_INNER;
     case END_BELT:
         /* Only worth crossing while the Belt is still lying there. */
         return belt_wearer_p() == NULL;
@@ -673,6 +824,7 @@ static int should_rush_crown(Player *p)
     Player *sitter = crown_sitter();
 
     switch (ending_kind()) {
+    case END_HUNT:                      /* the four come first, always */
     case END_DEMON:
     case END_BELT:
     case END_DRAGON:
@@ -811,7 +963,10 @@ int ai_shop_choice(Player *p, const ShopLine *lines, int n)
             if (spell_limit(p) > p->nspells) v = 12;
             break;
         case 'a':                                     /* the Alchemist */
-            if (item_objects(p) > item_limit(p)) v = 20;
+            /* enforce_limit() has already brought us back to the limit by
+             * the time we are standing at a counter, so `>` was never true
+             * and this line never fired. */
+            if (item_objects(p) >= item_limit(p)) v = 20;
             else if (p->gold < 2 && item_objects(p) > 1) v = 6;   /* broke */
             break;
         case 'c':                                     /* a Horse and Cart */
@@ -862,8 +1017,9 @@ int ai_spell_choice(Player *p, int battle_only)
             }
             break;
         
-        /* Updated: Spell target validation to avoid wasting them on empty spaces[cite: 5] */
-        case SK_ACQUIRE: /* E.g., Miser's Grasp[cite: 5] */
+        /* Check the target exists first: a Spell thrown into an empty space
+         * is simply gone. */
+        case SK_ACQUIRE:            /* the Miser's Grasp and its like */
             for (k = 0; k < nplayers; k++) {
                 if (players[k].alive && players[k].idx == p->idx && players[k].region == p->region && &players[k] != p && item_objects(&players[k]) > 0)
                     return i;
