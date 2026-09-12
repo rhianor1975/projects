@@ -635,6 +635,19 @@ int is_audio_file(const char *filename) {
             strcasecmp(ext, ".wma") == 0 ||
             strcasecmp(ext, ".aac") == 0 ||
             strcasecmp(ext, ".opus") == 0 ||
+            strcasecmp(ext, ".ape") == 0 ||
+            strcasecmp(ext, ".wv") == 0 ||
+            strcasecmp(ext, ".tta") == 0 ||
+            strcasecmp(ext, ".mpc") == 0 ||
+            strcasecmp(ext, ".aiff") == 0 ||
+            strcasecmp(ext, ".aif") == 0 ||
+            strcasecmp(ext, ".alac") == 0 ||
+            strcasecmp(ext, ".dsf") == 0 ||
+            strcasecmp(ext, ".dff") == 0 ||
+            strcasecmp(ext, ".mka") == 0 ||
+            strcasecmp(ext, ".oga") == 0 ||
+            strcasecmp(ext, ".ac3") == 0 ||
+            strcasecmp(ext, ".dts") == 0 ||
             strcasecmp(ext, ".cue") == 0);
 }
 

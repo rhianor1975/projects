@@ -3,9 +3,11 @@
 *.exe
 *.out
 
-# Project executables
-/Fenrir
-/Elara
+# Project executables.  These were once "/Fenrir" and "/Elara", from a
+# layout where the binaries sat at the root -- which meant the entries were
+# quietly ignoring the whole project directories instead.
+/Fenrir/fenrir
+/Elara/elara
 /Fidhcheall/fidch
 /Medusa/medusa
 /Talisman/talisman
