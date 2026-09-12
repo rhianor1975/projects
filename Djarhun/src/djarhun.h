@@ -111,12 +111,23 @@ int xp_for_level(int level);
 typedef enum { MOR_FAIR, MOR_KIND, MOR_VILE } Morality;
 #define MOR_GOOD(m) ((m) != MOR_VILE)
 
+/* The Skills, as far as the printed text can be read.  Every Hero carries
+ * three to six of them -- 300 clauses over the 71 cards -- and until now
+ * all of it was flavour.  Most cannot be implemented; these can, and they
+ * are what makes the Hero you pick different from the next one. */
 typedef struct {
     const char *name;
     const char *race;
     int   str, spd, sor;
     Morality morality;
     int   home_land, home_idx;
+    int   s_die;              /* "+N to your battle die roll..."           */
+    int   s_die_vs;           /* "...against Undead" -- a FoeKind          */
+    const char *s_die_at;     /* "...when in the Mountains" -- a space name*/
+    int   s_fortify;          /* "every Animal you slay... fortifying 1 Health" */
+    const char *s_heal_at;    /* "Heal to your maximum at the Mujarin Crypt" */
+    int   s_start_spell;
+    const char *s_start_item;
     const char *skill;
 } HeroTemplate;
 
@@ -157,6 +168,9 @@ typedef struct {
      * Strength halfway up the ladder and leave her middling at both.  A plan
      * is only a plan if it survives the next good card. */
     int   plan;
+    /* the Skills this Hero's card grants, copied at setup */
+    int   s_die, s_die_vs, s_fortify, s_start_spell;
+    const char *s_die_at, *s_heal_at, *s_start_item;
 } Hero;
 
 extern Hero heroes[MAX_PLAYERS];
@@ -190,6 +204,14 @@ typedef enum { TK_NONE, TK_GEM, TK_SPELL } TreasureKind;
 typedef enum { NK_NONE, NK_FLY, NK_TRAIN, NK_SPELL, NK_HEAL,
                NK_BUY } StrangerKind;
 
+/* "There are different types of Foes in Djarhun... These categories are
+ * important because some Items, Henchmen & Skills affect different
+ * categories of Foes."  Recovered from the name and the text, since the
+ * sheets head nearly all of them plainly FOE. */
+typedef enum { FK_NONE, FK_UNDEAD, FK_DRAGON, FK_GIANT, FK_ELEM,
+               FK_PLANAR, FK_ANIMAL, FK_BEAST,
+               FK_ANY } FoeKind;   /* FK_ANY: a Skill that cares about any Foe */
+
 typedef enum { SK_NONE, SK_SLAY, SK_HENCH, SK_HEAL, SK_BOOST, SK_GUARD,
                SK_EXTRA, SK_DRAW, SK_EVADE, SK_STEAL, SK_MOVE, SK_CURSE,
                SK_HARM } SpellKind;
@@ -221,6 +243,7 @@ typedef struct {
     int   lkind;           /* what a Luck card does */
     int   tkind;           /* an Item that is spent rather than carried */
     int   nkind;           /* what a Stranger sells; .gems is the price */
+    int   foekind;         /* Undead, Dragon, Giant... for the Skills */
     int   land;            /* which deck it belongs to, or -1 for any */
     /* The roman numeral at the top right.  "The lowest number is dealt with
      * first, and so on, until they have all been dealt with" -- so when

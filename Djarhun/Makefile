@@ -9,11 +9,16 @@ all: $(BIN)
 $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDLIBS)
 $(OBJ): src/djarhun.h
-src/data.o: src/cards.inc
+src/data.o: src/cards.inc src/heroes.inc
 
 # The card table is generated, but src/cards.inc is committed and the TSV it
 # comes from is raw material that does not travel with the source.  So the
 # rule only exists where the TSV does; elsewhere the checked-in table stands.
+ifneq ($(wildcard HEROES.tsv),)
+src/heroes.inc: HEROES.tsv gen-heroes.py
+	python3 gen-heroes.py > $@
+endif
+
 ifneq ($(wildcard CARDS-djarhun.tsv),)
 src/cards.inc: CARDS-djarhun.tsv gen-cards.py
 	python3 gen-cards.py > $@

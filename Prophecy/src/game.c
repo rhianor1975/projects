@@ -1659,11 +1659,24 @@ static int nearest_haven(const Player *p, int *dir)
     return bd;
 }
 
+/* Which of ai_move()'s branches chose the move.  A hero who walks two
+ * spaces because the ground is good and one who walks two because she is
+ * bleeding look identical in the log unless it says which. */
+static const char *why_rule = "-";
+
+/* The name of a ring space, for the trace. */
+static const char *why_where(int idx)
+{
+    return (idx >= 0 && idx < RING_N) ? ring[idx].name : "-";
+}
+
 static Move ai_move(Player *p)
 {
     Move best; int i, bv = -1000;
     int pl = plane_at(p->idx);
+    int runner = -1000;              /* the best option that was not taken */
 
+    why_rule = "-";
     best.kind = MV_STAY; best.dest = p->idx; best.dir = 0; best.plane = -1;
 
     /* Survival override: badly hurt, and not already somewhere that mends,
@@ -1679,12 +1692,21 @@ static Move ai_move(Player *p)
             best.dest = ring_step(p->idx, dir * hop);
             best.dir  = dir;
             glog("  %s is in no state to fight, and makes for shelter.", p->name);
+            why_rule = "shelter";
+            wlog("  why %s  [shelter]  to %s, %d space%s away  (Str %d)",
+                 p->name, why_where(best.dest), gap, gap == 1 ? "" : "s",
+                 p->str_now);
             return best;
         }
     }
 
     if (pl >= 0 && plane_ready(p, pl)) {
-        best.kind = MV_PLANE; best.plane = pl; return best;
+        best.kind = MV_PLANE; best.plane = pl;
+        why_rule = "take-the-plane";
+        wlog("  why %s  [take-the-plane]  at %s, %d Artifact%s held",
+             p->name, why_where(p->idx), p->artifacts,
+             p->artifacts == 1 ? "" : "s");
+        return best;
     }
     if (final_battle) {                 /* nothing is left but each other */
         int j, want = -1, wd = 99;
@@ -1703,6 +1725,9 @@ static Move ai_move(Player *p)
             int hop = (wd >= 2 && p->gold >= 1) ? 2 : (wd >= 1 ? 1 : 0);
             best.kind = hop == 0 ? MV_STAY : hop == 1 ? MV_WALK : MV_HORSE;
             best.dest = ring_step(p->idx, dir * hop);
+            why_rule = "run-them-down";
+            wlog("  why %s  [run-them-down]  after %s, %d away  -> %s",
+                 p->name, players[want].name, wd, why_where(best.dest));
             return best;
         }
     }
@@ -1712,13 +1737,25 @@ static Move ai_move(Player *p)
             const AbilityCard *a = &abil_proto[p->abils[si]];
             int v = (a->kind == SP_MOVE_FOREST || a->kind == SP_MOVE_MOUNTAIN)
                     ? space_worth(p, d) : w;
-            if (v > bv) { bv = v; best.kind = MV_SPELL; best.spell = si; best.dest = d; }
+            if (v > bv) { runner = bv; bv = v; why_rule = "a-spell";
+                          best.kind = MV_SPELL; best.spell = si; best.dest = d; }
+            else if (v > runner) runner = v;
         }
     }
     /* the three "instead of moving" labours, when they are worth it */
-    if (ring[p->idx].kind == SP_CITY && p->will_now >= 1 && p->gold <= MAX_GOLD - 2) bv = 4, best.kind = MV_WORK;
+    /* The Fortress branch below asks whether training beats what is already
+     * on the table; this one did not -- it set the score to 4 whatever it
+     * had been, so a City labour displaced a Spell worth 12.  Eight times in
+     * a hundred games the hero took the move she had scored worse, which is
+     * the only rule in here that ever did. */
+    if (ring[p->idx].kind == SP_CITY && p->will_now >= 1 && p->gold <= MAX_GOLD - 2) {
+        if (4 > bv) { runner = bv; bv = 4; best.kind = MV_WORK;
+                      why_rule = "work-for-gold"; }
+        else if (4 > runner) runner = 4;
+    }
     if (ring[p->idx].kind == SP_FORTRESS && p->str_now >= 3 && p->exp <= MAX_EXP - 2) {
-        if (5 > bv) { bv = 5; best.kind = MV_WORK; }
+        if (5 > bv) { runner = bv; bv = 5; best.kind = MV_WORK;
+                      why_rule = "train-for-experience"; }
     }
     for (i = -2; i <= 2; i++) {
         int dest = ring_step(p->idx, i), v;
@@ -1735,10 +1772,22 @@ static Move ai_move(Player *p)
             if (q >= 0 && plane_ready(p, q)) v += 25;
         }
         if (v > bv) {
-            bv = v; best.dest = dest; best.dir = i < 0 ? -1 : 1;
+            runner = bv; bv = v; best.dest = dest; best.dir = i < 0 ? -1 : 1;
             best.kind = (i == 0) ? MV_STAY : (i == -1 || i == 1) ? MV_WALK : MV_HORSE;
-        }
+            why_rule = (i == 0) ? "stand-still" : "best-ground";
+        } else if (v > runner) runner = v;
     }
+    wlog("  why %s  [%s]  %s %s  worth %d  (next best %d, margin %d)",
+         p->name, why_rule,
+         best.kind == MV_STAY  ? "stays at" :
+         best.kind == MV_HORSE ? "rides to" :
+         best.kind == MV_WORK  ? "works at" :
+         best.kind == MV_SPELL ? "casts at" : "walks to",
+         /* a labour happens where she stands; best.dest belongs to the
+          * walking options and would name the wrong space here */
+         why_where(best.kind == MV_WORK ? p->idx : best.dest), bv,
+         runner <= -1000 ? 0 : runner,
+         runner <= -1000 ? 0 : bv - runner);
     return best;
 }
 
@@ -2828,6 +2877,7 @@ int main(int argc, char **argv)
     if ((e = getenv("PROPHECY_DRAGON"))) use_dragon = atoi(e);
     if ((e = getenv("PROPHECY_WATER")))  use_water  = atoi(e);
     if ((e = getenv("PROPHECY_CHECK"))) checking = atoi(e);
+    if ((e = getenv("PROPHECY_WHY")))   ai_why   = atoi(e);
     if ((e = getenv("PROPHECY_DELAY"))) ai_delay = atoi(e);
     game_seed = (e = getenv("PROPHECY_SEED")) ? (unsigned)atoi(e)
                                               : (unsigned)(time(NULL) ^ getpid());

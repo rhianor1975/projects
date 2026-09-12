@@ -83,6 +83,22 @@ void ui_init(void)
 
 void ui_end(void) { curs_set(1); endwin(); }
 
+int ai_why;
+
+/* Only ever to the trace file: the on-screen log has a few lines and this
+ * would fill all of them every turn. */
+void wlog(const char *fmt, ...)
+{
+    va_list ap;
+
+    if (!ai_why || !tracefp) return;
+    va_start(ap, fmt);
+    vfprintf(tracefp, fmt, ap);
+    va_end(ap);
+    fputc('\n', tracefp);
+    fflush(tracefp);
+}
+
 void glog(const char *fmt, ...)
 {
     va_list ap; int i;

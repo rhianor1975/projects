@@ -9,6 +9,11 @@ all: $(BIN)
 $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDLIBS)
 $(OBJ): src/prophecy.h
+# Sanitisers find what the soak cannot: reads off the end of a table that
+# happen to land on something harmless.
+san: clean
+	$(MAKE) CFLAGS="-std=c99 -Wall -Wextra -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer"
+
 clean:
 	rm -f $(OBJ) $(BIN)
-.PHONY: all clean
+.PHONY: all clean san

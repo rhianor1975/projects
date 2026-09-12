@@ -451,6 +451,14 @@ void ui_draw(void);
 /* Tell the compiler this is a printf: with several hundred call sites a
  * mismatched format is otherwise silent until it prints nonsense. */
 void glog(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+
+/* The decision trace, and the thing that found every real AI bug in the two
+ * sibling projects: glog() records what happened, wlog() records why -- the
+ * move taken, the rule in ai_move() that chose it, the best move refused and
+ * the margin between them.  Trace file only, and only under PROPHECY_WHY,
+ * because it is a line a turn and nobody playing wants to read it. */
+extern int ai_why;
+void wlog(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 /* so the in-game help can show what is in force, not just its name */
 unsigned ui_seed(void);
 int      ui_delay(void);

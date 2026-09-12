@@ -342,6 +342,12 @@ static void hurt(Hero *h, int n)
  * They add their statistic and die roll together... Whoever gets the
  * highest score is the victor.  If it is a tie, then the Battle is a draw
  * and the turn ends for that Hero." */
+/* What battle() is fighting, for the Skills that care which kind it is.
+ * battle() takes a name and two numbers, which is right for Gharad and the
+ * Watch and everything else that is not a card -- so the card's category
+ * comes alongside rather than through it. */
+static int cur_foe_kind;
+
 static int  ai_ready(const Hero *h);
 static void ship_damage(Hero *h);
 static int  tarri_port(void);
@@ -356,6 +362,18 @@ static int battle(Hero *h, const char *foe, int fstr, int fsor)
         cast_before_battle(h, use_sorcery ? eff_sor(h) : eff_str(h), theirs);
     mine = use_sorcery ? eff_sor(h) : eff_str(h);
     d1 = die(8); d2 = die(8);
+    /* "You may add 2 to your battle die roll against Undead" -- and its
+     * cousins that ask where you are standing rather than what you face. */
+    if (h->s_die) {
+        int applies = 0;
+        if (h->s_die_vs && cur_foe_kind == h->s_die_vs) applies = 1;
+        if (h->s_die_at && strstr(space_at(h->land, h->idx)->name, h->s_die_at))
+            applies = 1;
+        if (applies) {
+            d1 += h->s_die;
+            glog("  %s fights in her element: +%d.", h->name, h->s_die);
+        }
+    }
     int a = mine + d1, b = theirs + d2;
 
     glog("%s (%s %d + %d = %d)  vs  %s (%d + %d = %d)",
@@ -366,6 +384,12 @@ static int battle(Hero *h, const char *foe, int fstr, int fsor)
     if (a > b) {
         gain_xp(h, theirs);        /* "The statistic used for Battle is the
                                     * number of Experience Points gained" */
+        /* "Every Animal you slay, you may eat it, fortifying 1 Health." */
+        if (h->s_fortify && h->health < max_health(h) &&
+            (h->s_fortify == FK_ANY || h->s_fortify == cur_foe_kind)) {
+            h->health++;
+            glog("  %s is the stronger for it. Health %d.", h->name, h->health);
+        }
         return 1;
     }
     if (a == b) { glog("  a draw; %s's turn ends.", h->name); turn_over = 1; return -1; }
@@ -674,7 +698,9 @@ static void resolve_card(Hero *h, int ci)
     switch (c->type) {
     case C_FOE:
         glog("%s meets %s (Str %d / Sor %d).", h->name, c->name, c->str, c->sor);
+        cur_foe_kind = c->foekind;
         battle(h, c->name, c->str, c->sor);
+        cur_foe_kind = FK_NONE;
         break;
     case C_TREASURE:
         h->gems += c->gems;
@@ -948,6 +974,15 @@ static void resolve_space(Hero *h)
     if (book_land == h->land && book_idx == h->idx) {
         h->book = 1; book_land = book_idx = -1;
         glog("*** %s takes up the fallen BOOK OF AVRAKAR. ***", h->name);
+    }
+
+    /* "You may Heal up to your maximum Health at the Mujarin Crypt."  The
+     * board abbreviates its cells, so the Skill keeps the one distinctive
+     * word of the place and looks for it in the name. */
+    if (h->s_heal_at && h->health < max_health(h) &&
+        strstr(sp->name, h->s_heal_at)) {
+        h->health = max_health(h);
+        glog("%s is made whole at %s.", h->name, sp->name);
     }
 
     /* "Any ranged Battle that is going to take place happens first." */
@@ -1602,6 +1637,36 @@ static void take_turn(Hero *h)
 }
 
 /* --------------------------------------------------------------- setup --*/
+/* The Skills name their kit in the card's words -- "a Bow", "the Grimblade"
+ * -- and the deck shouts: BOW, GRIMBLADE.  So match on the words rather than
+ * the exact string, and take the first Item that carries them all. */
+static int find_proto_like(const char *want)
+{
+    int i, j;
+    for (i = 0; card_proto[i].name; i++) {
+        const char *n = card_proto[i].name;
+        const char *w = want;
+        int ok = 1;
+        if (card_proto[i].type != C_ITEM) continue;
+        while (*w && ok) {
+            char word[24]; int k = 0;
+            while (*w == ' ') w++;
+            while (*w && *w != ' ' && k < (int)sizeof word - 1) word[k++] = *w++;
+            word[k] = 0;
+            if (k < 3) continue;                 /* "a", "of" and the like */
+            for (j = 0; n[j]; j++) {
+                int m = 0;
+                while (word[m] && n[j + m] &&
+                       (n[j + m] | 32) == (word[m] | 32)) m++;
+                if (!word[m]) break;
+            }
+            if (!n[j]) ok = 0;
+        }
+        if (ok) return i;
+    }
+    return -1;
+}
+
 static void deal_hero(Hero *h, int t, int ai)
 {
     const HeroTemplate *ht = &hero_tbl[t];
@@ -1620,6 +1685,25 @@ static void deal_hero(Hero *h, int t, int ai)
      * of the Foe" -- but what a Hero brings to it is her own, and the card
      * says which she is.  Ties go to Strength, which more Foes fight with. */
     h->plan = (h->sor > h->str) ? 2 : 0;
+    h->s_die = ht->s_die; h->s_die_vs = ht->s_die_vs; h->s_die_at = ht->s_die_at;
+    h->s_fortify = ht->s_fortify; h->s_heal_at = ht->s_heal_at;
+    h->s_start_spell = ht->s_start_spell; h->s_start_item = ht->s_start_item;
+    /* "You start your journey with a Bow."  Kit that is on the card is kit
+     * she has before the first roll. */
+    if (h->s_start_spell) {
+        int sp2 = deck_of_type(C_SPELL);
+        if (sp2 >= 0 && h->nspells < MAX_SPELLS) {
+            h->spells[h->nspells++] = sp2;
+            glog("  %s sets out knowing %s.", h->name, card_proto[sp2].name);
+        }
+    }
+    if (h->s_start_item) {
+        int ci = find_proto_like(h->s_start_item);
+        if (ci >= 0 && h->nitems < MAX_ITEMS) {
+            h->items[h->nitems++] = ci;
+            glog("  %s sets out carrying the %s.", h->name, card_proto[ci].name);
+        }
+    }
 }
 
 static int winner_check(void)
