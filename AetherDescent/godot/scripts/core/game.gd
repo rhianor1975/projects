@@ -222,6 +222,33 @@ func enter_town(at: Vector2i) -> void:
 	state_changed.emit()
 
 
+# ---- floor changes that take a moment --------------------------------------------
+## The screen sets this so a big floor's build can be announced before the
+## frame freezes for it. Off in tests: there the change happens at once.
+var defer_floors := false
+var pending_floor := {}
+
+
+## Go to floor n -- now, or after the screen has said so, on the big worlds.
+## `after` runs once you are standing on it.
+func go_to_floor(n: int, arrive_down := true, after := Callable()) -> void:
+	if defer_floors and world >= C.WorldSize.DEEPS:
+		pending_floor = {"n": n, "down": arrive_down, "after": after, "shown": false}
+		return
+	enter_floor(n, arrive_down)
+	if after.is_valid():
+		after.call()
+
+
+func finish_pending_floor() -> void:
+	var p := pending_floor
+	pending_floor = {}
+	enter_floor(int(p.n), bool(p.down))
+	var after: Callable = p.after
+	if after.is_valid():
+		after.call()
+
+
 func enter_floor(n: int, arrive_down := true) -> void:
 	if depth > 0:
 		Dda.floor_end()      # read how the floor being left went

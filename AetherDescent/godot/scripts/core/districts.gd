@@ -529,9 +529,9 @@ static func fall() -> void:
 	if Game.game_over:
 		return
 	Game.save_run()
-	Game.enter_floor(mini(Game.depth + 1, C.MAX_FLOOR))
-	Game.warn("You land on floor %d, in the dark, somewhere you did not choose." % Game.depth)
-	Game.emit_fx({"type": "warp"})
+	Game.go_to_floor(mini(Game.depth + 1, C.MAX_FLOOR), true, func():
+		Game.warn("You land on floor %d, in the dark, somewhere you did not choose." % Game.depth)
+		Game.emit_fx({"type": "warp"}))
 
 
 # ---- work ----------------------------------------------------------------------------

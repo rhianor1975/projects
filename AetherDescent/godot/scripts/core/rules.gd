@@ -729,16 +729,15 @@ static func _landed(tt: int) -> bool:
 	match tt:
 		C.Tile.STAIRS_DOWN:
 			Game.save_run()
-			Game.enter_floor(Game.depth + 1)
-			Game.emit_fx({"type": "warp"})
+			Game.go_to_floor(Game.depth + 1, true, func(): Game.emit_fx({"type": "warp"}))
 			return true
 		C.Tile.STAIRS_UP:
 			if Game.depth <= 1:
 				Game.enter_town(Town.TEMPLE + Vector2i(0, 1))
 				Game.msg("You climb back out into the plaza.", Color8(150, 200, 255))
+				Game.emit_fx({"type": "warp"})
 			else:
-				Game.enter_floor(Game.depth - 1, false)
-			Game.emit_fx({"type": "warp"})
+				Game.go_to_floor(Game.depth - 1, false, func(): Game.emit_fx({"type": "warp"}))
 			return true
 		C.Tile.PORTAL:
 			var to := m.portal_b if h.pos() == m.portal_a else m.portal_a

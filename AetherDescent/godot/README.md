@@ -137,8 +137,8 @@ The **guardian angel** (Esc menu) is an assist, off unless you switch it on:
 the dice lean your way when you are in trouble, one killing blow a floor is
 turned aside above floor 50, and a run that is coasting gets leaned on.
 
-Everything in the C game is ported. The Well (1400×800) floors take a few
-seconds to build when you take the stairs.
+Everything in the C game is ported. On the Deeps and the Well, a floor takes
+a moment to build: a card says where you are going while it does.
 
 ## Art: 16-bit or Classic
 

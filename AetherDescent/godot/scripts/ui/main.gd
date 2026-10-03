@@ -44,6 +44,17 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	t += delta
 	ui.queue_redraw()
+	# a big floor: show the card for a frame, then build it
+	if not Game.pending_floor.is_empty():
+		auto = false
+		hold_dir = Vector2i.ZERO
+		if Game.pending_floor.shown:
+			Game.finish_pending_floor()
+			view.snap()
+			_after_action()
+		else:
+			Game.pending_floor.shown = true
+		return
 	if mode != "game" or modal != null or not dialog.is_empty():
 		auto = false
 		return
@@ -324,6 +335,7 @@ func _name_input(ev: InputEvent) -> void:
 
 
 func _start_game() -> void:
+	Game.defer_floors = true
 	mode = "game"
 	view.visible = true
 	view.snap()
@@ -433,7 +445,21 @@ func _pad_input(ev: InputEventJoypadButton) -> void:
 			_open_pause()
 
 
+## A big floor is being built: say where you are going while the frame waits.
+func _draw_descent(ci: CanvasItem) -> void:
+	var p := Game.pending_floor
+	var n := int(p.n)
+	ci.draw_rect(Rect2(0, 0, W, H), Color8(6, 6, 18))
+	var b := C.biome_for_floor(n)
+	Gfx.text_center(ci, W / 2, H / 2 - 40, "Floor %d" % n, Gfx.GOLD, 3)
+	Gfx.text_center(ci, W / 2, H / 2 - 4, C.BIOME_NAMES[b], Gfx.WHITE, 2)
+	Gfx.text_center(ci, W / 2, H / 2 + 30, ("The stairs go a long way down..." if bool(p.down) else "The long climb back up...")
+		+ "  (%s floors take a moment to build)" % C.WORLD_NAMES[Game.world], Gfx.GREY)
+
+
 func _game_input(ev: InputEvent) -> void:
+	if not Game.pending_floor.is_empty():
+		return
 	if ev is InputEventJoypadButton:
 		_pad_input(ev)
 		return
@@ -1508,8 +1534,7 @@ func _open_temple() -> void:
 	m.on_select = func(mm: Menu, it: Dictionary) -> bool:
 		modal = null
 		Game.save_run()
-		Game.enter_floor(it.f)
-		view.snap()
+		Game.go_to_floor(it.f, true, func(): view.snap())
 		Sfx.play("stairs")
 		return true
 	m.detail = _detail_text.bind("The way down", "You can go straight down to any floor you have already reached.")
@@ -1589,6 +1614,9 @@ func _draw_ui() -> void:
 			var labels := {"difficulty": "1/4  Difficulty", "world": "2/4  World size", "class": "3/4  Class", "name": "4/4  Name"}
 			Gfx.text_right(ci, Vector2(W - 16, 17), labels[c_step], Gfx.CYAN)
 		"game":
+			if not Game.pending_floor.is_empty():
+				_draw_descent(ci)
+				return
 			if modal:
 				ci.draw_rect(Rect2(0, 0, W, H), Color(0.02, 0.02, 0.12, 0.6))
 				modal.draw(ci, t)
