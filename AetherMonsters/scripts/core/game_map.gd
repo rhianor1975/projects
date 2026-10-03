@@ -1,0 +1,506 @@
+class_name GameMap
+extends RefCounted
+## One floor (or the town): tiles, what you have seen of it, and everything
+## standing on it. Field of view and line of sight are the C game's own --
+## a Bresenham line per tile in the radius, walls and thicket blocking.
+
+var w := 0
+var h := 0
+var floor_num := 0
+var biome := 0
+var tiles := PackedByteArray()
+var seen := PackedByteArray()
+var visible := PackedByteArray()
+var district_id := PackedInt32Array()     # -1 outside any district
+var districts: Array = []                 # {x,y,w,h,kind}
+var monsters: Array = []                  # Array[Monster]
+var mgrid := {}                           # cell index -> Monster
+var items: Array = []                     # {x,y,kind,...}
+var features: Array = []                  # {x,y,type,used,relic_kind}
+var doors := {}                           # town: cell index -> building id
+var roof_style := {}                      # town: cell index -> roof tile kind
+var stairs_up := Vector2i(-1, -1)
+var stairs_down := Vector2i(-1, -1)
+var lever := Vector2i(-1, -1)
+var lever_door := Vector2i(-1, -1)
+var portal_a := Vector2i(-1, -1)
+var portal_b := Vector2i(-1, -1)
+var haven := Rect2i()
+var event_name := ""
+var event_desc := ""
+var overrun := false
+var gold_rush := false
+var turns_on_floor := 0
+var infest_target := 0
+var spawn_density := 1
+var heard: Array = []
+# Each body's own memory of the floor, by Hero.uid. `seen` is always the
+# memory of whoever is being played; the others live here until they are.
+var memories := {}                     # positions heard but not seen: a mark, not an identity
+# what the floor's districts remember between turns: the arena's wave, the
+# barrow's, the next lightning strike -- src/common.h's Map fields
+var dstate := {"arena_wave": 0, "arena_district": -1, "arena_paid": false,
+	"gauntlet_wave": 0, "gauntlet_district": -1, "gauntlet_paid": false,
+	"storm_x": -1, "storm_y": -1, "storm_countdown": 0, "storm_is_vent": false}
+
+
+func setup(width: int, height: int, fill: int) -> void:
+	w = width
+	h = height
+	tiles = PackedByteArray()
+	tiles.resize(w * h)
+	tiles.fill(fill)
+	seen = PackedByteArray()
+	seen.resize(w * h)
+	visible = PackedByteArray()
+	visible.resize(w * h)
+	district_id = PackedInt32Array()
+	district_id.resize(w * h)
+	district_id.fill(-1)
+
+
+func inb(x: int, y: int) -> bool:
+	return x >= 0 and y >= 0 and x < w and y < h
+
+
+func idx(x: int, y: int) -> int:
+	return y * w + x
+
+
+func t(x: int, y: int) -> int:
+	if x < 0 or y < 0 or x >= w or y >= h:
+		return C.Tile.WALL
+	return tiles[y * w + x]
+
+
+func set_t(x: int, y: int, v: int) -> void:
+	if x >= 0 and y >= 0 and x < w and y < h:
+		tiles[y * w + x] = v
+
+
+static func blocks_walk(tt: int) -> bool:
+	return tt == C.Tile.WALL or tt == C.Tile.WATER or tt == C.Tile.LOCKED_DOOR \
+		or tt == C.Tile.SEALED_DOOR or tt == C.Tile.THICKET or tt == C.Tile.CRYSTAL \
+		or tt == C.Tile.ROOF or tt == C.Tile.HOUSE_WALL or tt == C.Tile.DOOR \
+		or tt == C.Tile.FOUNTAIN or tt == C.Tile.PLANTER or tt == C.Tile.QUEST_BOARD \
+		or tt == C.Tile.ROD or tt == C.Tile.VENT or tt == C.Tile.ORE
+
+
+func walkable_player(x: int, y: int) -> bool:
+	return inb(x, y) and not blocks_walk(tiles[y * w + x])
+
+
+func walkable_monster(x: int, y: int) -> bool:
+	if not inb(x, y):
+		return false
+	var tt := tiles[y * w + x]
+	if blocks_walk(tt):
+		return false
+	# nothing else walks into a snare or down a hole: those are your decisions
+	return tt != C.Tile.LAVA and tt != C.Tile.MIASMA and tt != C.Tile.SNARE and tt != C.Tile.PIT
+
+
+func blocks_sight(tt: int) -> bool:
+	return tt == C.Tile.WALL or tt == C.Tile.THICKET or tt == C.Tile.ROOF or tt == C.Tile.HOUSE_WALL
+
+
+## Which district (by index into `districts`) covers (x,y), or -1.
+func district_index(x: int, y: int) -> int:
+	return district_id[y * w + x] if inb(x, y) else -1
+
+
+func district_at(x: int, y: int) -> int:
+	if not inb(x, y):
+		return -1
+	var d := district_id[y * w + x]
+	return -1 if d < 0 else districts[d].kind
+
+
+func in_haven(x: int, y: int) -> bool:
+	return haven.size.x > 0 and haven.has_point(Vector2i(x, y))
+
+
+# ---- monsters ------------------------------------------------------------------
+func add_monster(m: Monster) -> void:
+	monsters.append(m)
+	mgrid[m.y * w + m.x] = m
+
+
+func monster_at(x: int, y: int) -> Monster:
+	var m = mgrid.get(y * w + x)
+	if m != null and m.alive:
+		return m
+	return null
+
+
+## Live monsters within `r` squares (a box) of (x,y). Through the position
+## grid when the box is smaller than the roster -- a Well floor holds six
+## thousand of them, and most questions are about the few nearby.
+func monsters_near(x: int, y: int, r: int) -> Array:
+	var out: Array = []
+	if (2 * r + 1) * (2 * r + 1) < monsters.size():
+		for yy in range(maxi(0, y - r), mini(h, y + r + 1)):
+			for xx in range(maxi(0, x - r), mini(w, x + r + 1)):
+				var mo = mgrid.get(yy * w + xx)
+				if mo != null and mo.alive:
+					out.append(mo)
+	else:
+		for mo in monsters:
+			if mo.alive and absi(mo.x - x) <= r and absi(mo.y - y) <= r:
+				out.append(mo)
+	return out
+
+
+func move_monster(m: Monster, nx: int, ny: int) -> void:
+	if mgrid.get(m.y * w + m.x) == m:
+		mgrid.erase(m.y * w + m.x)
+	if nx < m.x:
+		m.facing_left = true
+	elif nx > m.x:
+		m.facing_left = false
+	m.x = nx
+	m.y = ny
+	mgrid[ny * w + nx] = m
+
+
+func remove_dead() -> void:
+	if monsters.all(func(mo): return mo.alive):
+		return
+	var live: Array = []
+	for m in monsters:
+		if m.alive:
+			live.append(m)
+		elif mgrid.get(m.y * w + m.x) == m:
+			mgrid.erase(m.y * w + m.x)
+	monsters = live
+
+
+func rebuild_mgrid() -> void:
+	mgrid.clear()
+	for m in monsters:
+		if m.alive:
+			mgrid[m.y * w + m.x] = m
+
+
+# Items by cell. Built once; a pickup goes through take_item(), which keeps
+# it right, and anything else that changes the list's size forces a rebuild.
+var _item_idx := {}
+var _item_idx_n := -1
+
+
+## Pick an item up off the floor.
+func take_item(it: Dictionary) -> void:
+	items.erase(it)
+	if _item_idx_n < 0:
+		return
+	var k: int = int(it.y) * w + int(it.x)
+	if _item_idx.has(k):
+		_item_idx[k].erase(it)
+		if _item_idx[k].is_empty():
+			_item_idx.erase(k)
+	_item_idx_n = items.size()
+
+
+func _items_index() -> Dictionary:
+	if items.size() != _item_idx_n:
+		_item_idx = {}
+		for it in items:
+			var k: int = int(it.y) * w + int(it.x)
+			if _item_idx.has(k):
+				_item_idx[k].append(it)
+			else:
+				_item_idx[k] = [it]
+		_item_idx_n = items.size()
+	return _item_idx
+
+
+func items_at(x: int, y: int) -> Array:
+	if items.size() < 64:
+		return items.filter(func(it): return it.x == x and it.y == y)
+	# a copy: callers erase from `items` while walking what they got
+	return _items_index().get(y * w + x, []).duplicate()
+
+
+## Items within `r` squares (a box) of (x,y).
+func items_near(x: int, y: int, r: int) -> Array:
+	if (2 * r + 1) * (2 * r + 1) >= items.size():
+		return items.filter(func(it): return absi(it.x - x) <= r and absi(it.y - y) <= r)
+	var idx := _items_index()
+	var out: Array = []
+	for yy in range(maxi(0, y - r), mini(h, y + r + 1)):
+		for xx in range(maxi(0, x - r), mini(w, x + r + 1)):
+			var here = idx.get(yy * w + xx)
+			if here != null:
+				out.append_array(here)
+	return out
+
+
+func feature_at(x: int, y: int) -> Dictionary:
+	for f in features:
+		if f.x == x and f.y == y:
+			return f
+	return {}
+
+
+# ---- sight ---------------------------------------------------------------------
+func line_of_sight(x0: int, y0: int, x1: int, y1: int) -> bool:
+	if not inb(x0, y0) or not inb(x1, y1):
+		return false
+	var dx := absi(x1 - x0)
+	var dy := absi(y1 - y0)
+	var sx := 1 if x0 < x1 else -1
+	var sy := 1 if y0 < y1 else -1
+	var err := dx - dy
+	var x := x0
+	var y := y0
+	while not (x == x1 and y == y1):
+		if not (x == x0 and y == y0):
+			if blocks_sight(tiles[y * w + x]):
+				return false
+		var e2 := 2 * err
+		if e2 > -dy:
+			err -= dy
+			x += sx
+		if e2 < dx:
+			err += dx
+			y += sy
+	return true
+
+
+var _lit: PackedInt32Array = PackedInt32Array()
+
+
+## The memory of body `uid` -- what they have seen of this floor.
+func memory(uid: int) -> PackedByteArray:
+	var k := str(uid)
+	if not memories.has(k):
+		var b := PackedByteArray()
+		b.resize(w * h)
+		memories[k] = b
+	return memories[k]
+
+
+## Light what (px,py) can see. `fresh` clears the last pass first; the
+## party's own eyes add to the driver's with fresh = false, and to their own
+## memory (`mem_uid`) as well.
+func compute_fov(px: int, py: int, radius: int, fresh := true, mem_uid := 0) -> void:
+	var mem := PackedByteArray()
+	if mem_uid != 0:
+		mem = memory(mem_uid)
+	if fresh:
+		for i in _lit:
+			visible[i] = 0
+		_lit.clear()
+	var r2 := radius * radius
+	for y in range(py - radius, py + radius + 1):
+		if y < 0 or y >= h:
+			continue
+		for x in range(px - radius, px + radius + 1):
+			if x < 0 or x >= w:
+				continue
+			var dx := x - px
+			var dy := y - py
+			if dx * dx + dy * dy > r2:
+				continue
+			if line_of_sight(px, py, x, y):
+				var i := y * w + x
+				if mem_uid != 0:
+					mem[i] = 1
+				if visible[i] == 1:
+					continue
+				visible[i] = 1
+				seen[i] = 1
+				_lit.append(i)
+	# packed arrays copy on write: put the marked memory back
+	if mem_uid != 0:
+		memories[str(mem_uid)] = mem
+
+
+func reveal_all() -> void:
+	seen.fill(1)
+
+
+func reveal_circle(cx: int, cy: int, radius: int) -> void:
+	for y in range(cy - radius, cy + radius + 1):
+		for x in range(cx - radius, cx + radius + 1):
+			if inb(x, y) and (x - cx) * (x - cx) + (y - cy) * (y - cy) <= radius * radius:
+				seen[y * w + x] = 1
+
+
+func is_visible(x: int, y: int) -> bool:
+	return inb(x, y) and visible[y * w + x] == 1
+
+
+func is_seen(x: int, y: int) -> bool:
+	return inb(x, y) and seen[y * w + x] == 1
+
+
+# ---- reachability --------------------------------------------------------------
+## Breadth-first distances from (sx, sy) over ground you can walk, ignoring
+## monsters. Hazards count as passable, the way tile_reachable() treats them.
+func flood(sx: int, sy: int, limit := 1 << 30) -> PackedInt32Array:
+	var dist := PackedInt32Array()
+	dist.resize(w * h)
+	dist.fill(-1)
+	if not inb(sx, sy):
+		return dist
+	var q := PackedInt32Array([sy * w + sx])
+	dist[sy * w + sx] = 0
+	var head := 0
+	while head < q.size():
+		var c := q[head]
+		head += 1
+		var cx := c % w
+		var cy := c / w
+		var d := dist[c]
+		if d >= limit:
+			continue
+		for dir in C.DIRS8:
+			var nx: int = cx + dir.x
+			var ny: int = cy + dir.y
+			if nx < 0 or ny < 0 or nx >= w or ny >= h:
+				continue
+			var ni := ny * w + nx
+			if dist[ni] >= 0 or blocks_walk(tiles[ni]):
+				continue
+			dist[ni] = d + 1
+			q.append(ni)
+	return dist
+
+
+static var _blocks := PackedByteArray()
+
+
+static func _block_table() -> PackedByteArray:
+	if _blocks.is_empty():
+		_blocks.resize(256)
+		for t in 256:
+			_blocks[t] = 1 if blocks_walk(t) else 0
+	return _blocks
+
+
+## Can you walk from a to b? Stops the moment it gets there.
+func reachable(a: Vector2i, b: Vector2i) -> bool:
+	if not inb(a.x, a.y) or not inb(b.x, b.y):
+		return false
+	var bl := _block_table()
+	var goal := b.y * w + b.x
+	var seen_ := PackedByteArray()
+	seen_.resize(w * h)
+	var q := PackedInt32Array([a.y * w + a.x])
+	seen_[a.y * w + a.x] = 1
+	var head := 0
+	var offs := PackedInt32Array([-1, 1, -w, w, -w - 1, -w + 1, w - 1, w + 1])
+	while head < q.size():
+		var c := q[head]
+		head += 1
+		if c == goal:
+			return true
+		var cx := c % w
+		if cx == 0 or cx == w - 1 or c < w or c >= w * (h - 1):
+			# the rim: take the slow, bounds-checked way round
+			for dir in C.DIRS8:
+				var nx: int = cx + dir.x
+				var ny: int = c / w + dir.y
+				if nx < 0 or ny < 0 or nx >= w or ny >= h:
+					continue
+				var ni := ny * w + nx
+				if seen_[ni] == 0 and bl[tiles[ni]] == 0:
+					seen_[ni] = 1
+					q.append(ni)
+			continue
+		for o in offs:
+			var ni := c + o
+			if seen_[ni] == 0 and bl[tiles[ni]] == 0:
+				seen_[ni] = 1
+				q.append(ni)
+	return false
+
+
+# ---- persistence ---------------------------------------------------------------
+func to_dict() -> Dictionary:
+	var ms: Array = []
+	for m in monsters:
+		if m.alive:
+			ms.append(m.to_dict())
+	return {
+		"w": w, "h": h, "floor_num": floor_num, "biome": biome,
+		"tiles": Marshalls.raw_to_base64(tiles.compress(FileAccess.COMPRESSION_DEFLATE)),
+		"seen": Marshalls.raw_to_base64(seen.compress(FileAccess.COMPRESSION_DEFLATE)),
+		"district_id": Marshalls.raw_to_base64(district_id.to_byte_array().compress(FileAccess.COMPRESSION_DEFLATE)),
+		"districts": districts, "monsters": ms, "items": items, "features": features,
+		"doors": doors, "stairs_up": [stairs_up.x, stairs_up.y], "stairs_down": [stairs_down.x, stairs_down.y],
+		"lever": [lever.x, lever.y], "lever_door": [lever_door.x, lever_door.y],
+		"portal_a": [portal_a.x, portal_a.y], "portal_b": [portal_b.x, portal_b.y],
+		"haven": [haven.position.x, haven.position.y, haven.size.x, haven.size.y],
+		"event_name": event_name, "event_desc": event_desc, "overrun": overrun, "gold_rush": gold_rush,
+		"turns_on_floor": turns_on_floor, "infest_target": infest_target, "dstate": dstate,
+		"memories": _pack_memories(),
+	}
+
+
+func _pack_memories() -> Dictionary:
+	var out := {}
+	for k in memories:
+		out[k] = Marshalls.raw_to_base64(memories[k].compress(FileAccess.COMPRESSION_DEFLATE))
+	return out
+
+
+static func _v(a) -> Vector2i:
+	return Vector2i(int(a[0]), int(a[1]))
+
+
+static func from_dict(d: Dictionary) -> GameMap:
+	var m := GameMap.new()
+	m.w = int(d.w)
+	m.h = int(d.h)
+	m.floor_num = int(d.floor_num)
+	m.biome = int(d.biome)
+	m.tiles = Marshalls.base64_to_raw(d.tiles).decompress(m.w * m.h, FileAccess.COMPRESSION_DEFLATE)
+	m.seen = Marshalls.base64_to_raw(d.seen).decompress(m.w * m.h, FileAccess.COMPRESSION_DEFLATE)
+	m.visible = PackedByteArray()
+	m.visible.resize(m.w * m.h)
+	m.district_id = Marshalls.base64_to_raw(d.district_id).decompress(m.w * m.h * 4, FileAccess.COMPRESSION_DEFLATE).to_int32_array()
+	m.districts = []
+	for ds in d.districts:
+		var dd := {}
+		for k in ds:
+			dd[k] = int(ds[k])
+		m.districts.append(dd)
+	for md in d.monsters:
+		m.monsters.append(Monster.from_dict(md))
+	m.rebuild_mgrid()
+	m.items = []
+	for it in d.items:
+		var c: Dictionary = it.duplicate()
+		c.x = int(c.x)
+		c.y = int(c.y)
+		m.items.append(c)
+	m.features = []
+	for f in d.features:
+		var c: Dictionary = f.duplicate()
+		c.x = int(c.x)
+		c.y = int(c.y)
+		c.type = int(c.type)
+		m.features.append(c)
+	for k in d.doors:
+		m.doors[int(k)] = d.doors[k]
+	m.stairs_up = _v(d.stairs_up)
+	m.stairs_down = _v(d.stairs_down)
+	m.lever = _v(d.lever)
+	m.lever_door = _v(d.lever_door)
+	m.portal_a = _v(d.portal_a)
+	m.portal_b = _v(d.portal_b)
+	m.haven = Rect2i(int(d.haven[0]), int(d.haven[1]), int(d.haven[2]), int(d.haven[3]))
+	for k in d.get("memories", {}):
+		m.memories[k] = Marshalls.base64_to_raw(d.memories[k]).decompress(m.w * m.h, FileAccess.COMPRESSION_DEFLATE)
+	for k in d.get("dstate", {}):
+		var v = d.dstate[k]
+		m.dstate[k] = v if v is bool else int(v)
+	m.event_name = d.event_name
+	m.event_desc = d.event_desc
+	m.overrun = d.overrun
+	m.gold_rush = d.gold_rush
+	m.turns_on_floor = int(d.turns_on_floor)
+	m.infest_target = int(d.infest_target)
+	return m

@@ -1,0 +1,6 @@
+__pycache__/
+.godot/
+*.import
+!mockups/*.png
+!assets/*.png
+build/
