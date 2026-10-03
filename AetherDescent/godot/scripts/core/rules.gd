@@ -112,6 +112,8 @@ static func monster_take_damage(mo: Monster, dmg: int, killer: Hero = null) -> v
 					woke += 1
 			if woke > 0:
 				Game.warn("The quiet goes out of the place. All %d of them are up." % woke)
+	if dmg > 0:
+		Districts.note_hurt(mo)
 	mo.aggro = true
 	mo.hp -= dmg
 	Game.emit_fx({"type": "hurt", "who": mo, "amount": dmg})
@@ -120,6 +122,7 @@ static func monster_take_damage(mo: Monster, dmg: int, killer: Hero = null) -> v
 	mo.hp = 0
 	mo.alive = false
 	Game.emit_fx({"type": "die", "who": mo})
+	Districts.note_kill(mo.x, mo.y)
 	var gold := Game.gain_gold(mo.gold_reward)
 	Game.msg("The %s falls. (+%d gold)" % [mo.name, gold], Color8(255, 232, 150))
 	# only a blade leaves anything worth carrying up
@@ -200,7 +203,10 @@ static func damage_all_in_reach(radius: int, dmg: int) -> int:
 
 static func hero_attack(mo: Monster) -> void:
 	var h := H()
-	var dmg := damage_after_defence(h.eff_atk(), mo.def, rnd(4) - 1)
+	if not Districts.allows(h.x, h.y, C.Act.MELEE):
+		Game.msg("Not here. This ground was marked out for %s." % C.PROVE_RULES[C.Prove.ARCANE], Gfx.GREY)
+		return
+	var dmg := damage_after_defence(Districts.eff_atk(h), mo.def, rnd(4) - 1)
 	var crit_chance := h.effective_stat(C.Acc.CRIT)
 	var crit := crit_chance > 0 and rnd(100) < crit_chance
 	if crit:
@@ -377,8 +383,13 @@ static func monster_turn(mo: Monster) -> void:
 	var dy := h.y - mo.y
 	if absi(dx) <= 1 and absi(dy) <= 1:
 		monster_hit_hero(mo)
+		# the stone wood: what you cannot see gets the first blow, and gets it twice
+		if mo.alive and H().alive and Districts.ambush(mo):
+			for i in C.AMBUSH_EXTRA_BLOWS:
+				monster_hit_hero(mo)
+			Game.warn("It was behind the stone. You never saw it move.")
 		return
-	var aggro_r := maxi(2, 8 - h.aggro_reduction)
+	var aggro_r := Districts.aggro_radius(mo.x, mo.y, maxi(2, 8 - h.aggro_reduction))
 	var dk := m.district_at(mo.x, mo.y)
 	if dk == C.District.QUIET:
 		aggro_r = mini(aggro_r, C.QUIET_AGGRO_RADIUS)
@@ -561,6 +572,10 @@ static func end_turn() -> void:
 		process_monsters()
 		if Game.game_over or Game.won:
 			return
+		Districts.tick()
+		M().remove_dead()
+		if Game.game_over or Game.won or Game.depth == 0:
+			return
 		maybe_respawn()
 		refresh_vision()
 		if Game.recall_countdown > 0:
@@ -634,6 +649,9 @@ static func try_move(dx: int, dy: int) -> bool:
 		return true
 	var mo := m.monster_at(nx, ny)
 	if mo:
+		if not Districts.allows(h.x, h.y, C.Act.MELEE):
+			Game.msg("Not here. This ground was marked out for %s." % C.PROVE_RULES[C.Prove.ARCANE], Gfx.GREY)
+			return false
 		if _hindered():
 			return true
 		hero_attack(mo)
@@ -665,14 +683,15 @@ static func try_move(dx: int, dy: int) -> bool:
 	if _hindered():
 		return true
 	var from := h.pos()
+	var was_in := m.district_index(h.x, h.y)
 	h.x = nx
 	h.y = ny
 	h.still_turns = 0
 	Game.emit_fx({"type": "move", "who": h, "from": from})
+	Districts.announce(was_in)
 	Game.steps += 1
 	if Game.steps % C.JUNK_STEPS_PER_PIECE == 0:
-		Game.junk_count += 1
-		Game.junk_value += ItemsData.junk_worth(Game.depth) * (2 if Game.depth <= Game.gold_boon_until else 1)
+		Districts.gain_material(Districts.material_tier(Game.depth), 1, ItemsData.junk_worth(Game.depth))
 	_pickup()
 	if _landed(tt):
 		return true
@@ -721,6 +740,9 @@ static func _landed(tt: int) -> bool:
 			if m.lever_door.x >= 0 and m.t(m.lever_door.x, m.lever_door.y) == C.Tile.SEALED_DOOR:
 				m.set_t(m.lever_door.x, m.lever_door.y, C.Tile.FLOOR)
 				Game.good("You haul the lever. Somewhere, stone grinds open.")
+		C.Tile.PIT:
+			Districts.fall()
+			return true
 		C.Tile.SNARE:
 			var sand := m.district_at(h.x, h.y) == C.District.QUICKSAND
 			var dmg := C.SNARE_SAND_DAMAGE if sand else C.SNARE_GARDEN_DAMAGE
@@ -760,6 +782,13 @@ static func trigger_feature(f: Dictionary) -> void:
 	match f.type:
 		C.Feature.MERCHANT:
 			request = {"open": "merchant"}
+			return
+		C.Feature.CONSOLE:
+			Districts.console()
+			return
+		C.Feature.STRONGBOX:
+			if not f.used:
+				Districts.strongbox(f)
 			return
 		C.Feature.TOWN_GATE:
 			Game.save_run()
@@ -977,6 +1006,9 @@ static func cast_spell(slot: int) -> bool:
 		Game.msg("Not in the plaza. Somebody would call the watch.")
 		return false
 	if slot < 0 or slot >= h.known_spells.size():
+		return false
+	if not Districts.allows(h.x, h.y, C.Act.ARCANE):
+		Game.msg("Not here. This ground was marked out for blades.", Gfx.GREY)
 		return false
 	var s := SpellBook.get_spell(h.known_spells[slot])
 	if h.spell_cd[slot] > 0:
@@ -1222,6 +1254,9 @@ static func fire_ranged() -> bool:
 		Game.msg("You have no ranged weapon equipped. The Armory sells them.")
 		return false
 	if Game.depth == 0:
+		return false
+	if not Districts.allows(h.x, h.y, C.Act.RANGED):
+		Game.msg("Not here. Whatever this ground is for, it is not shooting.", Gfx.GREY)
 		return false
 	if h.ranged_cooldown > 0:
 		Game.msg("%s needs a moment to reset. (%d)" % [h.ranged_name, h.ranged_cooldown])

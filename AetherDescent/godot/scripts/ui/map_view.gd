@@ -312,6 +312,12 @@ func _src_for(m: GameMap, x: int, y: int, tt: int) -> Rect2:
 		C.Tile.PRISM_BLUE: k = "prism_blue"
 		C.Tile.PRISM_GREEN: k = "prism_green"
 		C.Tile.SNARE: k = "snare"
+		C.Tile.ROD: k = "rod"
+		C.Tile.CURRENT: k = "current%d" % (int(t * 4.0) % 2)
+		C.Tile.BELT: k = "belt%d" % (int(t * 6.0) % 2)
+		C.Tile.PIT: k = "pit"
+		C.Tile.ORE: k = "ore"
+		C.Tile.VENT: k = "vent"
 	return Gfx.tile_src(row, Gfx.kind_col(k))
 
 
@@ -353,6 +359,25 @@ func _draw_world() -> void:
 				ci.draw_texture_rect(Gfx.torch, Rect2(x * TS, y * TS - 4, TS, TS), false, light * Color(1, 1, 1, flick))
 				if m.is_visible(x, y):
 					torches.append(Vector2(x * TS + 16, y * TS + 8))
+	# the districts' tells: the rod about to take the bolt, the eye's quiet quarter
+	if Game.depth > 0:
+		var ds: Dictionary = m.dstate
+		if int(ds.storm_x) >= 0 and int(ds.storm_countdown) <= 2 and m.is_visible(int(ds.storm_x), int(ds.storm_y)):
+			var sp := Vector2(int(ds.storm_x) * TS + 16, int(ds.storm_y) * TS + 10)
+			var pulse := 0.5 + 0.5 * sin(t * 18.0)
+			var col := Color(1.0, 0.55, 0.2) if ds.storm_is_vent else Color(0.65, 0.85, 1.0)
+			ci.draw_arc(sp, 14 + pulse * 4, 0, TAU, 24, Color(col, 0.8), 2.0)
+			ci.draw_arc(sp, C.STORM_BLAST_RADIUS * TS + 8, 0, TAU, 48, Color(col, 0.25 + pulse * 0.25), 2.0)
+		for d in m.districts:
+			if d.kind != C.District.EYE:
+				continue
+			var q := Districts.eye_safe_quarter()
+			var hw: int = d.w / 2
+			var hh: int = d.h / 2
+			var qr := Rect2((d.x + (hw if q % 2 == 1 else 0)) * TS, (d.y + (hh if q >= 2 else 0)) * TS,
+				(d.w - hw if q % 2 == 1 else hw) * TS, (d.h - hh if q >= 2 else hh) * TS)
+			ci.draw_rect(qr, Color(0.45, 0.75, 1.0, 0.10))
+			ci.draw_rect(qr, Color(0.45, 0.75, 1.0, 0.35), false, 2.0)
 	# torch glow: additive-looking warm pools
 	for p in torches:
 		for i in 4:
@@ -510,6 +535,9 @@ func _draw_monster(ci: CanvasItem, mo: Monster, v: Dictionary) -> void:
 	mod.a = 1
 	if v.flash_t >= 0 and v.flash_t < 0.14:
 		mod = Color(3, 3, 3)
+	if mo.look >= 0:
+		_draw_person(ci, mo, v, feet, mod)
+		return
 	var big := mo.is_boss
 	var size := ArtLayout.BOSS_CELL if big else c
 	_shadow(ci, feet, 34 if big else 26)
@@ -539,10 +567,29 @@ func _draw_monster(ci: CanvasItem, mo: Monster, v: Dictionary) -> void:
 		Gfx.text_center(ci, feet.x, feet.y - c - 10, "*", Gfx.GOLD)
 
 
+## A barrow ghost or your reflection: a person, drawn as one, but pale.
+func _draw_person(ci: CanvasItem, mo: Monster, v: Dictionary, feet: Vector2, mod: Color) -> void:
+	var cell: Vector2i = ArtLayout.HERO_CELL
+	var frame := "atk1" if v.lunge_t < 0.18 else ("walk%d" % (int(t * 4 + v.phase) % 4) if v.pos.distance_to(Vector2(mo.pos()) * TS) > 0.5 else "walk0")
+	var facing := "left" if mo.facing_left else "right"
+	var tint := Color(0.62, 0.78, 1.0, 0.9) if mo.apparition == 1 else Color(0.85, 0.9, 1.0, 0.9)
+	if mod.r > 2.0:
+		tint = mod
+	else:
+		tint = Color(tint.r * mod.r, tint.g * mod.g, tint.b * mod.b, tint.a)
+	_shadow(ci, feet, 20)
+	var pos := (feet - Vector2(cell.x / 2.0, ArtLayout.HERO_FEET_Y)).round()
+	ci.draw_texture_rect_region(Gfx.heroes, Rect2(pos, Vector2(cell)), Gfx.hero_src(mo.look, facing, frame), tint)
+	if mo.hp < mo.maxhp:
+		Gfx.bar(ci, feet + Vector2(-11, -ArtLayout.HERO_FEET_Y - 4), 22, float(mo.hp) / mo.maxhp, Color8(255, 176, 48), 2)
+
+
 func _draw_dying(ci: CanvasItem, d: Dictionary) -> void:
 	if d.t < 0:
 		return
 	var mo: Monster = d.m
+	if mo.look >= 0:
+		return
 	var f: float = d.t / 0.45
 	var c := ArtLayout.MON_CELL
 	var feet: Vector2 = d.pos + Vector2(TS / 2.0, TS - 3)
@@ -580,6 +627,9 @@ func _mini_color(m: GameMap, x: int, y: int) -> Color:
 		C.Tile.STAIRS_DOWN, C.Tile.TEMPLE: return Color8(255, 224, 96)
 		C.Tile.STAIRS_UP: return Color8(200, 200, 255)
 		C.Tile.THICKET, C.Tile.GRASS, C.Tile.FLOWERS: return Color8(72, 140, 72)
+		C.Tile.CURRENT: return Color8(96, 150, 230)
+		C.Tile.PIT: return Color8(16, 12, 20)
+		C.Tile.ROD, C.Tile.VENT, C.Tile.ORE: return Color8(200, 220, 255)
 		C.Tile.DOOR, C.Tile.LOCKED_DOOR, C.Tile.SEALED_DOOR, C.Tile.QUEST_BOARD: return Color8(220, 150, 80)
 	var d := m.district_at(x, y)
 	if d >= 0:
@@ -660,6 +710,7 @@ func _draw_hud() -> void:
 	if h.stance_atk_pct > 0: chips.append(["RED", Gfx.RED])
 	if h.stance_def_pct > 0: chips.append(["BLUE", Gfx.CYAN])
 	if Game.recall_countdown > 0: chips.append(["RECALL %d" % Game.recall_countdown, Gfx.CYAN])
+	if h.work_left > 0: chips.append(["WORK %d" % h.work_left, Color8(220, 200, 150)])
 	if Quests.active():
 		var q := Game.quest
 		var here := Game.depth == int(q.depth)

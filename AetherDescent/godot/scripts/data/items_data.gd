@@ -151,6 +151,23 @@ static func upgrade_price(current_plus: int) -> int:
 	return 20 * n * n + 100 * n + 20
 
 
+## Past +20 the smith wants platinum, past +50 diamond -- items.c.
+static func upgrade_material_tier(current_plus: int) -> int:
+	if current_plus >= C.UPGRADE_DIAMOND_FROM:
+		return C.Mat.DIAMOND
+	if current_plus >= C.UPGRADE_PLATINUM_FROM:
+		return C.Mat.PLATINUM
+	return C.Mat.SCRAP
+
+
+## Scrap rungs cost none: the early game is not gated on a currency it has not taught you.
+static func upgrade_material_cost(current_plus: int) -> int:
+	if current_plus < C.UPGRADE_PLATINUM_FROM:
+		return 0
+	var over := current_plus - (C.UPGRADE_DIAMOND_FROM if current_plus >= C.UPGRADE_DIAMOND_FROM else C.UPGRADE_PLATINUM_FROM)
+	return 2 + over / 4
+
+
 static func training_price(value: int) -> int:
 	value = maxi(value, 1)
 	return 200 * value * value + 300

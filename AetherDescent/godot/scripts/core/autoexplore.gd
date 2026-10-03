@@ -45,7 +45,19 @@ static func step() -> String:
 			return ""
 		if h.hp * 4 < h.maxhp:
 			return "Badly hurt, with nothing to drink."
-	# fight what is awake and close
+	# off ground that carries you before anything else: a walk that steps onto a
+	# belt gets carried off its route, re-paths, and is carried off again
+	if m.t(h.x, h.y) == C.Tile.CURRENT or m.t(h.x, h.y) == C.Tile.BELT:
+		for d in C.DIRS8:
+			var nx: int = h.x + d.x
+			var ny: int = h.y + d.y
+			var tt := m.t(nx, ny)
+			if m.walkable_monster(nx, ny) and not m.monster_at(nx, ny) and tt != C.Tile.CURRENT \
+					and tt != C.Tile.BELT and tt != C.Tile.STAIRS_UP:
+				Rules.try_move(d.x, d.y)
+				return ""
+	# fight what is awake and close -- unless this ground will not let you
+	var may_fight := Districts.allows(h.x, h.y, C.Act.MELEE)
 	var foe: Monster = null
 	var fd := 1 << 30
 	for mo in m.monsters:
@@ -53,6 +65,11 @@ static func step() -> String:
 			continue
 		var d := maxi(absi(mo.x - h.x), absi(mo.y - h.y))
 		if d > 1 and _ignored.has(mo.get_instance_id()):
+			continue
+		if not may_fight:
+			continue
+		# a watch is not to be started: leave the wardens be unless they come
+		if not mo.aggro and m.district_at(mo.x, mo.y) == C.District.WATCH:
 			continue
 		if (mo.aggro or d <= 2) and d < fd:
 			fd = d
@@ -137,7 +154,14 @@ static func _path_step(goal: Callable, to_monster: bool) -> Vector2i:
 		var r := _bfs(goal, to_monster, avoid)
 		if r != Vector2i.ZERO:
 			return r
-	return Vector2i.ZERO
+	# nothing reaches without crossing the sand: then it is the only way on
+	_cross_shut = true
+	var last := _bfs(goal, to_monster, false)
+	_cross_shut = false
+	return last
+
+
+static var _cross_shut := false
 
 
 static var _prev := PackedInt32Array()
@@ -146,6 +170,9 @@ static var _prev := PackedInt32Array()
 static func _bfs(goal: Callable, to_monster: bool, avoid_hazard: bool) -> Vector2i:
 	var h := Game.hero
 	var m := Game.map
+	# The sand and the barrow are fights you choose by stepping in: a walk on
+	# your behalf does not choose them for you. Once inside, it may move freely.
+	var shut_in := _cross_shut or m.district_at(h.x, h.y) in [C.District.ARENA, C.District.GAUNTLET]
 	if _prev.size() != m.w * m.h:
 		_prev.resize(m.w * m.h)
 	_prev.fill(-2)
@@ -177,11 +204,14 @@ static func _bfs(goal: Callable, to_monster: bool, avoid_hazard: bool) -> Vector
 					continue
 				if GameMap.blocks_walk(tt) and not (tt == C.Tile.LOCKED_DOOR and Game.keys > 0):
 					continue
-				if tt == C.Tile.STAIRS_UP or tt == C.Tile.PORTAL or tt == C.Tile.SNARE:
+				if tt == C.Tile.STAIRS_UP or tt == C.Tile.PORTAL or tt == C.Tile.SNARE or tt == C.Tile.PIT:
+					continue
+				if not shut_in and m.district_at(nx, ny) in [C.District.ARENA, C.District.GAUNTLET]:
 					continue
 				if tt == C.Tile.STAIRS_DOWN and not goal.call(nx, ny):
 					continue
-				if avoid_hazard and (tt == C.Tile.LAVA or tt == C.Tile.MIASMA):
+				# ground that carries you is crossed only when nothing else reaches
+				if avoid_hazard and (tt == C.Tile.LAVA or tt == C.Tile.MIASMA or tt == C.Tile.CURRENT or tt == C.Tile.BELT):
 					continue
 			_prev[ni] = c
 			q.append(ni)

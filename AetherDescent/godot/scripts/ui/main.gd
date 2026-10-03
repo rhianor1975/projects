@@ -14,6 +14,7 @@ var dialog := {}             # a simple message box: {title, lines, on_close}
 var t := 0.0
 var auto := false
 var hold_dir := Vector2i.ZERO
+var working := false         # a `g` job is running: one turn per step until done
 var hold_t := 0.0
 
 # creation state
@@ -47,6 +48,12 @@ func _process(delta: float) -> void:
 		auto = false
 		return
 	if view.busy():
+		return
+	if working:
+		if Game.hero.work_left > 0 and Game.depth > 0:
+			_do(Districts.work_step)
+		else:
+			working = false
 		return
 	# auto-explore runs one step per settle
 	if auto:
@@ -436,6 +443,10 @@ func _game_input(ev: InputEvent) -> void:
 		auto = false
 		Game.msg("You take the reins back.", Gfx.GREY)
 		return
+	if working:
+		working = false
+		Districts.work_abandon("You straighten up and leave it.")
+		return
 	if view.show_full_map and ev.keycode != KEY_TAB:
 		view.show_full_map = false
 		return
@@ -468,6 +479,9 @@ func _game_input(ev: InputEvent) -> void:
 				_open_spells()
 		KEY_TAB:
 			view.show_full_map = not view.show_full_map
+		KEY_G:
+			if Game.depth > 0 and Districts.work_begin():
+				working = true
 		KEY_P:
 			if Party.switch_next():
 				Sfx.play("confirm")
@@ -638,7 +652,8 @@ func _open_character() -> void:
 		Gfx.text(ci, p + Vector2(92, 14), "%s  Lv %d" % [h.class_name_str(), h.level], Gfx.GOLD)
 		Gfx.text(ci, p + Vector2(92, 30), "%s  /  %s" % [C.ARCHETYPE_NAMES[h.archetype], C.DIFFICULTY_NAMES[Game.difficulty]], Gfx.GREY)
 		Gfx.text(ci, p + Vector2(92, 46), "XP %d/%d   seed %d" % [h.xp, h.xp_next, Game.run_seed], Gfx.GREY)
-		Gfx.text(ci, p + Vector2(92, 62), "Deepest floor %d" % Game.deepest_floor, Gfx.GREY)
+		Gfx.text(ci, p + Vector2(92, 62), "Deepest floor %d    %d scrap  %d plat  %d diam" % [Game.deepest_floor,
+			int(Game.mats[0]), int(Game.mats[1]), int(Game.mats[2])], Gfx.GREY)
 		var stats := [["ATK", h.eff_atk()], ["DEF", h.eff_def()], ["HP", "%d/%d" % [h.hp, h.maxhp]],
 			["AE", "%d/%d" % [h.aether, h.aether_max]], ["Crit", "%d%%" % h.effective_stat(C.Acc.CRIT)],
 			["Evasion", "%d%%" % h.effective_stat(C.Acc.EVASION)], ["Ward", "%d%%" % h.effective_stat(C.Acc.WARD)],
@@ -688,6 +703,7 @@ func _open_help() -> void:
 		"m: cast a spell     s: cast the last one again     f: fire     a: class ability",
 		"i: pack     c: character sheet     r: recall charm     Esc: menu",
 		"p: take over the next of your party -- hires fight on their own until you do.",
+		"g: work what is beside you -- an ore vein, a rod, a vent, a wreck -- for materials.",
 	])
 
 
@@ -815,8 +831,13 @@ func _open_armory() -> void:
 			4:
 				for spec in [["weapon", "Weapon", h.weapon_plus], ["armor", "Armour", h.armor_plus]]:
 					var p := Game.discounted(ItemsData.upgrade_price(spec[2]))
+					var mt := ItemsData.upgrade_material_tier(spec[2])
+					var mc := ItemsData.upgrade_material_cost(spec[2])
+					var need := (" and %d %s (you have %d)" % [mc, C.MAT_NAMES[mt], int(Game.mats[mt])]) if mc > 0 else ""
 					mm.items.append({"label": "%s +%d" % [spec[1], spec[2] + 1], "right": p, "price": p, "kind": "plus_" + spec[0],
-						"desc": "+%d %s on whatever you carry now. Buying a new one starts it again at +0." % [C.UPGRADE_STEP, "attack" if spec[0] == "weapon" else "defence"]})
+						"mat": mt, "mat_cost": mc, "enabled": int(Game.mats[mt]) >= mc,
+						"why": "\"Past this I need %d %s, and coin won't stand in for it.\" It comes up from the deep floors." % [mc, C.MAT_NAMES[mt]],
+						"desc": "+%d %s on whatever you carry now, for %s gold%s. Buying a new one starts it again at +0." % [C.UPGRADE_STEP, "attack" if spec[0] == "weapon" else "defence", Gfx.comma(p), need]})
 				var ap := Game.discounted(ItemsData.upgrade_price(h.ammo_plus))
 				mm.items.append({"label": "Bandolier +%d" % (h.ammo_plus + 1), "right": ap, "price": ap, "kind": "plus_ammo",
 					"enabled": h.ranged_type != C.Ranged.NONE, "why": "Buy something to load first.",
@@ -857,9 +878,11 @@ func _open_armory() -> void:
 				h.recompute_set_bonus()
 				mm.say("You put on the %s." % g.name)
 			"plus_weapon":
+				Game.mats[it.mat] = int(Game.mats[it.mat]) - int(it.mat_cost)
 				h.weapon_plus += 1
 				mm.say("The smith works your %s up to +%d." % [h.weapon_name, h.weapon_plus])
 			"plus_armor":
+				Game.mats[it.mat] = int(Game.mats[it.mat]) - int(it.mat_cost)
 				h.armor_plus += 1
 				mm.say("The smith works your %s up to +%d." % [h.armor_name, h.armor_plus])
 			"plus_ammo":
@@ -1396,16 +1419,29 @@ func _open_gladiator() -> void:
 
 
 func _open_junkyard() -> void:
-	if Game.junk_count <= 0:
-		_show("Junkyard", ["The scrap merchant weighs your empty hands.",
-			"You pick up a piece of junk for every hundred steps in the temple.", "Bring it here to sell."])
-		return
-	var g := Game.gain_gold(Game.junk_value)
-	_show("Junkyard", ["The scales creak. %d pieces of scrap." % Game.junk_count, "+%s gold." % Gfx.comma(g)])
-	Sfx.play("coin")
-	Game.junk_count = 0
-	Game.junk_value = 0
-	Game.save_run()
+	var m := _menu("Junkyard")
+	m.rebuild = func(mm: Menu):
+		mm.items = []
+		for tier in 3:
+			var n := int(Game.mats[tier])
+			mm.items.append({"label": "Sell the %s (%d)" % [C.MAT_NAMES[tier], n], "right": Gfx.comma(int(Game.mat_value[tier])),
+				"tier": tier, "enabled": n > 0, "why": "You have no %s." % C.MAT_NAMES[tier],
+				"color": [Gfx.WHITE, Gfx.CYAN, Gfx.GOLD][tier],
+				"desc": ("Scrap comes off the walls as you walk -- a piece every hundred steps -- and out of wrecks." if tier == 0
+					else "The smith wants %s for the rungs past +%d. Selling it is a choice you can regret." % [C.MAT_NAMES[tier], C.UPGRADE_PLATINUM_FROM if tier == 1 else C.UPGRADE_DIAMOND_FROM])})
+		mm.items.append({"label": "Leave", "tier": -1})
+	m.on_select = func(mm: Menu, it: Dictionary) -> bool:
+		if it.tier < 0:
+			return true
+		var g := Game.gain_gold(int(Game.mat_value[it.tier]))
+		mm.say("The scales creak. %d %s, %s gold." % [int(Game.mats[it.tier]), C.MAT_NAMES[it.tier], Gfx.comma(g)])
+		Game.mats[it.tier] = 0
+		Game.mat_value[it.tier] = 0
+		Sfx.play("coin")
+		Game.save_run()
+		return false
+	m.detail = _detail_hero
+	m.refresh()
 
 
 func _open_blackmarket() -> void:
@@ -1488,6 +1524,7 @@ func _open_merchant() -> void:
 func _open_death() -> void:
 	var hardcore := Game.difficulty == C.Difficulty.HARDCORE
 	var best := Game.record_highscore()
+	Game.record_fallen()      # onto the roster the barrows are raised from
 	var died_on := Game.depth
 	var lines := ["Slain by %s on floor %d." % [Game.killed_by, died_on],
 		"Level %d. Deepest floor %d. Best ever: %d." % [Game.hero.level, Game.deepest_floor, best]]

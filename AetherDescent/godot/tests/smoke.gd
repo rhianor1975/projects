@@ -205,6 +205,7 @@ func _ready() -> void:
 	if pct != Kitchen.bazaar_pct(2) or pct < Kitchen.BAZAAR_MIN_PCT or pct > Kitchen.BAZAAR_MAX_PCT:
 		print("FAIL bazaar price unstable or out of range"); failures += 1
 	print("kitchen: %d cuts from 300 blade kills" % cuts)
+	failures += _districts(game)
 	# generation sweep: every floor is connected stairs-to-stairs
 	for f in [1, 7, 15, 22, 35, 48, 60, 77, 85, 99, 100]:
 		for ws in [C.WorldSize.SHAFT, C.WorldSize.HALLS]:
@@ -227,3 +228,164 @@ func _ready() -> void:
 	print("spells in pool: ", SpellBook.count())
 	print("done in %d ms, %d failures" % [Time.get_ticks_msec() - t0, failures])
 	get_tree().quit(1 if failures else 0)
+
+
+
+## A floor holding a district of `kind`, made current, with the hero standing
+## on an open square inside it. Returns the district's index, or -1.
+func _floor_with(game, kind: int) -> int:
+	for f in range(1, 99):
+		var m: GameMap = MapGen.generate(f, C.WORLD_DIMS[C.WorldSize.HALLS], 3000 + f * 7 + kind, C.Difficulty.NORMAL)
+		for i in m.districts.size():
+			var d: Dictionary = m.districts[i]
+			if d.kind != kind:
+				continue
+			for y in range(d.y + 1, d.y + d.h - 1):
+				for x in range(d.x + 1, d.x + d.w - 1):
+					if m.t(x, y) == C.Tile.FLOOR and not m.monster_at(x, y):
+						game.map = m
+						game.depth = f
+						game.hero.x = x
+						game.hero.y = y
+						# a quiet floor: only what the district itself brings
+						for mo in m.monsters:
+							mo.alive = false
+						m.remove_dead()
+						Rules.refresh_vision()
+						return i
+	return -1
+
+
+func _districts(game) -> int:
+	var fails := 0
+	game.fallen().append({"name": "Old Kael", "floor": 12, "maxhp": 60, "atk": 9, "def": 3, "gold": 77, "look": 0})
+	game.new_run(0, "Wanderer", C.Difficulty.NORMAL, C.WorldSize.HALLS, 12)
+	game.hero.maxhp = 50000
+	game.hero.hp = 50000
+	# the arena: the gates shut, ten waves, a writ
+	var i := _floor_with(game, C.District.ARENA)
+	if i < 0:
+		print("FAIL no arena generated"); return 1
+	Districts.tick()
+	if int(game.map.dstate.arena_wave) != 1 or game.map.monsters.is_empty():
+		print("FAIL the arena did not start"); fails += 1
+	var writs: int = game.writs
+	for k in 40:
+		for mo in game.map.monsters.duplicate():
+			if mo.alive:
+				Rules.monster_take_damage(mo, 999999)
+		game.map.remove_dead()
+		Districts.tick()
+	if game.writs != writs + 1 or not game.map.dstate.arena_paid:
+		print("FAIL the arena never paid (wave %d)" % int(game.map.dstate.arena_wave)); fails += 1
+	# the barrow raises the fallen
+	i = _floor_with(game, C.District.GAUNTLET)
+	if i >= 0:
+		Districts.tick()
+		var ghosts: Array = game.map.monsters.filter(func(mo): return mo.apparition == 1)
+		if ghosts.is_empty() or ghosts[0].name != "Old Kael":
+			print("FAIL the barrow raised nobody"); fails += 1
+	else:
+		print("FAIL no barrow generated"); fails += 1
+	# the mirror
+	i = _floor_with(game, C.District.MIRROR)
+	Districts.tick()
+	if game.map.monsters.filter(func(mo): return mo.apparition == 2).size() != 1:
+		print("FAIL the mirror made no copy"); fails += 1
+	# the eye strikes whoever is out of the quiet quarter
+	i = _floor_with(game, C.District.EYE)
+	var d: Dictionary = game.map.districts[i]
+	var hurt := false
+	for turn in 30:
+		game.map.turns_on_floor = turn
+		if not Districts.eye_sheltered(d, game.hero.x, game.hero.y):
+			var before: int = game.hero.hp
+			if turn % C.EYE_STRIKE_EVERY == 0:
+				Districts.tick()
+				hurt = hurt or game.hero.hp < before
+	if not hurt:
+		print("FAIL the eye never struck"); fails += 1
+	# the watch: the strongbox pays while it holds; a blow breaks it
+	i = _floor_with(game, C.District.WATCH)
+	var box: Array = game.map.features.filter(func(f): return f.type == C.Feature.STRONGBOX)
+	if box.is_empty():
+		print("FAIL a watch with no strongbox"); fails += 1
+	else:
+		var g0: int = game.hero.gold_bonus_pct
+		Districts.strongbox(box[0])
+		if game.hero.gold_bonus_pct != g0 + C.WATCH_FIND_PCT:
+			print("FAIL the strongbox paid nothing"); fails += 1
+	# the proving ground's rules
+	i = _floor_with(game, C.District.PROVING)
+	var rule: int = game.map.districts[i].state
+	var melee_ok := Districts.allows(game.hero.x, game.hero.y, C.Act.MELEE)
+	var shoot_ok := Districts.allows(game.hero.x, game.hero.y, C.Act.RANGED)
+	if shoot_ok or melee_ok != (rule != C.Prove.ARCANE):
+		print("FAIL proving ground rule %d not applied" % rule); fails += 1
+	# the rods: a strike comes round
+	i = _floor_with(game, C.District.STORM)
+	var struck := false
+	for k in 20:
+		Districts.tick()
+		struck = struck or int(game.map.dstate.storm_x) >= 0
+	if not struck:
+		print("FAIL the rods never sang"); fails += 1
+	# the aqueduct carries you
+	i = _floor_with(game, C.District.AQUEDUCT)
+	d = game.map.districts[i]
+	var carried := false
+	for y in range(d.y, d.y + d.h):
+		for x in range(d.x, d.x + d.w):
+			if carried or game.map.t(x, y) != C.Tile.CURRENT:
+				continue
+			game.hero.x = x
+			game.hero.y = y
+			var before: Vector2i = game.hero.pos()
+			Districts.tick()
+			carried = game.hero.pos() != before
+	if not carried:
+		print("FAIL the current carried nobody"); fails += 1
+	# the workings: a pit drops you a floor; ore pays materials
+	i = _floor_with(game, C.District.SHAFT)
+	d = game.map.districts[i]
+	var dropped := false
+	for y in range(d.y, d.y + d.h):
+		for x in range(d.x, d.x + d.w):
+			if dropped or game.map.t(x, y) != C.Tile.PIT:
+				continue
+			var f0: int = game.depth
+			game.hero.x = x - 1
+			game.hero.y = y
+			if game.map.walkable_player(x - 1, y):
+				Rules.try_move(1, 0)
+				dropped = game.depth == f0 + 1
+	if not dropped:
+		print("FAIL no fall through a pit"); fails += 1
+	var vein := Vector2i(-1, -1)
+	for y in game.map.h:
+		for x in game.map.w:
+			if vein.x < 0 and game.map.t(x, y) == C.Tile.ORE:
+				for dd in C.DIRS8:
+					if game.map.walkable_player(x + dd.x, y + dd.y) and not game.map.monster_at(x + dd.x, y + dd.y):
+						vein = Vector2i(x, y)
+						game.hero.x = x + dd.x
+						game.hero.y = y + dd.y
+						break
+	if vein.x < 0:
+		print("FAIL no ore vein"); fails += 1
+	else:
+		for mo in game.map.monsters:
+			mo.alive = false
+		game.map.remove_dead()
+		var before_mats: int = game.mats[0] + game.mats[1] + game.mats[2]
+		Districts.work_begin()
+		for k in 12:
+			if game.hero.work_left > 0:
+				Districts.work_step()
+		if game.mats[0] + game.mats[1] + game.mats[2] <= before_mats:
+			print("FAIL mining yielded nothing"); fails += 1
+	if ItemsData.upgrade_material_cost(19) != 0 or ItemsData.upgrade_material_cost(20) != 2 \
+			or ItemsData.upgrade_material_tier(55) != C.Mat.DIAMOND:
+		print("FAIL the smith's material rungs"); fails += 1
+	print("districts checked")
+	return fails

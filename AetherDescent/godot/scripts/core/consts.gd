@@ -10,6 +10,8 @@ enum Tile {
 	# town
 	TOWN_FLOOR, ROOF, HOUSE_WALL, DOOR, TOWN_GRASS, TOWN_FLOWERS, PLANTER, FOUNTAIN, TEMPLE,
 	QUEST_BOARD,
+	# the later wild districts: appended, never inserted -- floors are saved
+	ROD, CURRENT, BELT, PIT, ORE, VENT,
 }
 
 enum Difficulty { NORMAL, HARD, SWARM, HARDCORE }
@@ -35,9 +37,9 @@ const BIOME_NAMES := ["the Sunken Jungle Roots", "the Company Works", "the Flood
 	"the Salt Wastes", "the Abyssal Approach"]
 const BIOME_SHORT := ["Jungle Roots", "Company Works", "Flooded Ruins", "Salt Wastes", "Abyssal Approach"]
 
-enum Feature { SHRINE, FOUNTAIN, MERCHANT, MACHINE, RELIC, TOWN_GATE, ALTAR, TOLL }
-const FEATURE_PROPS := ["shrine", "fountain", "merchant", "machine", "relic", "waygate", "altar", "toll"]
-const FEATURE_NAMES := ["Shrine", "Fountain", "Merchant", "Machine", "Relic", "Waygate", "Altar", "Toll"]
+enum Feature { SHRINE, FOUNTAIN, MERCHANT, MACHINE, RELIC, TOWN_GATE, ALTAR, TOLL, CONSOLE, STRONGBOX }
+const FEATURE_PROPS := ["shrine", "fountain", "merchant", "machine", "relic", "waygate", "altar", "toll", "console", "strongbox"]
+const FEATURE_NAMES := ["Shrine", "Fountain", "Merchant", "Machine", "Relic", "Waygate", "Altar", "Toll", "Console", "Strongbox"]
 
 enum Attr {
 	MIGHT, BRAWN, AGILITY, REFLEXES, PRECISION, GRIT, FORTITUDE, STAMINA, BALANCE, VISION,
@@ -103,9 +105,12 @@ enum Effect {
 }
 
 # Districts carried over: the terrain-and-rule kinds. See mapgen.gd.
-enum District { JUNGLE, SEA, SWAMP, RUINS, MYCELIUM, HIVE, MIRE, CRYSTAL, QUIET, BLOODMARSH, PRISM, GARDEN, QUICKSAND }
+enum District { JUNGLE, SEA, SWAMP, RUINS, MYCELIUM, HIVE, MIRE, CRYSTAL, QUIET, BLOODMARSH, PRISM, GARDEN, QUICKSAND,
+	STORM, ARENA, AQUEDUCT, ASSEMBLY, WATCH, GAUNTLET, EYE, MIRROR, PETRIFIED, SHAFT, BONEYARD, PROVING, CHAPEL, GEOTHERMAL }
 const DISTRICT_NAMES := ["Jungle", "Sea", "Swamp", "Ruins", "Mycelium", "Hive", "Mire", "Crystal",
-	"Quiet Quarter", "Blood Marsh", "Chromatic Abyss", "Carnivorous Garden", "Quicksand Basin"]
+	"Quiet Quarter", "Blood Marsh", "Chromatic Abyss", "Carnivorous Garden", "Quicksand Basin",
+	"Storm-Cage", "Arena", "Aqueduct", "Assembly Line", "The Watch", "Barrow of the Fallen", "Eye of the Storm",
+	"Mirror", "Stone Wood", "Workings", "Boneyard", "Proving Ground", "Chapel of Silence", "Vent Field"]
 const DISTRICT_NOTES := [
 	"ragged ground, thicket and pools -- fights start at four paces",
 	"standing water, islands, causeways laid over it",
@@ -120,18 +125,37 @@ const DISTRICT_NOTES := [
 	"the ground you fight on is a choice",
 	"flowers with teeth: 8 damage, held 2 turns",
 	"sand with a ripple in it: 3 damage, held 4 turns",
+	"a rod sings, then the lightning takes it -- stand clear, or lure them close",
+	"step onto the sand and the gates shut: ten waves, free to leave after five",
+	"channels that carry whatever stands in them",
+	"belts that carry you, lanes alternating; three keys at the console build a golem",
+	"awake and watching -- start nothing, and the strongbox is yours",
+	"the runs you have already lost, waiting for you",
+	"one quarter is quiet at a time, and it moves",
+	"it makes a copy of you and sets it walking",
+	"stone trees; what you cannot see gets the first blow",
+	"holes in the floor: a floor skipped, paid for in blood; ore in the galleries",
+	"dead golems -- ten turns cracking one open (g) for its core",
+	"fight their way, or do not fight here",
+	"nothing carries here: they notice you only up close",
+	"vents on a timer -- stand clear when one draws",
 ]
 const DISTRICT_TINTS := [Color8(96, 200, 96), Color8(80, 140, 230), Color8(120, 170, 90),
 	Color8(210, 210, 220), Color8(170, 120, 230), Color8(230, 180, 60), Color8(170, 190, 200),
 	Color8(150, 220, 255), Color8(190, 190, 160), Color8(220, 60, 70), Color8(230, 120, 230),
-	Color8(240, 120, 170), Color8(230, 210, 150)]
+	Color8(240, 120, 170), Color8(230, 210, 150),
+	Color8(150, 170, 255), Color8(230, 200, 140), Color8(110, 170, 240), Color8(200, 170, 120),
+	Color8(210, 190, 150), Color8(170, 150, 200), Color8(150, 200, 230), Color8(220, 230, 255),
+	Color8(170, 170, 160), Color8(190, 150, 110), Color8(180, 170, 150), Color8(240, 210, 140),
+	Color8(200, 200, 230), Color8(240, 150, 90)]
 # per biome: jungle sea swamp ruins myc hive mire cryst quiet blood prism garden sand
+# then storm arena aque asm watch barrow eye mirror stone shaft bone prov chapel vent
 const DIST_WEIGHT := [
-	[18, 8, 11, 5, 9, 6, 4, 4, 6, 5, 3, 10, 3],
-	[5, 4, 9, 20, 5, 6, 5, 6, 6, 2, 3, 2, 3],
-	[12, 7, 5, 17, 6, 5, 6, 7, 8, 3, 2, 4, 4],
-	[3, 3, 17, 17, 4, 5, 10, 6, 5, 5, 2, 3, 10],
-	[3, 16, 12, 9, 7, 7, 7, 8, 6, 4, 5, 4, 5],
+	[18, 8, 11, 5, 9, 6, 4, 4, 6, 5, 3, 10, 3, 5, 3, 5, 2, 3, 1, 2, 2, 8, 2, 1, 2, 2, 2],
+	[5, 4, 9, 20, 5, 6, 5, 6, 6, 2, 3, 2, 3, 8, 3, 8, 11, 9, 2, 5, 3, 2, 9, 10, 4, 3, 8],
+	[12, 7, 5, 17, 6, 5, 6, 7, 8, 3, 2, 4, 4, 4, 3, 7, 5, 7, 3, 4, 5, 5, 5, 6, 6, 6, 3],
+	[3, 3, 17, 17, 4, 5, 10, 6, 5, 5, 2, 3, 10, 8, 2, 4, 3, 5, 3, 7, 3, 6, 6, 4, 4, 4, 8],
+	[3, 16, 12, 9, 7, 7, 7, 8, 6, 4, 5, 4, 5, 5, 2, 5, 3, 4, 4, 6, 7, 3, 4, 3, 5, 6, 6],
 ]
 const MYCELIUM_HEAR_RADIUS := 20
 const MYCELIUM_FORGET_TURNS := 2
@@ -146,6 +170,46 @@ const SNARE_GARDEN_DAMAGE := 8
 const SNARE_GARDEN_HOLD := 2
 const SNARE_SAND_DAMAGE := 3
 const SNARE_SAND_HOLD := 4
+# the later districts -- src/common.h
+const STORM_STRIKE_EVERY := 5
+const STORM_BLAST_RADIUS := 2
+const STORM_DAMAGE := 10
+const ARENA_WAVES := 10
+const ARENA_FREE_AFTER := 5
+const ARENA_BASE_ENEMIES := 3
+const CURRENT_PUSH := 3
+const BELT_PUSH := 2
+const CONSOLE_KEY_COST := 3
+const WATCH_AGGRO_RADIUS := 2
+const WATCH_FIND_PCT := 5
+const WATCH_FIND_CAP := 60
+enum { WATCH_KEEPING, WATCH_BROKEN, WATCH_TAKEN }
+const GAUNTLET_MAX_GHOSTS := 5
+const GAUNTLET_MIN_GHOSTS := 1
+const FALLEN_MAX := 16
+const EYE_ROTATE_EVERY := 8
+const EYE_DAMAGE := 7
+const EYE_STRIKE_EVERY := 3
+const MIRROR_HP_PCT := 50
+const MIRROR_DAMAGE_PCT := 50
+const AMBUSH_EXTRA_BLOWS := 1
+const PIT_FALL_HP_PCT := 18
+const PIT_MIN_DAMAGE := 6
+const CHAPEL_AGGRO_RADIUS := 3
+enum Prove { MELEE, ARCANE, UNARMED }
+const PROVE_RULES := ["blades only", "the arts only", "no weapons"]
+const PROVE_KILLS_WANTED := 6
+enum Act { MELEE, ARCANE, RANGED }
+# work: multi-turn jobs with `g`
+enum Work { NONE, MINE, HARVEST_ROD, SALVAGE, CORE, HARVEST_VENT }
+const WORK_TURNS := [0, 8, 5, 10, 10, 5]
+const WORK_VERBS := ["working", "cutting the vein out", "cutting the ore out of the rod",
+	"stripping the wreck", "cracking the core open", "breaking the crust off the vent"]
+# materials: what the deep upgrade rungs want
+enum Mat { SCRAP, PLATINUM, DIAMOND }
+const MAT_NAMES := ["scrap", "platinum", "diamond"]
+const UPGRADE_PLATINUM_FROM := 20
+const UPGRADE_DIAMOND_FROM := 50
 
 const MAX_FLOOR := 100
 const NEW_GAME_GOLD := 60

@@ -304,6 +304,45 @@ static func candidate(idx: int) -> Hero:
 	return c
 
 
+## The assembly line's golem: built rather than hired -- no roster seat, no
+## fee, and gone when you leave the floor. Sturdy and slow: a wall you can put
+## in front of yourself.
+static func grant_golem(floor_num: int) -> bool:
+	if Game.party.size() >= MAX_COMPANIONS + 1:
+		Game.msg("The frame stands up, looks at your crowd, and sits back down.")
+		return false
+	var c := candidate(0)
+	c.name = "Assembly Golem"
+	c.roster_idx = -1
+	c.temporary = true
+	c.known_spells = []
+	c.spell_cd = []
+	c.ranged_type = C.Ranged.NONE
+	c.aether = 0
+	c.aether_max = 0
+	c.level = maxi(floor_num, 1)
+	c.maxhp = 40 + floor_num * 12
+	c.hp = c.maxhp
+	c.base_atk = 8 + floor_num * 2
+	c.base_def = 10 + floor_num * 3
+	c.weapon_bonus = 0
+	c.armor_bonus = 0
+	c.personality = BOLD
+	c.archetype = 0
+	c.look = 4 * 2       # the artificer's frame
+	c.x = Game.hero.x
+	c.y = Game.hero.y
+	for d in C.DIRS8 + [Vector2i(2, 0), Vector2i(-2, 0), Vector2i(0, 2), Vector2i(0, -2)]:
+		var p: Vector2i = Game.hero.pos() + d
+		if Game.map.walkable_monster(p.x, p.y) and not Game.map.monster_at(p.x, p.y) and not body_at(p.x, p.y):
+			c.x = p.x
+			c.y = p.y
+			break
+	Game.party.append(c)
+	Game.good("The frame shudders, finds its feet, and falls in beside you.")
+	return true
+
+
 ## The live party member for roster seat `idx`, if they are out with you.
 static func by_roster(idx: int) -> Hero:
 	for h in Game.party:
@@ -658,7 +697,7 @@ static func _free(c: Hero, x: int, y: int) -> bool:
 	if not m.walkable_monster(x, y):
 		return false
 	# The stairs are the player's decision.
-	if m.t(x, y) in [C.Tile.STAIRS_DOWN, C.Tile.STAIRS_UP, C.Tile.PORTAL, C.Tile.LEVER]:
+	if m.t(x, y) in [C.Tile.STAIRS_DOWN, C.Tile.STAIRS_UP, C.Tile.PORTAL, C.Tile.LEVER, C.Tile.CURRENT, C.Tile.BELT]:
 		return false
 	if Game.hero.x == x and Game.hero.y == y:
 		return false
@@ -898,6 +937,8 @@ static func _cast(c: Hero, target: Monster) -> bool:
 		return false
 	var m := Game.map
 	var r := reach(c)
+	if not Districts.allows(c.x, c.y, C.Act.ARCANE):
+		return false
 	var can := target != null and (target.x - c.x) * (target.x - c.x) + (target.y - c.y) * (target.y - c.y) <= r * r \
 		and m.line_of_sight(c.x, c.y, target.x, target.y)
 	var slot := pick_spell(c, target, can)
@@ -949,6 +990,8 @@ static func _cast(c: Hero, target: Monster) -> bool:
 static func _fire(c: Hero, target: Monster) -> bool:
 	if c.ranged_type == C.Ranged.NONE or target == null or c.ranged_cooldown > 0:
 		return false
+	if not Districts.allows(c.x, c.y, C.Act.RANGED):
+		return false
 	var r := reach(c)
 	if (target.x - c.x) * (target.x - c.x) + (target.y - c.y) * (target.y - c.y) > r * r:
 		return false
@@ -976,6 +1019,8 @@ static func _fire(c: Hero, target: Monster) -> bool:
 ## A hire with nothing to shoot can still throw something at range, every
 ## other turn; anybody carrying a weapon or a spellbook reaches through that.
 static func _strike(c: Hero, mo: Monster) -> bool:
+	if not Districts.allows(c.x, c.y, C.Act.MELEE):
+		return false
 	var at_range := (mo.x - c.x) * (mo.x - c.x) + (mo.y - c.y) * (mo.y - c.y) > 2
 	if at_range:
 		if _has_kit(c) or c.shot_cd > 0:
@@ -985,7 +1030,7 @@ static func _strike(c: Hero, mo: Monster) -> bool:
 	Game.emit_fx({"type": "attack", "who": c, "target": mo})
 	if at_range:
 		Game.emit_fx({"type": "shot", "from": c.pos(), "to": mo.pos(), "color": _shot_color(c)})
-	var dmg := Rules.damage_after_defence(c.eff_atk(), mo.def, rnd(4) - 1)
+	var dmg := Rules.damage_after_defence(Districts.eff_atk(c), mo.def, rnd(4) - 1)
 	var crit := c.effective_stat(C.Acc.CRIT)
 	if crit > 0 and rnd(100) < crit:
 		dmg *= 2

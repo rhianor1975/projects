@@ -33,6 +33,11 @@ var gold_rush := false
 var turns_on_floor := 0
 var infest_target := 0
 var spawn_density := 1
+# what the floor's districts remember between turns: the arena's wave, the
+# barrow's, the next lightning strike -- src/common.h's Map fields
+var dstate := {"arena_wave": 0, "arena_district": -1, "arena_paid": false,
+	"gauntlet_wave": 0, "gauntlet_district": -1, "gauntlet_paid": false,
+	"storm_x": -1, "storm_y": -1, "storm_countdown": 0, "storm_is_vent": false}
 
 
 func setup(width: int, height: int, fill: int) -> void:
@@ -73,7 +78,8 @@ static func blocks_walk(tt: int) -> bool:
 	return tt == C.Tile.WALL or tt == C.Tile.WATER or tt == C.Tile.LOCKED_DOOR \
 		or tt == C.Tile.SEALED_DOOR or tt == C.Tile.THICKET or tt == C.Tile.CRYSTAL \
 		or tt == C.Tile.ROOF or tt == C.Tile.HOUSE_WALL or tt == C.Tile.DOOR \
-		or tt == C.Tile.FOUNTAIN or tt == C.Tile.PLANTER or tt == C.Tile.QUEST_BOARD
+		or tt == C.Tile.FOUNTAIN or tt == C.Tile.PLANTER or tt == C.Tile.QUEST_BOARD \
+		or tt == C.Tile.ROD or tt == C.Tile.VENT or tt == C.Tile.ORE
 
 
 func walkable_player(x: int, y: int) -> bool:
@@ -86,11 +92,17 @@ func walkable_monster(x: int, y: int) -> bool:
 	var tt := tiles[y * w + x]
 	if blocks_walk(tt):
 		return false
-	return tt != C.Tile.LAVA and tt != C.Tile.MIASMA and tt != C.Tile.SNARE
+	# nothing else walks into a snare or down a hole: those are your decisions
+	return tt != C.Tile.LAVA and tt != C.Tile.MIASMA and tt != C.Tile.SNARE and tt != C.Tile.PIT
 
 
 func blocks_sight(tt: int) -> bool:
 	return tt == C.Tile.WALL or tt == C.Tile.THICKET or tt == C.Tile.ROOF or tt == C.Tile.HOUSE_WALL
+
+
+## Which district (by index into `districts`) covers (x,y), or -1.
+func district_index(x: int, y: int) -> int:
+	return district_id[y * w + x] if inb(x, y) else -1
 
 
 func district_at(x: int, y: int) -> int:
@@ -289,7 +301,7 @@ func to_dict() -> Dictionary:
 		"portal_a": [portal_a.x, portal_a.y], "portal_b": [portal_b.x, portal_b.y],
 		"haven": [haven.position.x, haven.position.y, haven.size.x, haven.size.y],
 		"event_name": event_name, "event_desc": event_desc, "overrun": overrun, "gold_rush": gold_rush,
-		"turns_on_floor": turns_on_floor, "infest_target": infest_target,
+		"turns_on_floor": turns_on_floor, "infest_target": infest_target, "dstate": dstate,
 	}
 
 
@@ -339,6 +351,9 @@ static func from_dict(d: Dictionary) -> GameMap:
 	m.portal_a = _v(d.portal_a)
 	m.portal_b = _v(d.portal_b)
 	m.haven = Rect2i(int(d.haven[0]), int(d.haven[1]), int(d.haven[2]), int(d.haven[3]))
+	for k in d.get("dstate", {}):
+		var v = d.dstate[k]
+		m.dstate[k] = v if v is bool else int(v)
 	m.event_name = d.event_name
 	m.event_desc = d.event_desc
 	m.overrun = d.overrun

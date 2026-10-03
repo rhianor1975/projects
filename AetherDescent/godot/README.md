@@ -47,6 +47,7 @@ Saves, the Inn snapshot and high scores live in Godot's user folder
 | Character sheet | `c` | |
 | Whole-floor map | `Tab` or `M` | Back |
 | Recall charm | `r` | |
+| Work what is beside you | `g` (any key stops) | |
 | Take over the next of your party | `p` | stick click |
 | Menu (save & quit) | `Esc` | Start / B |
 | Menus | arrows, `Z`/`Enter`, `X`/`Esc`, Left/Right for tabs | D-pad, A, B |
@@ -65,8 +66,23 @@ the plaza take you down to any floor you have already reached.
   chromatic abyss, carnivorous garden, quicksand), with their rules: the
   mycelium hears you walk, the hive and the quiet quarter wake together, the
   mire cuts your sight, crystals ricochet spells and shot, blood pools heal
-  monsters, the prisms change your stance, snares hold you; the camp; vaults
-  with keys and levers; portals; floor events; gold-rush and overrun floors.
+  monsters, the prisms change your stance, snares hold you; and 14 more: the
+  storm-cage and the vent field (telegraphed strikes that kill whatever is
+  beside the rod), the arena (ten waves behind a shut gate), the aqueduct and
+  the assembly line (channels and belts that carry you; three keys at the
+  console build you a golem), the watch (start nothing and take the
+  strongbox), the barrow (your own lost runs, standing up again), the eye
+  (one safe quarter, and it moves), the mirror (a copy of you), the stone
+  wood (ambushes), the workings (pits that drop you a floor, ore in the
+  galleries), the boneyard (golem cores), the proving ground (blades only,
+  the arts only, or no weapons -- a writ if you play by it) and the chapel
+  (they notice you only up close); the camp; vaults with keys and levers;
+  portals; floor events; gold-rush and overrun floors.
+- **Work and materials** — `g` works what is beside you for several turns,
+  and anything that hurts you ruins it: ore veins, rods, vents, wrecks in old
+  quarters and golem cores in boneyards. Scrap, platinum and diamond come up
+  by depth; the smith wants platinum past +20 and diamond past +50, and the
+  Junkyard buys whatever you would rather sell.
 - **Monsters** — the curated rosters and the generated variants, escalation,
   swarm scaling, elites every tenth floor, the four biome bosses and the
   Warden on floor 100; line-of-sight aggro, wandering, chasing; poison, stun
@@ -108,11 +124,8 @@ the plaza take you down to any floor you have already reached.
 
 ## Not ported yet
 
-The remaining 14 district kinds (storm
-cage, colosseum, aqueduct, assembly line, watch, gauntlet, eye, mirror,
-petrified forest, shaft, boneyard, proving ground, chapel, geothermal); ore
-and the material-gated upgrade rungs past +20; dynamic difficulty and biome
-bands; and the Well (1400×800) world size. Each of these is self-contained
+Dynamic difficulty and the biome bands' quiet help for a run that is going
+badly; and the Well (1400×800) world size. Each of these is self-contained
 in the C source and slots into the same structure.
 
 ## Art: 16-bit or Classic
@@ -143,6 +156,7 @@ scripts/core/   the rules: no nodes, no frames -- testable headless
   party.gd        the Tavern and hired heroes                   (companions.c)
   quests.gd       the bounty board                              (quests.c)
   kitchen.gd      the Kitchen, the lizard track, the Bazaar      (kitchen.c)
+  districts.gd    the later districts' rules, and work (`g`)     (combat.c, main.c)
   autoexplore.gd  `x`
   town.gd         the plaza
   sfx.gd          synthesised sound effects (autoload Sfx)

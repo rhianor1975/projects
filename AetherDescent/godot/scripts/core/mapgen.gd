@@ -126,7 +126,11 @@ static func nearest_room(rooms: Array, from: int, nth: int) -> int:
 
 # ---- wild districts --------------------------------------------------------------
 static func pick_district_kind(biome: int) -> int:
-	var wts: Array = C.DIST_WEIGHT[biome]
+	var wts: Array = C.DIST_WEIGHT[biome].duplicate()
+	# a barrow with nobody in it is a room with piers in it: until a run has
+	# been lost, the kind does not come up
+	if Game.fallen().size() < C.GAUNTLET_MIN_GHOSTS:
+		wts[C.District.GAUNTLET] = 0
 	var total := 0
 	for v in wts:
 		total += v
@@ -136,6 +140,32 @@ static func pick_district_kind(biome: int) -> int:
 			return i
 		roll -= wts[i]
 	return C.District.RUINS
+
+
+static func _inb(m: GameMap, x: int, y: int) -> bool:
+	return x >= 1 and y >= 1 and x < m.w - 1 and y < m.h - 1
+
+
+## Plant `tt` on `count` random floor squares inside the district, away from its edge.
+static func _plant(m: GameMap, rm: Rect2i, count: int, tt: int) -> void:
+	for i in count:
+		var x := rm.position.x + 2 + r(maxi(1, rm.size.x - 4))
+		var y := rm.position.y + 2 + r(maxi(1, rm.size.y - 4))
+		if _inb(m, x, y) and m.t(x, y) == C.Tile.FLOOR:
+			m.set_t(x, y, tt)
+
+
+## A walled rectangle with a floor inside -- the barrow and the proving ground.
+static func _walled(m: GameMap, rm: Rect2i, rim_pct: int) -> void:
+	for y in range(rm.position.y, rm.end.y):
+		for x in range(rm.position.x, rm.end.x):
+			if not _inb(m, x, y):
+				continue
+			var rim := x == rm.position.x or x == rm.end.x - 1 or y == rm.position.y or y == rm.end.y - 1
+			if not rim:
+				m.set_t(x, y, C.Tile.FLOOR)
+			elif r(100) < rim_pct:
+				m.set_t(x, y, C.Tile.WALL)
 
 
 static func fill_ragged(m: GameMap, rm: Rect2i, tt: int) -> void:
@@ -296,6 +326,137 @@ static func carve_district(m: GameMap, rm: Rect2i, k: int) -> void:
 			fill_ragged(m, rm, C.Tile.FLOOR)
 			scatter(m, rm, area / 22, 2, 3, C.Tile.FLOOR, C.Tile.SNARE)
 			scatter(m, rm, area / 90, 1, 2, C.Tile.FLOOR, C.Tile.DECOR)
+		C.District.STORM, C.District.GEOTHERMAL:
+			# open ground: the decision is where you stand relative to the rods,
+			# and you cannot make it if you cannot see them
+			fill_ragged(m, rm, C.Tile.FLOOR)
+			_plant(m, rm, 6 + area / 60, C.Tile.ROD if k == C.District.STORM else C.Tile.VENT)
+			scatter(m, rm, area / 120, 1, 2, C.Tile.FLOOR, C.Tile.DECOR)
+		C.District.CHAPEL:
+			fill_ragged(m, rm, C.Tile.FLOOR)
+			for y in range(rm.position.y + 2, rm.end.y - 2, 3):
+				for x in range(rm.position.x + 3, rm.end.x - 3, 4):
+					if _inb(m, x, y) and m.t(x, y) == C.Tile.FLOOR:
+						m.set_t(x, y, C.Tile.WALL)
+			scatter(m, rm, area / 150, 1, 2, C.Tile.FLOOR, C.Tile.DECOR)
+		C.District.ARENA:
+			# an amphitheatre: a ring of seating round open sand, one gate
+			var c := center(rm)
+			var rx := maxi(4, rm.size.x / 2 - 1)
+			var ry := maxi(3, rm.size.y / 2 - 1)
+			for y in range(rm.position.y, rm.end.y):
+				for x in range(rm.position.x, rm.end.x):
+					if not _inb(m, x, y):
+						continue
+					var e := (x - c.x) * (x - c.x) * ry * ry + (y - c.y) * (y - c.y) * rx * rx
+					var lim := rx * rx * ry * ry
+					if e <= lim:
+						m.set_t(x, y, C.Tile.FLOOR)
+					elif e <= lim * 9 / 5:
+						m.set_t(x, y, C.Tile.WALL)
+			for x in range(c.x, rm.end.x):
+				if _inb(m, x, c.y):
+					m.set_t(x, c.y, C.Tile.FLOOR)
+		C.District.AQUEDUCT:
+			fill_ragged(m, rm, C.Tile.FLOOR)
+			var horizontal := rm.size.x >= rm.size.y
+			for ch in 2 + r(3):
+				var wide := 1 + int(r(100) < 40)
+				if horizontal:
+					var y := rm.position.y + 2 + r(maxi(1, rm.size.y - 4))
+					for k2 in wide:
+						for x in range(rm.position.x + 1, rm.end.x - 1):
+							if _inb(m, x, y + k2):
+								m.set_t(x, y + k2, C.Tile.CURRENT)
+				else:
+					var x := rm.position.x + 2 + r(maxi(1, rm.size.x - 4))
+					for k2 in wide:
+						for y in range(rm.position.y + 1, rm.end.y - 1):
+							if _inb(m, x + k2, y):
+								m.set_t(x + k2, y, C.Tile.CURRENT)
+			scatter(m, rm, area / 90, 1, 2, C.Tile.FLOOR, C.Tile.DECOR)
+		C.District.ASSEMBLY:
+			fill_ragged(m, rm, C.Tile.FLOOR)
+			for y in range(rm.position.y + 2, rm.end.y - 2, 3):
+				for x in range(rm.position.x + 1, rm.end.x - 1):
+					if _inb(m, x, y) and m.t(x, y) == C.Tile.FLOOR:
+						m.set_t(x, y, C.Tile.BELT)
+			scatter(m, rm, area / 80, 1, 2, C.Tile.FLOOR, C.Tile.DECOR)
+		C.District.WATCH:
+			# blocks in rows with lanes between: always something to put
+			# between you and a warden
+			fill_ragged(m, rm, C.Tile.FLOOR)
+			for by in range(rm.position.y + 2, rm.end.y - 3, 4):
+				for bx in range(rm.position.x + 2, rm.end.x - 3, 5):
+					if r(100) < 22:
+						continue
+					var bw := 2 + r(2)
+					var bh := 1 + r(2)
+					for y in range(by, by + bh):
+						for x in range(bx, bx + bw):
+							if _inb(m, x, y):
+								m.set_t(x, y, C.Tile.WALL)
+			scatter(m, rm, area / 70, 1, 2, C.Tile.FLOOR, C.Tile.DECOR)
+		C.District.GAUNTLET:
+			# the barrow: a walled hall with piers down the long sides, one door
+			_walled(m, rm, 100)
+			for x in range(rm.position.x + 3, rm.end.x - 3, 4):
+				for y in [rm.position.y + 2, rm.end.y - 3]:
+					if _inb(m, x, y):
+						m.set_t(x, y, C.Tile.WALL)
+			var gy := rm.position.y + rm.size.y / 2
+			if _inb(m, rm.end.x - 1, gy):
+				m.set_t(rm.end.x - 1, gy, C.Tile.FLOOR)
+		C.District.EYE:
+			# open ground marked into quarters by two lines of rubble, so the
+			# shelter has visible edges
+			fill_ragged(m, rm, C.Tile.FLOOR)
+			var mc := center(rm)
+			for x in range(rm.position.x + 1, rm.end.x - 1):
+				if _inb(m, x, mc.y) and r(100) < 62:
+					m.set_t(x, mc.y, C.Tile.DECOR)
+			for y in range(rm.position.y + 1, rm.end.y - 1):
+				if _inb(m, mc.x, y) and r(100) < 62:
+					m.set_t(mc.x, y, C.Tile.DECOR)
+		C.District.MIRROR:
+			fill_ragged(m, rm, C.Tile.FLOOR)
+			scatter(m, rm, area / 110, 1, 2, C.Tile.FLOOR, C.Tile.CRYSTAL)
+			scatter(m, rm, area / 130, 1, 2, C.Tile.FLOOR, C.Tile.DECOR)
+		C.District.PETRIFIED:
+			# stone trees in loose stands: all blind corners, no corridors
+			fill_ragged(m, rm, C.Tile.FLOOR)
+			for i in area / 30:
+				var cx := rm.position.x + 1 + r(rm.size.x - 2)
+				var cy := rm.position.y + 1 + r(rm.size.y - 2)
+				for n in 1 + r(3):
+					var x := cx + r(3) - 1
+					var y := cy + r(3) - 1
+					if _inb(m, x, y) and m.t(x, y) == C.Tile.FLOOR:
+						m.set_t(x, y, C.Tile.WALL)
+			scatter(m, rm, area / 100, 1, 2, C.Tile.FLOOR, C.Tile.DECOR)
+		C.District.SHAFT:
+			# a worked-out mine: galleries, spoil, and holes that go somewhere
+			fill_ragged(m, rm, C.Tile.FLOOR)
+			for y in range(rm.position.y + 2, rm.end.y - 2, 3):
+				for x in range(rm.position.x + 2, rm.end.x - 2, 4):
+					if _inb(m, x, y) and r(100) < 45:
+						m.set_t(x, y, C.Tile.WALL)
+			_plant(m, rm, 1 + area / 260, C.Tile.PIT)
+			scatter(m, rm, area / 90, 1, 2, C.Tile.FLOOR, C.Tile.ORE)
+			scatter(m, rm, area / 110, 1, 2, C.Tile.FLOOR, C.Tile.DECOR)
+		C.District.BONEYARD:
+			# half-buried machines: the rubble is the salvage
+			fill_ragged(m, rm, C.Tile.FLOOR)
+			scatter(m, rm, area / 24, 1, 2, C.Tile.FLOOR, C.Tile.DECOR)
+			for i in area / 70:
+				var x := rm.position.x + 1 + r(rm.size.x - 2)
+				var y := rm.position.y + 1 + r(rm.size.y - 2)
+				if _inb(m, x, y) and m.t(x, y) == C.Tile.FLOOR:
+					m.set_t(x, y, C.Tile.WALL)
+		C.District.PROVING:
+			# a swept floor with a fence round it, not a seal: you can always walk out
+			_walled(m, rm, 62)
+			scatter(m, rm, area / 120, 1, 2, C.Tile.FLOOR, C.Tile.DECOR)
 
 
 static func district_anchor(m: GameMap, rm: Rect2i) -> Vector2i:
@@ -420,9 +581,22 @@ static func generate(floor_num: int, size: Vector2i, run_seed: int, difficulty: 
 					for x in range(d.position.x, d.end.x):
 						m.set_t(x, y, C.Tile.WALL)
 				continue
-			district_relink(m, d, a)
+			# the arena and the barrow are meant to have one way in
+			if not k in [C.District.ARENA, C.District.GAUNTLET]:
+				district_relink(m, d, a)
 			var di := m.districts.size()
-			m.districts.append({"x": d.position.x, "y": d.position.y, "w": d.size.x, "h": d.size.y, "kind": k, "state": 0})
+			var rec := {"x": d.position.x, "y": d.position.y, "w": d.size.x, "h": d.size.y, "kind": k, "state": 0,
+				"fdx": 0, "fdy": 0, "kills": 0}
+			if k == C.District.AQUEDUCT:
+				# one way for the whole district: a channel that changed its mind would be noise
+				var dir := 1 if r(2) else -1
+				if d.size.x >= d.size.y:
+					rec.fdx = dir
+				else:
+					rec.fdy = dir
+			if k == C.District.PROVING:
+				rec.state = r(3)      # the rule: a property of the place, said on arrival
+			m.districts.append(rec)
 			for y in range(d.position.y, d.end.y):
 				for x in range(d.position.x, d.end.x):
 					m.district_id[y * m.w + x] = di
@@ -824,6 +998,29 @@ static func _vault(m: GameMap, rooms: Array, floor_num: int, sealed: bool) -> vo
 
 
 static func _place_features(m: GameMap, rooms: Array, floor_num: int) -> void:
+	# the districts' own fittings, inside them where they belong
+	for d in m.districts:
+		var rc := Rect2i(d.x, d.y, d.w, d.h)
+		if d.kind == C.District.ASSEMBLY:
+			_place_in(m, rc, C.Feature.CONSOLE)
+		elif d.kind == C.District.WATCH:
+			_place_in(m, rc, C.Feature.STRONGBOX)
+	# ore veins, in walls you can reach: every depth has to be able to supply
+	# its own tier of material, so these are not left to a district
+	for i in 6 + floor_num / 6:
+		for tries in 30:
+			var x := 1 + r(m.w - 2)
+			var y := 1 + r(m.h - 2)
+			if m.t(x, y) != C.Tile.WALL or m.district_id[y * m.w + x] >= 0:
+				continue
+			var reach := false
+			for dd in C.DIRS8:
+				if m.walkable_player(x + dd.x, y + dd.y):
+					reach = true
+					break
+			if reach:
+				m.set_t(x, y, C.Tile.ORE)
+				break
 	if m.haven.size.x > 0:
 		_place_in(m, m.haven, C.Feature.FOUNTAIN)
 		if r(100) < 75:

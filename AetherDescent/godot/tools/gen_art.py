@@ -32,6 +32,8 @@ TILE_KINDS = [
     "lava0", "lava1", "stairs_down", "stairs_up", "bridge", "miasma", "portal", "locked_door",
     "sealed_door", "lever", "crystal", "bloodpool", "prism_red", "prism_blue", "prism_green",
     "snare", "ore", "rubble",
+    # the later wild districts: appended, so earlier indices never move
+    "rod", "current0", "current1", "belt0", "belt1", "pit", "vent",
 ]
 
 
@@ -169,6 +171,56 @@ def dungeon_tile(biome, kind):
             st = ramp(TL.BIOMES[biome][2])
             for (x, y, r) in ((5, 10, 2.4), (9, 12, 2.0), (11, 7, 1.6), (6, 5, 1.2)):
                 c.ellipsoid(x, y, r, r * 0.8, st)
+        return _overlay_on(TL.floor(biome, 3), f)
+    if kind == "rod":
+        # the storm-cage: an iron spire on a footing, its tip catching the arc
+        def f(c):
+            c.ellipsoid(8, 14, 3.6, 1.6, ramp((96, 96, 112)))
+            c.limb(8, 14, 8, 2.5, 1.3, 0.5, ramp((150, 160, 184)), gloss=1.4)
+            c.ellipsoid(8, 2.6, 1.3, 1.3, ramp((150, 220, 255)), gloss=1.8)
+        return _overlay_on(TL.floor(biome, 2), f)
+    if kind.startswith("current"):
+        # a cut channel with the water moving: brighter streaks over the pool
+        img = TL.water(int(kind[-1]))
+        px = img.load()
+        off = int(kind[-1]) * 6
+        for row in (5, 13, 21, 28):
+            for x in range(T):
+                if (x + off + row) % 12 < 6:
+                    r, g, b, a2 = px[x, row]
+                    px[x, row] = (min(255, r + 70), min(255, g + 70), min(255, b + 60), 255)
+        stone = ramp(TL.BIOMES[biome][2], n=6)
+        for x in range(T):
+            px[x, 0] = stone[1] + (255,)
+            px[x, T - 1] = stone[1] + (255,)
+        return img
+    if kind.startswith("belt"):
+        # an assembly belt: dark plates between roller ridges, offset per frame
+        img = TL.floor(biome, 0)
+        px = img.load()
+        plate = ramp((92, 88, 96), n=6)
+        off = int(kind[-1]) * 4
+        for y in range(4, T - 4):
+            for x in range(T):
+                k = 2
+                if (x + off) % 8 == 0:
+                    k = 4
+                elif (x + off) % 8 == 1:
+                    k = 1
+                if y in (4, T - 5):
+                    k = 0
+                px[x, y] = plate[k] + (255,)
+        return img
+    if kind == "pit":
+        def f(c):
+            c.ellipsoid(8, 9, 6.6, 5.0, ramp((70, 60, 56)))
+            c.ellipsoid(8, 9.4, 5.2, 3.8, ramp((14, 10, 18)), bulge=0.2)
+        return _overlay_on(TL.floor(biome, 1), f)
+    if kind == "vent":
+        def f(c):
+            c.ellipsoid(8, 11, 5.6, 3.6, ramp(TL.BIOMES[biome][2]))
+            c.ellipsoid(8, 9.6, 2.6, 1.6, ramp((255, 150, 48)), gloss=1.6)
+            c.ellipsoid(8, 9.2, 1.2, 0.8, ramp((255, 236, 160)), gloss=1.8)
         return _overlay_on(TL.floor(biome, 3), f)
     raise KeyError(kind)
 

@@ -2,7 +2,7 @@
 class_name ArtLayout
 
 const TILE := 32
-const TILE_KINDS := ["floor0", "floor1", "floor2", "floor3", "grown0", "grown1", "grass0", "grass1", "flowers", "thicket0", "thicket1", "face0", "face1", "face2", "top0", "top1", "water0", "water1", "lava0", "lava1", "stairs_down", "stairs_up", "bridge", "miasma", "portal", "locked_door", "sealed_door", "lever", "crystal", "bloodpool", "prism_red", "prism_blue", "prism_green", "snare", "ore", "rubble"]
+const TILE_KINDS := ["floor0", "floor1", "floor2", "floor3", "grown0", "grown1", "grass0", "grass1", "flowers", "thicket0", "thicket1", "face0", "face1", "face2", "top0", "top1", "water0", "water1", "lava0", "lava1", "stairs_down", "stairs_up", "bridge", "miasma", "portal", "locked_door", "sealed_door", "lever", "crystal", "bloodpool", "prism_red", "prism_blue", "prism_green", "snare", "ore", "rubble", "rod", "current0", "current1", "belt0", "belt1", "pit", "vent"]
 const TOWN_KINDS := ["cobble0", "cobble1", "cobble2", "cobble3", "roof_red", "roof_teal", "roof_slate", "house_wall", "door_general", "door_armory", "door_apothecary", "door_arcanist", "door_inn", "door_tavern", "door_junkyard", "door_gladiator", "door_bank", "door_races", "door_kitchen", "door_blackmarket", "door_oracle", "door_altar", "door_bazaar", "fountain", "quest_board", "grass", "flowers", "temple", "planter"]
 const TOWN_ROW := 5
 const HERO_CELL := Vector2i(48, 60)

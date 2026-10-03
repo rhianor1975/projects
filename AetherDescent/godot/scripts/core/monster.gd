@@ -27,6 +27,8 @@ var jinx_turns := 0
 var stun_turns := 0
 var slow_turns := 0
 var facing_left := true
+var apparition := 0      # 1: a barrow ghost, 2: your reflection
+var look := -1           # a person, not a beast: drawn with this hero look (barrow ghosts, the mirror)
 
 # ---- the pool ------------------------------------------------------------------
 const GEN_PER_TIER := 148

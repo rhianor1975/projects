@@ -28,8 +28,8 @@ var turns := 0
 var floor_entries := 0
 var escalation_pct := 0
 var steps := 0
-var junk_count := 0
-var junk_value := 0
+var mats: Array = [0, 0, 0]         # scrap, platinum, diamond: C.Mat
+var mat_value: Array = [0, 0, 0]    # what the Junkyard would pay for them
 var recall_countdown := 0
 var rested := false            # has taken a room at the Inn: a place to wake
 var quest := {}
@@ -135,8 +135,8 @@ func new_run(class_id: int, name: String, diff: int, wsize: int, seed_ := 0) -> 
 	turns = 0
 	floor_entries = 0
 	steps = 0
-	junk_count = 0
-	junk_value = 0
+	mats = [0, 0, 0]
+	mat_value = [0, 0, 0]
 	recall_countdown = 0
 	rested = false
 	quest = {}
@@ -218,6 +218,8 @@ func enter_floor(n: int, arrive_down := true) -> void:
 		deepest_floor = n
 	floor_entries += 1
 	bazaar_day += 1
+	# built things stay where they were built
+	party = party.filter(func(h): return not h.temporary)
 	if arrive_down:
 		# going down is what resets the town's per-visit counters: a second
 		# service night or three more generous races are earned, not clicked for
@@ -348,7 +350,7 @@ func snapshot() -> Dictionary:
 		"run_seed": run_seed, "depth": depth, "deepest_floor": deepest_floor, "gold": gold,
 		"gold_mult": gold_mult, "gold_boon_until": gold_boon_until, "inventory": inventory,
 		"keys": keys, "turns": turns, "floor_entries": floor_entries, "steps": steps,
-		"junk_count": junk_count, "junk_value": junk_value, "rested": rested, "quest": quest,
+		"mats": mats, "mat_value": mat_value, "rested": rested, "quest": quest,
 		"oracle_reading": oracle_reading, "writs": writs,
 		"map": map.to_dict() if depth > 0 else {},
 	}
@@ -390,8 +392,8 @@ func restore(d: Dictionary) -> void:
 	turns = int(d.turns)
 	floor_entries = int(d.floor_entries)
 	steps = int(d.steps)
-	junk_count = int(d.junk_count)
-	junk_value = int(d.junk_value)
+	mats = Array(d.get("mats", [int(d.get("junk_count", 0)), 0, 0])).map(func(v): return int(v))
+	mat_value = Array(d.get("mat_value", [int(d.get("junk_value", 0)), 0, 0])).map(func(v): return int(v))
 	rested = d.rested
 	quest = d.quest
 	oracle_reading = d.get("oracle_reading", "")
@@ -478,6 +480,33 @@ func load_inn_snapshot() -> bool:
 		return false
 	restore(d)
 	return true
+
+
+# ---- the fallen ------------------------------------------------------------------
+# Runs this save folder has lost, newest first. The barrow raises them.
+var _fallen: Array = []
+var _fallen_read := false
+
+
+func fallen() -> Array:
+	if not _fallen_read:
+		_fallen_read = true
+		if persist:
+			_fallen = Array(_read(SAVE_DIR + "fallen.json").get("runs", []))
+	return _fallen
+
+
+func record_fallen() -> void:
+	var h := hero
+	var rec := {"name": h.name, "class_id": h.class_id, "level": h.level, "look": h.look,
+		"floor": deepest_floor if deepest_floor > 0 else depth, "gold": gold,
+		"maxhp": h.maxhp, "atk": h.eff_atk(), "def": h.eff_def()}
+	var list := fallen()
+	list.push_front(rec)
+	while list.size() > C.FALLEN_MAX:
+		list.pop_back()
+	if persist:
+		_write(SAVE_DIR + "fallen.json", {"runs": list})
 
 
 func record_highscore() -> int:

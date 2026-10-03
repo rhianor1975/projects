@@ -112,6 +112,11 @@ var alive := true
 # are what a hire carries on top. The character has roster_idx -1 and none of it.
 var is_hire := false
 var roster_idx := -1
+var temporary := false         # built, not hired (the assembly golem): gone when you leave the floor
+var work_kind := 0             # C.Work: a multi-turn job in progress
+var work_left := 0
+var work_x := -1
+var work_y := -1
 var is_client := false         # walking with you on an escort bounty
 var personality := 1           # Party.BOLD / STEADY / CAUTIOUS
 var tier := 0                  # which price step was paid
