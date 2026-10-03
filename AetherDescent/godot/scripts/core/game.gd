@@ -558,5 +558,25 @@ func record_highscore() -> int:
 	if deepest_floor > best:
 		best = deepest_floor
 		hs.best = best
-		_write(SAVE_DIR + "highscores.json", hs)
+	# and the deepest each class has been taken
+	var by_class: Dictionary = hs.get("classes", {})
+	var key := str(owner().class_id)
+	if deepest_floor > int(by_class.get(key, 0)):
+		by_class[key] = deepest_floor
+	hs.classes = by_class
+	_write(SAVE_DIR + "highscores.json", hs)
 	return best
+
+
+func records() -> Dictionary:
+	return _read(SAVE_DIR + "highscores.json") if persist else {}
+
+
+static func title_for_floor(f: int) -> String:
+	if f >= 100: return "Conqueror of the Deep Well"
+	if f >= 85: return "Warden's Equal"
+	if f >= 60: return "Well-Touched"
+	if f >= 35: return "Depth-Breaker"
+	if f >= 15: return "Delver"
+	if f >= 5: return "Wreck-Trail Survivor"
+	return "Wanderer"

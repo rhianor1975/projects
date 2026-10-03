@@ -432,5 +432,25 @@ func _dda(game) -> int:
 	game.enter_floor(90)
 	if Dda.sight(game.hero, 8) != 5:
 		print("FAIL the Abyss took no sight"); fails += 1
+	# hearing: what is in range and out of sight is marked, nothing else
+	game.enter_floor(4)
+	game.hero.hearing_radius = 6
+	var due := 0
+	for k in 40:
+		Rules.refresh_vision()
+		due = 0
+		for mo in game.map.monsters:
+			if mo.alive and not game.map.is_visible(mo.x, mo.y) \
+					and (mo.x - game.hero.x) * (mo.x - game.hero.x) + (mo.y - game.hero.y) * (mo.y - game.hero.y) <= 36:
+				due += 1
+		if due > 0:
+			break
+		AutoExplore.step()
+	if due > 0 and game.map.heard.size() != mini(due, 64):
+		print("FAIL heard %d of %d" % [game.map.heard.size(), due]); fails += 1
+	for hp in game.map.heard:
+		if game.map.is_visible(hp.x, hp.y):
+			print("FAIL a seen monster was 'heard'"); fails += 1
+			break
 	print("dda checked")
 	return fails

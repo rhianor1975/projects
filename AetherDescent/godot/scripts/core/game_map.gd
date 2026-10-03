@@ -33,6 +33,7 @@ var gold_rush := false
 var turns_on_floor := 0
 var infest_target := 0
 var spawn_density := 1
+var heard: Array = []                     # positions heard but not seen: a mark, not an identity
 # what the floor's districts remember between turns: the arena's wave, the
 # barrow's, the next lightning strike -- src/common.h's Map fields
 var dstate := {"arena_wave": 0, "arena_district": -1, "arena_paid": false,

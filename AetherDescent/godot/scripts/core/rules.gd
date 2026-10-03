@@ -34,6 +34,29 @@ static func refresh_vision() -> void:
 	radius = Dda.sight(h, radius)
 	m.compute_fov(h.x, h.y, radius)
 	Party.reveal()
+	_hear(m)
+
+
+## The other sense: a monster nobody can see, inside somebody's hearing
+## radius, is heard -- through walls, which is the point. It reports a
+## position, not an identity. Standing in the chapel costs you it.
+static func _hear(m: GameMap) -> void:
+	m.heard = []
+	var ears: Array = []
+	for b in Game.party:
+		if Party.is_up(b) and b.hearing_radius > 0 and m.district_at(b.x, b.y) != C.District.CHAPEL:
+			ears.append([b.x, b.y, b.hearing_radius * b.hearing_radius])
+	if ears.is_empty():
+		return
+	for mo in m.monsters:
+		if m.heard.size() >= 64:
+			break
+		if not mo.alive or m.is_visible(mo.x, mo.y):
+			continue
+		for e in ears:
+			if (mo.x - e[0]) * (mo.x - e[0]) + (mo.y - e[1]) * (mo.y - e[1]) <= e[2]:
+				m.heard.append(mo.pos())
+				break
 
 
 # ---- the damage model --------------------------------------------------------------

@@ -359,6 +359,15 @@ func _draw_world() -> void:
 				ci.draw_texture_rect(Gfx.torch, Rect2(x * TS, y * TS - 4, TS, TS), false, light * Color(1, 1, 1, flick))
 				if m.is_visible(x, y):
 					torches.append(Vector2(x * TS + 16, y * TS + 8))
+	# what you hear and cannot see: a ripple, not the monster
+	if Game.depth > 0:
+		for hp in m.heard:
+			if hp.x < x0 or hp.x > x1 or hp.y < y0 or hp.y > y1:
+				continue
+			var c := Vector2(hp.x * TS + 16, hp.y * TS + 16)
+			var k := fmod(t * 1.4 + (hp.x + hp.y) * 0.13, 1.0)
+			ci.draw_arc(c, 4 + k * 10, 0, TAU, 20, Color(1.0, 0.85, 0.55, 0.7 * (1.0 - k)), 2.0)
+			ci.draw_circle(c, 2.0, Color(1.0, 0.85, 0.55, 0.8))
 	# the districts' tells: the rod about to take the bolt, the eye's quiet quarter
 	if Game.depth > 0:
 		var ds: Dictionary = m.dstate
@@ -369,7 +378,7 @@ func _draw_world() -> void:
 			ci.draw_arc(sp, 14 + pulse * 4, 0, TAU, 24, Color(col, 0.8), 2.0)
 			ci.draw_arc(sp, C.STORM_BLAST_RADIUS * TS + 8, 0, TAU, 48, Color(col, 0.25 + pulse * 0.25), 2.0)
 		for d in m.districts:
-			if d.kind != C.District.EYE:
+			if d.kind != C.District.EYE or not m.is_seen(d.x + d.w / 2, d.y + d.h / 2):
 				continue
 			var q := Districts.eye_safe_quarter()
 			var hw: int = d.w / 2

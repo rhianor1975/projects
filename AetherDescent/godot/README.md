@@ -48,6 +48,7 @@ Saves, the Inn snapshot and high scores live in Godot's user folder
 | Whole-floor map | `Tab` or `M` | Back |
 | Recall charm | `r` | |
 | Work what is beside you | `g` (any key stops) | |
+| Records (this run, best by class, the fallen) | `Shift+R` | |
 | Take over the next of your party | `p` | stick click |
 | Menu (save & quit) | `Esc` | Start / B |
 | Menus | arrows, `Z`/`Enter`, `X`/`Esc`, Left/Right for tabs | D-pad, A, B |
@@ -119,6 +120,8 @@ the plaza take you down to any floor you have already reached.
   fights for themselves -- you can even take them over with `p`.
 - **Features** — shrines, fountains, machines, relics and the five gear sets,
   altars, tolls, waygates.
+- **Hearing** — monsters within your Hearing radius show through walls as
+  a ring: a position, not an identity. The chapel takes it away.
 - **Auto-explore**, recall charms, death and waking at the Inn (permanent on
   Hardcore), save and resume, high scores.
 

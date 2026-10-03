@@ -536,7 +536,10 @@ func _game_input(ev: InputEvent) -> void:
 		KEY_C:
 			_open_character()
 		KEY_R:
-			_do(Rules.start_recall)
+			if ev.shift_pressed:
+				_open_records()
+			else:
+				_do(Rules.start_recall)
 		KEY_SLASH, KEY_F1:
 			_open_help()
 		KEY_ESCAPE:
@@ -708,6 +711,42 @@ func _open_character() -> void:
 	m.refresh()
 
 
+## This run, the lifetime best, the deepest each class has been, and the fallen
+## the barrows are raised from.
+func _open_records() -> void:
+	var rec := Game.records()
+	var best := maxi(int(rec.get("best", 0)), Game.deepest_floor)
+	var lines := [
+		"This run: %s, the %s -- floor %d (deepest %d), level %d, %s gold, %d turns." % [Game.owner().name,
+			Game.owner().class_name_str(), Game.depth, Game.deepest_floor, Game.owner().level, Gfx.comma(Game.gold), Game.turns],
+		"%s, %s." % [C.DIFFICULTY_NAMES[Game.difficulty], C.WORLD_NAMES[Game.world]],
+		"Lifetime best: floor %d -- %s." % [best, Game.title_for_floor(best)],
+		"",
+	]
+	var by_class: Dictionary = rec.get("classes", {})
+	var keys := by_class.keys()
+	keys.sort_custom(func(a, b): return int(by_class[a]) > int(by_class[b]))
+	if keys.is_empty():
+		lines.append("Deepest by class: nothing yet. Take one down and come back.")
+	else:
+		var parts: Array = []
+		for k in keys.slice(0, 6):
+			parts.append("%s %d" % [ClassesData.CLASSES[int(k)].name, int(by_class[k])])
+		lines.append("Deepest by class: " + ", ".join(parts))
+	lines.append("")
+	var fallen := Game.fallen()
+	if fallen.is_empty():
+		lines.append("The fallen: nobody yet. The barrows stay shut until somebody is in them.")
+	else:
+		lines.append("The fallen -- and what the barrows are made of:")
+		for fr in fallen.slice(0, 4):
+			lines.append("  %s, level %d, floor %d, %s gold" % [fr.get("name", "?"), int(fr.get("level", 1)),
+				int(fr.get("floor", 1)), Gfx.comma(int(fr.get("gold", 0)))])
+		if fallen.size() > 4:
+			lines.append("  ...and %d more, further back." % (fallen.size() - 4))
+	_show("Records", lines)
+
+
 func _attr_desc(i: int) -> String:
 	var d := {
 		C.Attr.MIGHT: "Raises base attack.", C.Attr.BRAWN: "Raises attack and maximum HP.",
@@ -734,6 +773,7 @@ func _open_help() -> void:
 		"i: pack     c: character sheet     r: recall charm     Esc: menu",
 		"p: take over the next of your party -- hires fight on their own until you do.",
 		"g: work what is beside you -- an ore vein, a rod, a vent, a wreck -- for materials.",
+		"Shift+R: records. Rings in the dark are things you can hear but not see.",
 	])
 
 
