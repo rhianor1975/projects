@@ -122,11 +122,23 @@ the plaza take you down to any floor you have already reached.
 - **Auto-explore**, recall charms, death and waking at the Inn (permanent on
   Hardcore), save and resume, high scores.
 
-## Not ported yet
+## What the run does about how it is going
 
-Dynamic difficulty and the biome bands' quiet help for a run that is going
-badly; and the Well (1400×800) world size. Each of these is self-contained
-in the C source and slots into the same structure.
+Ported from `dda.c` and `bands.c`, and invisible on purpose: a pressure
+reading of how your floors have been going, and five small gifts the
+places give a run that is drowning -- the Roots regenerate you, the Works
+give aether and shot back faster, the Ruins' wards turn blows aside, the
+Wastes' salt sometimes keeps a draught unspent, the Abyss's dark hides you.
+They only ever add. Each band also has a rule it always keeps: the growth
+hides everyone, the Ruins' monsters ward some of your blows, the Wastes'
+ground bites harder, the Abyss takes your sight (Aether-Sense keeps more).
+
+The **guardian angel** (Esc menu) is an assist, off unless you switch it on:
+the dice lean your way when you are in trouble, one killing blow a floor is
+turned aside above floor 50, and a run that is coasting gets leaned on.
+
+Everything in the C game is ported. The Well (1400×800) floors take a few
+seconds to build when you take the stairs.
 
 ## Art: 16-bit or Classic
 
@@ -157,6 +169,7 @@ scripts/core/   the rules: no nodes, no frames -- testable headless
   quests.gd       the bounty board                              (quests.c)
   kitchen.gd      the Kitchen, the lizard track, the Bazaar      (kitchen.c)
   districts.gd    the later districts' rules, and work (`g`)     (combat.c, main.c)
+  dda.gd          pressure, the band gifts, the guardian angel   (dda.c, bands.c)
   autoexplore.gd  `x`
   town.gd         the plaza
   sfx.gd          synthesised sound effects (autoload Sfx)

@@ -110,18 +110,73 @@ static func join(m: GameMap, a: Rect2i, b: Rect2i, width := -1) -> void:
 		h_corridor(m, ca.x, cb.x, cb.y, width)
 
 
+# ---- big floors: room-centre lookups through a coarse grid -------------------------
+const GRID := 48
+const BIG_FLOOR_ROOMS := 800
+static var _grid := {}          # cell -> PackedInt32Array of room indices
+static var _gcs: Array = []     # room centres the grid was built from
+
+
+static func _grid_build(cs: Array) -> void:
+	_grid = {}
+	_gcs = cs
+	for i in cs.size():
+		var c: Vector2i = cs[i]
+		var k := Vector2i(c.x / GRID, c.y / GRID)
+		if not _grid.has(k):
+			_grid[k] = PackedInt32Array()
+		_grid[k].append(i)
+
+
+## The `count` nearest rooms to room `from`, nearest first: rings of cells
+## out from its own until enough are found, then one ring more so a nearer
+## room just over a cell edge is not missed.
+static func _grid_near(from: int, count: int) -> PackedInt32Array:
+	var fc: Vector2i = _gcs[from]
+	var home := Vector2i(fc.x / GRID, fc.y / GRID)
+	var keys := PackedInt64Array()
+	var ring := 0
+	var extra := -1
+	while ring < 64:
+		for gy in range(home.y - ring, home.y + ring + 1):
+			for gx in range(home.x - ring, home.x + ring + 1):
+				if maxi(absi(gx - home.x), absi(gy - home.y)) != ring:
+					continue
+				for i in _grid.get(Vector2i(gx, gy), PackedInt32Array()):
+					if i == from:
+						continue
+					var c: Vector2i = _gcs[i]
+					keys.append(((c.x - fc.x) * (c.x - fc.x) + (c.y - fc.y) * (c.y - fc.y)) * 65536 + i)
+		if extra < 0 and keys.size() >= count:
+			extra = ring + 1
+		if extra >= 0 and ring >= extra:
+			break
+		ring += 1
+	keys.sort()
+	var out := PackedInt32Array()
+	for k in mini(count, keys.size()):
+		out.append(keys[k] % 65536)
+	return out
+
+
 static func nearest_room(rooms: Array, from: int, nth: int) -> int:
+	if rooms.size() > BIG_FLOOR_ROOMS and _gcs.size() == rooms.size():
+		var near := _grid_near(from, nth)
+		return near[near.size() - 1] if not near.is_empty() else -1
+	# distance and index packed into one key, sorted natively: a script
+	# comparator over two thousand rooms, hundreds of times, was most of the
+	# time a Well floor took to build
 	var fc := center(rooms[from])
-	var ds: Array = []
+	var keys := PackedInt64Array()
 	for i in rooms.size():
 		if i == from:
 			continue
 		var c := center(rooms[i])
-		ds.append([(c.x - fc.x) * (c.x - fc.x) + (c.y - fc.y) * (c.y - fc.y), i])
-	ds.sort_custom(func(a, b): return a[0] < b[0])
-	if ds.is_empty():
+		keys.append(((c.x - fc.x) * (c.x - fc.x) + (c.y - fc.y) * (c.y - fc.y)) * 65536 + i)
+	if keys.is_empty():
 		return -1
-	return ds[mini(nth - 1, ds.size() - 1)][1]
+	keys.sort()
+	return keys[mini(nth - 1, keys.size() - 1)] % 65536
 
 
 # ---- wild districts --------------------------------------------------------------
@@ -475,47 +530,81 @@ static func district_anchor(m: GameMap, rm: Rect2i) -> Vector2i:
 ## Cut trails from every stranded pocket in a district back to its anchor,
 ## so nothing inside one is unreachable -- district_relink() in C.
 static func district_relink(m: GameMap, rm: Rect2i, anchor: Vector2i) -> void:
+	# Packed arrays over the district's own rectangle: 0 unseen, 1 reached from
+	# the anchor, 2 counted as a pocket. Same walk as before, same trails cut.
+	var x0 := rm.position.x
+	var y0 := rm.position.y
+	var rw := rm.size.x
+	var rh := rm.size.y
+	var bl := GameMap._block_table()
+	var open := PackedByteArray()
+	open.resize(rw * rh)
+	var refresh := func():
+		for ly in rh:
+			for lx in rw:
+				var x := x0 + lx
+				var y := y0 + ly
+				open[ly * rw + lx] = 1 if m.inb(x, y) and bl[m.tiles[y * m.w + x]] == 0 else 0
+	var dx4 := [1, -1, 0, 0]
+	var dy4 := [0, 0, 1, -1]
 	for pass_ in 12:
-		var seen := {}
-		var stack: Array = [anchor]
-		seen[anchor] = 1
+		refresh.call()
+		var seen := PackedByteArray()
+		seen.resize(rw * rh)
+		var al := (anchor.y - y0) * rw + (anchor.x - x0)
+		var stack := PackedInt32Array([al])
+		seen[al] = 1
 		while not stack.is_empty():
-			var c: Vector2i = stack.pop_back()
-			for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-				var n: Vector2i = c + d
-				if not rm.has_point(n) or seen.has(n) or not m.walkable_player(n.x, n.y):
+			var c := stack[stack.size() - 1]
+			stack.resize(stack.size() - 1)
+			var cx := c % rw
+			var cy := c / rw
+			for k in 4:
+				var nx: int = cx + dx4[k]
+				var ny: int = cy + dy4[k]
+				if nx < 0 or ny < 0 or nx >= rw or ny >= rh:
 					continue
-				seen[n] = 1
-				stack.append(n)
+				var ni := ny * rw + nx
+				if seen[ni] != 0 or open[ni] == 0:
+					continue
+				seen[ni] = 1
+				stack.append(ni)
 		var cut := 0
-		for y in range(rm.position.y, rm.end.y):
-			for x in range(rm.position.x, rm.end.x):
-				var p := Vector2i(x, y)
-				if seen.has(p) or not m.walkable_player(x, y):
+		for ly in rh:
+			for lx in rw:
+				var li := ly * rw + lx
+				if seen[li] != 0 or open[li] == 0:
 					continue
 				# measure the pocket and find its point nearest the anchor
-				var pocket: Array = [p]
-				var near := p
-				var near_d := absi(p.x - anchor.x) + absi(p.y - anchor.y)
-				seen[p] = 2
+				var pocket := PackedInt32Array([li])
+				var near := Vector2i(x0 + lx, y0 + ly)
+				var near_d := absi(near.x - anchor.x) + absi(near.y - anchor.y)
+				seen[li] = 2
 				var i := 0
 				while i < pocket.size():
-					var c: Vector2i = pocket[i]
+					var c := pocket[i]
 					i += 1
-					var dd := absi(c.x - anchor.x) + absi(c.y - anchor.y)
+					var cx := c % rw
+					var cy := c / rw
+					var dd := absi(x0 + cx - anchor.x) + absi(y0 + cy - anchor.y)
 					if dd < near_d:
 						near_d = dd
-						near = c
-					for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-						var n: Vector2i = c + d
-						if rm.has_point(n) and not seen.has(n) and m.walkable_player(n.x, n.y):
-							seen[n] = 2
-							pocket.append(n)
+						near = Vector2i(x0 + cx, y0 + cy)
+					for k in 4:
+						var nx: int = cx + dx4[k]
+						var ny: int = cy + dy4[k]
+						if nx < 0 or ny < 0 or nx >= rw or ny >= rh:
+							continue
+						var ni := ny * rw + nx
+						if seen[ni] == 0 and open[ni] != 0:
+							seen[ni] = 2
+							pocket.append(ni)
 				if pocket.size() < 2:
 					continue
 				var q := near
-				for steps in rm.size.x + rm.size.y + 4:
-					if seen.get(q, 0) == 1 and m.walkable_player(q.x, q.y):
+				for steps in rw + rh + 4:
+					var ql := (q.y - y0) * rw + (q.x - x0)
+					if rm.has_point(q) and seen[ql] == 1 and m.walkable_player(q.x, q.y):
 						break
 					_strip(m, q.x, q.y)
 					if q == anchor:
@@ -530,7 +619,16 @@ static func district_relink(m: GameMap, rm: Rect2i, anchor: Vector2i) -> void:
 
 
 # ---- the floor -------------------------------------------------------------------
+static var _t := 0
+static func _lap(name: String) -> void:
+	var now := Time.get_ticks_msec()
+	if OS.has_environment("MAPGEN_PROF"):
+		print("  %s: %d ms" % [name, now - _t])
+	_t = now
+
+
 static func generate(floor_num: int, size: Vector2i, run_seed: int, difficulty: int) -> GameMap:
+	_t = Time.get_ticks_msec()
 	rng.seed = floor_seed(run_seed, floor_num)
 	var m := GameMap.new()
 	m.setup(size.x, size.y, C.Tile.WALL)
@@ -548,6 +646,7 @@ static func generate(floor_num: int, size: Vector2i, run_seed: int, difficulty: 
 		for i in int((params[2] + r(params[3] - params[2] + 1)) * sc):
 			blob(m, 6 + r(m.w - 12), 6 + r(m.h - 12), 2 + r(3), C.Tile.WALL, C.Tile.LAVA)
 
+	_lap("lakes")
 	# wild districts, before the rooms so the rooms go around them
 	var dists: Array = []
 	var anchors: Array = []
@@ -603,6 +702,7 @@ static func generate(floor_num: int, size: Vector2i, run_seed: int, difficulty: 
 			dists.append(d)
 			anchors.append(a)
 
+	_lap("districts")
 	# the camp: one floor in six
 	if not boss_floor and r(6) == 0:
 		for tries in 40:
@@ -618,6 +718,7 @@ static func generate(floor_num: int, size: Vector2i, run_seed: int, difficulty: 
 				m.haven = hv
 				break
 
+	_lap("camp")
 	# occupancy: everything rooms must avoid, dilated by one
 	var mark := func(rc: Rect2i):
 		for y in range(maxi(0, rc.position.y - 1), mini(m.h, rc.end.y + 1)):
@@ -633,6 +734,7 @@ static func generate(floor_num: int, size: Vector2i, run_seed: int, difficulty: 
 	if m.haven.size.x > 0:
 		mark.call(m.haven)
 
+	_lap("occupancy")
 	var rooms: Array = []
 	var hubs := {}
 	var budget := mini(scale_by_area(m, 30000) / ROOM_SPECS.size(), 6000)
@@ -674,6 +776,7 @@ static func generate(floor_num: int, size: Vector2i, run_seed: int, difficulty: 
 	for rc in rooms:
 		carve_room(m, rc)
 
+	_lap("rooms")
 	# nearest-first spanning tree (Prim's), then a few short extra links
 	var n := rooms.size()
 	var joined := PackedByteArray()
@@ -686,10 +789,14 @@ static func generate(floor_num: int, size: Vector2i, run_seed: int, difficulty: 
 	for rc in rooms:
 		cs.append(center(rc))
 	joined[0] = 1
+	_gcs = []
+	if n > BIG_FLOOR_ROOMS:
+		_grid_build(cs)
+		_join_big(m, rooms, cs)
 	for i in range(1, n):
 		var dd: Vector2i = cs[i] - cs[0]
 		best_d[i] = dd.x * dd.x + dd.y * dd.y
-	for done in range(1, n):
+	for done in range(1, n if n <= BIG_FLOOR_ROOMS else 1):
 		var pick := -1
 		for i in range(1, n):
 			if not joined[i] and (pick < 0 or best_d[i] < best_d[pick]):
@@ -706,20 +813,26 @@ static func generate(floor_num: int, size: Vector2i, run_seed: int, difficulty: 
 			if d2 < best_d[i]:
 				best_d[i] = d2
 				best_a[i] = pick
+	if OS.has_environment("MAPGEN_PROF"):
+		print("  rooms %d hubs %d anchors %d" % [n, hubs.size(), anchors.size()])
+	_lap("prim")
 	for i in n / 6:
 		var a := r(n)
 		var b := nearest_room(rooms, a, 1 + r(4))
 		if b >= 0:
 			join(m, rooms[a], rooms[b])
+	_lap("extra links")
 	for a in anchors:
 		for k in 2:
 			join(m, Rect2i(a, Vector2i.ONE), rooms[r(n)])
+	_lap("anchors")
 	for i in hubs:
 		for k in 3 + r(2):
 			var b := nearest_room(rooms, i, k + 1)
 			if b >= 0:
 				join(m, rooms[i], rooms[b], 2 + int(r(100) < 35))
 
+	_lap("joining")
 	# the camp: a palisade with gates, built after the roads so they stop at it
 	if m.haven.size.x > 0:
 		_carve_haven(m, m.haven)
@@ -737,12 +850,16 @@ static func generate(floor_num: int, size: Vector2i, run_seed: int, difficulty: 
 			var rc: Rect2i = rooms[1 + r(n - 1)]
 			blob(m, rc.position.x + r(rc.size.x), rc.position.y + r(rc.size.y), 1 + r(2), C.Tile.FLOOR, C.Tile.MIASMA)
 
+	_lap("stairs+miasma")
 	_place_monsters(m, rooms, dists, difficulty, boss_floor, down)
+	_lap("monsters")
 	_place_items(m, rooms, dists, boss_floor, down)
+	_lap("items")
 	if not boss_floor:
 		_place_features(m, rooms, floor_num)
 		_random_event(m, rooms, floor_num)
 
+	_lap("features")
 	# the invariant: the stairs connect
 	if not boss_floor and not m.reachable(m.stairs_up, m.stairs_down):
 		join(m, rooms[0], rooms[n - 1], 1)
@@ -753,12 +870,65 @@ static func generate(floor_num: int, size: Vector2i, run_seed: int, difficulty: 
 		if not m.reachable(m.stairs_up, hc):
 			join(m, Rect2i(hc, Vector2i.ONE), rooms[0], 1)
 			m.set_t(m.stairs_up.x, m.stairs_up.y, C.Tile.STAIRS_UP)
+	_lap("reachable")
 	# nothing may be generated standing in a wall a later pass put there
 	for mo in m.monsters:
 		if not m.walkable_player(mo.x, mo.y):
 			mo.alive = false
 	m.remove_dead()
 	return m
+
+
+## A spanning tree over each room's eight nearest neighbours (Kruskal), then
+## whatever components that leaves are joined nearest-first. Prim's over every
+## pair is twelve million steps on a Well floor; this is a few hundred thousand.
+static func _join_big(m: GameMap, rooms: Array, cs: Array) -> void:
+	var n := rooms.size()
+	var parent := PackedInt32Array()
+	parent.resize(n)
+	for i in n:
+		parent[i] = i
+	var find := func(x: int) -> int:
+		while parent[x] != x:
+			parent[x] = parent[parent[x]]
+			x = parent[x]
+		return x
+	var edges := PackedInt64Array()
+	for i in n:
+		for j in _grid_near(i, 8):
+			if j > i:
+				var d: Vector2i = cs[i] - cs[j]
+				# distance, then the pair: 2^24 rooms is far more than any floor holds
+				edges.append(((d.x * d.x + d.y * d.y) << 24 | i) << 16 | (j & 0xFFFF))
+	edges.sort()
+	var comps := n
+	for e in edges:
+		var j := e & 0xFFFF
+		var i := (e >> 16) & 0xFFFFFF
+		var ri: int = find.call(i)
+		var rj: int = find.call(j)
+		if ri == rj:
+			continue
+		parent[ri] = rj
+		join(m, rooms[i], rooms[j])
+		comps -= 1
+	# anything still apart (an island of rooms) joins the main body nearest-first
+	if comps > 1:
+		var main: int = find.call(0)
+		for i in n:
+			if find.call(i) == main:
+				continue
+			var best := -1
+			var best_d := 1 << 60
+			for j in n:
+				if find.call(j) != main:
+					continue
+				var d: Vector2i = cs[i] - cs[j]
+				if d.x * d.x + d.y * d.y < best_d:
+					best_d = d.x * d.x + d.y * d.y
+					best = j
+			join(m, rooms[i], rooms[best])
+			parent[find.call(i)] = main
 
 
 static func _carve_haven(m: GameMap, hv: Rect2i) -> void:

@@ -23,13 +23,14 @@ const DIFFICULTY_BLURBS := [
 	"Swarm's density, and no safety net: no recall, death is final.",
 ]
 
-enum WorldSize { SHAFT, HALLS, DEEPS }
-const WORLD_NAMES := ["The Shaft", "The Halls", "The Deeps"]
-const WORLD_DIMS := [Vector2i(140, 80), Vector2i(350, 200), Vector2i(700, 400)]
+enum WorldSize { SHAFT, HALLS, DEEPS, WELL }
+const WORLD_NAMES := ["The Shaft", "The Halls", "The Deeps", "The Well"]
+const WORLD_DIMS := [Vector2i(140, 80), Vector2i(350, 200), Vector2i(700, 400), Vector2i(1400, 800)]
 const WORLD_BLURBS := [
 	"140 x 80. Cleared in minutes; the stairs are never far.",
 	"350 x 200. Room to get lost without losing the afternoon.",
 	"700 x 400. Each floor is a journey. A waygate on every floor.",
+	"1400 x 800. Vast: a hundred times the Shaft. Crossing a single floor is the evening's work.",
 ]
 
 enum Biome { JUNGLE, INDUSTRIAL, RUINS, WASTES, ABYSS }

@@ -1121,9 +1121,9 @@ static func tick(h: Hero) -> void:
 		if int(h.spell_cd[i]) > 0:
 			h.spell_cd[i] = int(h.spell_cd[i]) - 1
 	if h.aether < h.aether_max:
-		h.aether += 1
+		h.aether = mini(h.aether_max, h.aether + 1 + Dda.recharge_bonus())
 	if Game.turns % C.RANGED_AMMO_REGEN_TURNS == 0 and h.ranged_ammo < h.ranged_ammo_max:
-		h.ranged_ammo += 1
+		h.ranged_ammo = mini(h.ranged_ammo_max, h.ranged_ammo + 1 + Dda.recharge_bonus())
 	if h.atk_buff_turns > 0:
 		h.atk_buff_turns -= 1
 		if h.atk_buff_turns == 0:

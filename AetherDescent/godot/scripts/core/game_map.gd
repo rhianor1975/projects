@@ -280,8 +280,53 @@ func flood(sx: int, sy: int, limit := 1 << 30) -> PackedInt32Array:
 	return dist
 
 
+static var _blocks := PackedByteArray()
+
+
+static func _block_table() -> PackedByteArray:
+	if _blocks.is_empty():
+		_blocks.resize(256)
+		for t in 256:
+			_blocks[t] = 1 if blocks_walk(t) else 0
+	return _blocks
+
+
+## Can you walk from a to b? Stops the moment it gets there.
 func reachable(a: Vector2i, b: Vector2i) -> bool:
-	return flood(a.x, a.y)[b.y * w + b.x] >= 0
+	if not inb(a.x, a.y) or not inb(b.x, b.y):
+		return false
+	var bl := _block_table()
+	var goal := b.y * w + b.x
+	var seen_ := PackedByteArray()
+	seen_.resize(w * h)
+	var q := PackedInt32Array([a.y * w + a.x])
+	seen_[a.y * w + a.x] = 1
+	var head := 0
+	var offs := PackedInt32Array([-1, 1, -w, w, -w - 1, -w + 1, w - 1, w + 1])
+	while head < q.size():
+		var c := q[head]
+		head += 1
+		if c == goal:
+			return true
+		var cx := c % w
+		if cx == 0 or cx == w - 1 or c < w or c >= w * (h - 1):
+			# the rim: take the slow, bounds-checked way round
+			for dir in C.DIRS8:
+				var nx: int = cx + dir.x
+				var ny: int = c / w + dir.y
+				if nx < 0 or ny < 0 or nx >= w or ny >= h:
+					continue
+				var ni := ny * w + nx
+				if seen_[ni] == 0 and bl[tiles[ni]] == 0:
+					seen_[ni] = 1
+					q.append(ni)
+			continue
+		for o in offs:
+			var ni := c + o
+			if seen_[ni] == 0 and bl[tiles[ni]] == 0:
+				seen_[ni] = 1
+				q.append(ni)
+	return false
 
 
 # ---- persistence ---------------------------------------------------------------

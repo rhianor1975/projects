@@ -31,6 +31,7 @@ static func refresh_vision() -> void:
 	var radius := h.fov_radius
 	if m.district_at(h.x, h.y) == C.District.MIRE:
 		radius = mini(radius, C.MIRE_FOV_RADIUS)
+	radius = Dda.sight(h, radius)
 	m.compute_fov(h.x, h.y, radius)
 	Party.reveal()
 
@@ -206,8 +207,15 @@ static func hero_attack(mo: Monster) -> void:
 	if not Districts.allows(h.x, h.y, C.Act.MELEE):
 		Game.msg("Not here. This ground was marked out for %s." % C.PROVE_RULES[C.Prove.ARCANE], Gfx.GREY)
 		return
+	# the Ruins' old wards did not all fail: a warded blow costs the turn and nothing else
+	var mward := Dda.monster_ward_pct()
+	if mward > 0 and rnd(100) < mward:
+		_face(h, mo.x - h.x, mo.y - h.y)
+		Game.emit_fx({"type": "attack", "who": h, "target": mo})
+		Game.msg("An old ward flares around the %s and your blow slides off." % mo.name, Color8(170, 190, 230))
+		return
 	var dmg := damage_after_defence(Districts.eff_atk(h), mo.def, rnd(4) - 1)
-	var crit_chance := h.effective_stat(C.Acc.CRIT)
+	var crit_chance := h.effective_stat(C.Acc.CRIT) + Dda.grace()
 	var crit := crit_chance > 0 and rnd(100) < crit_chance
 	if crit:
 		dmg *= 2
@@ -253,6 +261,8 @@ static func hero_take_damage(dmg: int, source: String) -> void:
 
 static func _die() -> void:
 	var h := H()
+	if Dda.guardian_catch():
+		return
 	# The party will not let you die with a charm in your pack...
 	if Party.attempt_rescue():
 		return
@@ -292,7 +302,7 @@ static func monster_hit_hero(mo: Monster, target: Hero = null) -> void:
 	var you := h == H()
 	mo.facing_left = h.x < mo.x
 	Game.emit_fx({"type": "attack", "who": mo, "target": h})
-	if rnd(100) < C.MONSTER_CRIT_PCT:
+	if rnd(100) < (Dda.softened_crit(C.MONSTER_CRIT_PCT) if you else C.MONSTER_CRIT_PCT):
 		var dmg := maxi(1, Party.max_hp(h) * (4 + rnd(4)) / 100)
 		if you:
 			Game.warn("A critical blow from the %s finds a gap in your guard! (-%d)" % [mo.name, dmg])
@@ -300,13 +310,13 @@ static func monster_hit_hero(mo: Monster, target: Hero = null) -> void:
 		_reflect(mo, dmg, h)
 		_inflict_status(mo, h)
 		return
-	var ev := h.effective_stat(C.Acc.EVASION) + h.evasion_buff
+	var ev := h.effective_stat(C.Acc.EVASION) + h.evasion_buff + (Dda.grace() if you else 0)
 	if ev > 0 and rnd(100) < ev:
 		if you:
 			Game.msg("You dodge the %s's attack." % mo.name, Color8(150, 220, 255))
 		Game.emit_fx({"type": "miss", "who": h})
 		return
-	var wd := h.effective_stat(C.Acc.WARD)
+	var wd := h.effective_stat(C.Acc.WARD) + Dda.ward_bonus()
 	if wd > 0 and rnd(100) < wd:
 		if you:
 			Game.msg("Something wards off the %s's blow entirely." % mo.name, Color8(150, 220, 255))
@@ -389,7 +399,8 @@ static func monster_turn(mo: Monster) -> void:
 				monster_hit_hero(mo)
 			Game.warn("It was behind the stone. You never saw it move.")
 		return
-	var aggro_r := Districts.aggro_radius(mo.x, mo.y, maxi(2, 8 - h.aggro_reduction))
+	var aggro_r := Districts.aggro_radius(mo.x, mo.y,
+		maxi(2, 8 - h.aggro_reduction - Dda.aggro_reduction() - Dda.growth_cover()))
 	var dk := m.district_at(mo.x, mo.y)
 	if dk == C.District.QUIET:
 		aggro_r = mini(aggro_r, C.QUIET_AGGRO_RADIUS)
@@ -530,14 +541,14 @@ static func end_turn() -> void:
 		if h.spell_cd[i] > 0:
 			h.spell_cd[i] -= 1
 	if h.aether < h.aether_max:
-		h.aether += 1
+		h.aether = mini(h.aether_max, h.aether + 1 + Dda.recharge_bonus())
 	if h.ability_cd > 0:
 		h.ability_cd -= 1
 	if h.ranged_cooldown > 0:
 		h.ranged_cooldown -= 1
 	if Game.turns % C.RANGED_AMMO_REGEN_TURNS == 0 and h.ranged_ammo < h.ranged_ammo_max:
-		h.ranged_ammo += 1
-	var regen := h.effective_stat(C.Acc.REGEN)
+		h.ranged_ammo = mini(h.ranged_ammo_max, h.ranged_ammo + 1 + Dda.recharge_bonus())
+	var regen := h.effective_stat(C.Acc.REGEN) + Dda.regen_bonus()
 	if regen > 0 and h.poison_turns == 0 and h.hp < h.maxhp:
 		h.hp = mini(h.maxhp, h.hp + regen)
 	# the ground you stand on
@@ -553,7 +564,7 @@ static func end_turn() -> void:
 	elif here == C.Tile.PRISM_GREEN and h.hp < h.maxhp:
 		h.hp = mini(h.maxhp, h.hp + C.PRISM_REGEN)
 	if here == C.Tile.LAVA or here == C.Tile.MIASMA:
-		var raw := (12 + rnd(9)) if here == C.Tile.LAVA else (2 + rnd(4))
+		var raw := ((12 + rnd(9)) if here == C.Tile.LAVA else (2 + rnd(4))) + Dda.hazard_extra()
 		var dmg := maxi(1, raw - raw * (h.hazard_resist_pct + h.set_bonus_hazard) / 100)
 		Game.warn(("The lava sears you for %d damage!" if here == C.Tile.LAVA else "The miasma burns in your lungs for %d damage.") % dmg)
 		hero_take_damage(dmg, "the lava" if here == C.Tile.LAVA else "the miasma")
@@ -927,6 +938,7 @@ static func use_item(name: String) -> bool:
 		h.hp = mini(h.maxhp, h.hp + amount)
 		Game.good("You drink the %s, healing %d HP." % [name, amount])
 		Game.emit_fx({"type": "heal", "who": h, "amount": amount})
+		Game.dda_heals += 1
 		if h.poison_turns > 0:
 			h.poison_turns = 0
 			Game.msg("The draught cleanses the poison from your blood.")
@@ -943,7 +955,8 @@ static func use_item(name: String) -> bool:
 		h.maxhp += amount
 		h.hp += amount
 		Game.good("You feel permanently sturdier: +%d max HP." % amount)
-	Game.take(name)
+	if not Dda.supply_saved():       # the Wastes' salt keeps it, sometimes
+		Game.take(name)
 	if Game.depth > 0:
 		end_turn()
 	return true
@@ -964,6 +977,7 @@ static func start_recall() -> bool:
 		return false
 	Game.recall_countdown = H().recall_turns
 	Quests.note_recall()
+	Game.dda_retreated = true
 	Game.msg("You crack a recall charm. Hold steady -- %d turns." % Game.recall_countdown, Color8(150, 230, 255))
 	Game.emit_fx({"type": "burst", "at": H().pos(), "radius": 2, "color": Color8(120, 230, 255)})
 	end_turn()

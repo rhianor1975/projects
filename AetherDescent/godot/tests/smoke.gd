@@ -206,7 +206,13 @@ func _ready() -> void:
 		print("FAIL bazaar price unstable or out of range"); failures += 1
 	print("kitchen: %d cuts from 300 blade kills" % cuts)
 	failures += _districts(game)
+	failures += _dda(game)
 	# generation sweep: every floor is connected stairs-to-stairs
+	var tw := Time.get_ticks_msec()
+	var well: GameMap = MapGen.generate(30, C.WORLD_DIMS[C.WorldSize.WELL], 4321, C.Difficulty.NORMAL)
+	if not well.reachable(well.stairs_up, well.stairs_down):
+		print("FAIL a Well floor's stairs do not connect"); failures += 1
+	print("well floor 30: %d monsters, %d districts, %d ms" % [well.monsters.size(), well.districts.size(), Time.get_ticks_msec() - tw])
 	for f in [1, 7, 15, 22, 35, 48, 60, 77, 85, 99, 100]:
 		for ws in [C.WorldSize.SHAFT, C.WorldSize.HALLS]:
 			var tg := Time.get_ticks_msec()
@@ -388,4 +394,43 @@ func _districts(game) -> int:
 			or ItemsData.upgrade_material_tier(55) != C.Mat.DIAMOND:
 		print("FAIL the smith's material rungs"); fails += 1
 	print("districts checked")
+	return fails
+
+
+
+func _dda(game) -> int:
+	var fails := 0
+	game.new_run(0, "Pressed", C.Difficulty.NORMAL, C.WorldSize.SHAFT, 3)
+	game.enter_floor(2)       # the Roots
+	if Dda.band_help() != 0 or Dda.regen_bonus() != 0:
+		print("FAIL the band helped a run that is fine"); fails += 1
+	game.hero.hp = game.hero.maxhp / 10
+	if Dda.pressure() >= 0 or Dda.band_help() < 1 or Dda.regen_bonus() < 1:
+		print("FAIL the Roots did nothing for a run that is drowning"); fails += 1
+	game.enter_floor(3)       # leaving a floor at 10% is a rout
+	if game.dda_pressure != Dda.ROUTED:
+		print("FAIL a mauled floor did not move pressure (%d)" % game.dda_pressure); fails += 1
+	game.hero.hp = game.hero.maxhp
+	for i in 12:
+		game.enter_floor(4 + i)  # cruising
+	if game.dda_pressure <= 0:
+		print("FAIL cruising never recovered the pressure"); fails += 1
+	# the guardian: off by default, on when asked
+	game.hero.hp = 0
+	if Dda.guardian_catch():
+		print("FAIL the guardian acted without being asked"); fails += 1
+	game.settings.guardian = true
+	game.enter_floor(10)
+	game.hero.hp = 0
+	if not Dda.guardian_catch() or game.hero.hp != 1:
+		print("FAIL the guardian did not catch the blow"); fails += 1
+	game.hero.hp = 0
+	if Dda.guardian_catch():
+		print("FAIL the guardian caught twice on one floor"); fails += 1
+	game.settings.guardian = false
+	# the Abyss is dark, and Aether-Sense answers it
+	game.enter_floor(90)
+	if Dda.sight(game.hero, 8) != 5:
+		print("FAIL the Abyss took no sight"); fails += 1
+	print("dda checked")
 	return fails

@@ -88,6 +88,10 @@ func _open_title() -> void:
 	title_menu.items.append({"label": "Quit", "id": "quit"})
 
 
+func _guardian_label() -> String:
+	return "Guardian angel: %s" % ("on" if Game.settings.get("guardian", false) else "off")
+
+
 func _art_label() -> String:
 	return "Art: %s" % ("16-bit" if Gfx.art == "16bit" else "Classic")
 
@@ -188,7 +192,7 @@ func _create_step(m: Menu) -> void:
 			m.detail = _detail_text.bind("Difficulty", "Chosen once, at creation. Hardcore death is final; on every other mode you wake at the Inn.")
 		"world":
 			m.items = []
-			for i in 3:
+			for i in C.WORLD_NAMES.size():
 				m.items.append({"label": C.WORLD_NAMES[i], "desc": C.WORLD_BLURBS[i], "v": i})
 			m.cursor = c_world
 			m.detail = _detail_text.bind("World size", "How big every floor of the run is. Waygates home come every fifth floor on the Shaft and the Halls, and on every floor of the Deeps.")
@@ -712,6 +716,8 @@ func _open_pause() -> void:
 	m.items = [{"label": "Resume", "id": "resume"}, {"label": "Keys", "id": "help"},
 		{"label": "Sound: %s" % ("on" if Sfx.enabled else "off"), "id": "sound"},
 		{"label": _art_label(), "id": "art", "desc": "16-bit: shaded anime sprites.  Classic: the flat look of the first sketches."},
+		{"label": _guardian_label(), "id": "guardian",
+			"desc": "An assist, not a difficulty. The dice lean your way when you are in trouble, one killing blow a floor is turned aside above floor 50 -- and a run that is coasting gets leaned on."},
 		{"label": "Save and quit to title", "id": "quit"}]
 	m.detail = _detail_hero
 	m.on_select = func(mm: Menu, it: Dictionary) -> bool:
@@ -729,6 +735,12 @@ func _open_pause() -> void:
 				Gfx.set_art("classic" if Gfx.art == "16bit" else "16bit")
 				Game.save_settings()
 				it.label = _art_label()
+				return false
+			"guardian":
+				Game.settings.guardian = not Game.settings.get("guardian", false)
+				Game.save_settings()
+				it.label = _guardian_label()
+				Game.update_escalation()
 				return false
 			"quit":
 				Game.save_run()

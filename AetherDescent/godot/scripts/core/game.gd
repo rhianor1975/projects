@@ -41,6 +41,11 @@ var kitchen_nights := 0        # service nights cooked since you last went down
 var kitchen_earned := 0
 var races_this_visit := 0      # the bookmaker's memory is short
 var bazaar_day := 0            # the Bazaar re-prices once a trip
+var dda_pressure := 0          # how the finished floors went: Dda.MIN..Dda.MAX
+var dda_start_hp := 0
+var dda_heals := 0
+var dda_retreated := false
+var guardian_caught := false
 var tavern_seed := 1           # the Tavern's twenty, regenerated from this
 var tavern_reroll: Array = []  # per seat: how many times it has been let go
 var tavern_hired := 0          # bitmask of seats out with you
@@ -56,7 +61,7 @@ const LOG_CAP := 200
 const SAVE_DIR := "user://"
 
 
-var settings := {"art": "16bit", "sound": true}
+var settings := {"art": "16bit", "sound": true, "guardian": false}
 
 
 func _ready() -> void:
@@ -120,6 +125,9 @@ func new_run(class_id: int, name: String, diff: int, wsize: int, seed_ := 0) -> 
 	tavern_hired = 0
 	tavern_fallen = 0
 	meat = [0, 0, 0, 0]
+	dda_pressure = 0
+	dda_heals = 0
+	dda_retreated = false
 	kitchen_rep = 0
 	kitchen_nights = 0
 	kitchen_earned = 0
@@ -194,10 +202,12 @@ func controlled_set(h: Hero) -> void:
 
 
 func update_escalation() -> void:
-	escalation_pct = Monster.escalation_for(hero.level, floor_entries)
+	escalation_pct = Monster.escalation_for(hero.level, floor_entries) + Dda.avenger_escalation()
 
 
 func enter_town(at: Vector2i) -> void:
+	if depth > 0:
+		Dda.floor_end()
 	depth = 0
 	map = Town.generate()
 	Party.reap_fallen()
@@ -213,6 +223,8 @@ func enter_town(at: Vector2i) -> void:
 
 
 func enter_floor(n: int, arrive_down := true) -> void:
+	if depth > 0:
+		Dda.floor_end()      # read how the floor being left went
 	depth = n
 	if n > deepest_floor:
 		deepest_floor = n
@@ -231,6 +243,7 @@ func enter_floor(n: int, arrive_down := true) -> void:
 	hero.x = at.x
 	hero.y = at.y
 	Party.place()
+	Dda.floor_begin()
 	recall_countdown = 0
 	_spend_oracle()
 	Rules.refresh_vision()
@@ -345,7 +358,7 @@ func snapshot() -> Dictionary:
 		"party": party.map(func(h): return h.to_dict()), "controlled": party.find(hero),
 		"tavern_seed": tavern_seed, "tavern_reroll": tavern_reroll,
 		"tavern_hired": tavern_hired, "tavern_fallen": tavern_fallen,
-		"meat": meat, "kitchen_rep": kitchen_rep, "kitchen_nights": kitchen_nights,
+		"meat": meat, "kitchen_rep": kitchen_rep, "dda_pressure": dda_pressure, "kitchen_nights": kitchen_nights,
 		"kitchen_earned": kitchen_earned, "races_this_visit": races_this_visit, "bazaar_day": bazaar_day, "difficulty": difficulty, "world": world,
 		"run_seed": run_seed, "depth": depth, "deepest_floor": deepest_floor, "gold": gold,
 		"gold_mult": gold_mult, "gold_boon_until": gold_boon_until, "inventory": inventory,
@@ -372,6 +385,7 @@ func restore(d: Dictionary) -> void:
 			tavern_reroll[i] = 0
 	meat = Array(d.get("meat", [0, 0, 0, 0])).map(func(v): return int(v))
 	kitchen_rep = int(d.get("kitchen_rep", 0))
+	dda_pressure = int(d.get("dda_pressure", 0))
 	kitchen_nights = int(d.get("kitchen_nights", 0))
 	kitchen_earned = int(d.get("kitchen_earned", 0))
 	races_this_visit = int(d.get("races_this_visit", 0))
