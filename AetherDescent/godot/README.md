@@ -14,8 +14,10 @@ in comments so you can find both halves of a rule.
 ![The city](screenshots/3-town.png)
 ![A fight on the first floor](screenshots/5-fight.png)
 
+![A hired party at work](screenshots/10-party-fight.png)
+
 More in [`screenshots/`](screenshots): the title, character creation, the
-Armory, and the Classic art set.
+Armory, the Tavern, and the Classic art set.
 
 ## Running it
 
@@ -45,6 +47,7 @@ Saves, the Inn snapshot and high scores live in Godot's user folder
 | Character sheet | `c` | |
 | Whole-floor map | `Tab` or `M` | Back |
 | Recall charm | `r` | |
+| Take over the next of your party | `p` | stick click |
 | Menu (save & quit) | `Esc` | Start / B |
 | Menus | arrows, `Z`/`Enter`, `X`/`Esc`, Left/Right for tabs | D-pad, A, B |
 
@@ -74,6 +77,18 @@ the plaza take you down to any floor you have already reached.
 - **The city** — General Store, Armory (weapons, armour, ranged, accessories,
   smithing), Apothecary, Arcanist's Guild, Bank, Inn, Gladiator School,
   Junkyard, Black Market, Oracle, the temple; merchants in the dungeon.
+- **The Tavern and hired heroes** — the Brass Lantern, west of the plaza:
+  twenty candidates drawn from the same hundred classes, each priced ten times
+  the last (1,000 up to 10,000,000), scaled to how strong you are when you
+  hire them. They are not pets: they walk the floor on their own, fight with
+  their own spells, guns and bows, use their role's signature move (Bulwark,
+  Flurry, Called Shot, Detonation, Charge Bomb, Second Wind, Rally), pick up
+  loot and hand you the gold, find their own gear, level off their own kills,
+  and back off or press on according to temperament (Bold, Steady,
+  Cautious). Monsters fight whoever is next to them. A fallen hire can be
+  taken back for a quarter; one you let go hands back half the fee. Press `p`
+  to take over any of them -- and if you fall, one of them carries on, or
+  spends a recall charm to drag you home.
 - **Features** — shrines, fountains, machines, relics and the five gear sets,
   altars, tolls, waygates.
 - **Auto-explore**, recall charms, death and waking at the Inn (permanent on
@@ -81,7 +96,7 @@ the plaza take you down to any floor you have already reached.
 
 ## Not ported yet
 
-Hired heroes and the Tavern; the Ashfall Kitchen, the lizard track, the
+The Ashfall Kitchen, the lizard track, the
 Bazaar and the town Altar; quests; the remaining 14 district kinds (storm
 cage, colosseum, aqueduct, assembly line, watch, gauntlet, eye, mirror,
 petrified forest, shaft, boneyard, proving ground, chapel, geothermal); ore
@@ -114,6 +129,7 @@ scripts/core/   the rules: no nodes, no frames -- testable headless
   mapgen.gd       floor generation                              (mapgen.c)
   rules.gd        turns, combat, AI, spells, ranged, features   (combat.c ...)
   spellbook.gd    the 180-spell pool                            (spells.c)
+  party.gd        the Tavern and hired heroes                   (companions.c)
   autoexplore.gd  `x`
   town.gd         the plaza
   sfx.gd          synthesised sound effects (autoload Sfx)

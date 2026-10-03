@@ -412,6 +412,10 @@ func _pad_input(ev: InputEventJoypadButton) -> void:
 			_open_inventory()
 		JOY_BUTTON_BACK:
 			view.show_full_map = not view.show_full_map
+		JOY_BUTTON_LEFT_STICK, JOY_BUTTON_RIGHT_STICK:
+			if Party.switch_next():
+				Game.msg("You are %s now." % Game.hero.name, Party.color_of(Game.hero))
+				view.snap_camera()
 		JOY_BUTTON_START, JOY_BUTTON_B:
 			_open_pause()
 
@@ -462,6 +466,15 @@ func _game_input(ev: InputEvent) -> void:
 				_open_spells()
 		KEY_TAB:
 			view.show_full_map = not view.show_full_map
+		KEY_P:
+			if Party.switch_next():
+				Sfx.play("confirm")
+				Game.msg("You are %s now." % Game.hero.name, Party.color_of(Game.hero))
+				view.snap_camera()
+			elif Party.count() == 0:
+				Game.msg("Nobody to hand the lantern to. The Brass Lantern hires, west of the plaza.", Gfx.GREY)
+			else:
+				Game.msg("There is nobody else standing.", Gfx.GREY)
 		KEY_S:
 			var slot := Game.hero.last_spell_slot
 			if slot >= 0:
@@ -672,6 +685,7 @@ func _open_help() -> void:
 		". or Space: wait     x: auto-explore     Tab or M: the whole floor",
 		"m: cast a spell     s: cast the last one again     f: fire     a: class ability",
 		"i: pack     c: character sheet     r: recall charm     Esc: menu",
+		"p: take over the next of your party -- hires fight on their own until you do.",
 	])
 
 
@@ -730,6 +744,7 @@ func _open_building(id: String) -> void:
 		"junkyard": _open_junkyard()
 		"blackmarket": _open_blackmarket()
 		"oracle": _open_oracle()
+		"tavern": _open_tavern()
 
 
 func _open_store(title: String, stock: Array, hp_upgrade: bool) -> void:
@@ -913,10 +928,12 @@ func _open_inn() -> void:
 		if it.get("id", "") == "leave":
 			return true
 		Game.gold -= fee
-		Game.hero.hp = Game.hero.maxhp
-		Game.hero.aether = Game.hero.aether_max
-		Game.hero.ranged_ammo = Game.hero.ranged_ammo_max
-		Game.hero.poison_turns = 0
+		for b in Game.party:
+			if b.alive:
+				b.hp = Party.max_hp(b)
+				b.aether = b.aether_max
+				b.ranged_ammo = b.ranged_ammo_max
+				b.poison_turns = 0
 		Game.rested = true
 		Sfx.play("heal")
 		if hardcore:
@@ -928,6 +945,107 @@ func _open_inn() -> void:
 		Game.save_run()
 		return true
 	m.detail = _detail_hero
+
+
+# ---- the Tavern ---------------------------------------------------------------------
+## The Brass Lantern: heroes for hire, coin up front. Twenty on offer, each
+## ten times the price of the last one you took; they fight on their own down
+## there -- you pay them, you don't command them.
+func _open_tavern() -> void:
+	var m := _menu("The Brass Lantern")
+	m.list_width = 300
+	m.rows = 11
+	m.data = {"confirm": -1}
+	m.rebuild = func(mm: Menu):
+		mm.items = []
+		var filled := Party.count()
+		mm.footer = "Z/Enter: hire    R: let go    X/Esc: leave    Party %d of %d" % [filled, Party.MAX_COMPANIONS]
+		for i in Party.TAVERN_ROSTER:
+			var live := Party.by_roster(i)
+			var c: Hero = live if live else Party.candidate(i)
+			var right := ""
+			var col := Gfx.WHITE
+			if Party.is_hired(i):
+				right = "with you"
+				col = Party.color_of(c)
+			elif Party.has_fallen(i):
+				right = Gfx.comma(Party.rehire_cost(filled))
+				col = Gfx.RED.lightened(0.3)
+			else:
+				right = Gfx.comma(Party.hire_cost(filled))
+			mm.items.append({"label": c.name, "right": right, "i": i, "color": col,
+				"desc": "%s, %s.  %s" % [ClassesData.CLASSES[c.class_id].name, Party.PERSONALITY_NAMES[c.personality],
+					ClassesData.CLASSES[c.class_id].tagline]})
+	m.on_select = func(mm: Menu, it: Dictionary) -> bool:
+		if Party.is_hired(it.i):
+			Sfx.play("buzz")
+			mm.say("They already drink on your coin. R lets them go.")
+			return false
+		var before := Party.count()
+		var line := Party.hire(it.i)
+		if Party.count() > before:
+			Sfx.play("buy")
+			Game.save_run()
+		else:
+			Sfx.play("buzz")
+		mm.say(line)
+		return false
+	m.on_key = func(mm: Menu, key: int) -> bool:
+		if key != KEY_R:
+			return false
+		var i: int = mm.current().get("i", -1)
+		if i < 0 or not Party.can_release(i):
+			Sfx.play("buzz")
+			mm.say("They don't work for you. There's nothing to end.")
+			return true
+		if mm.data.confirm != i:
+			mm.data.confirm = i
+			var refund := " Half the fee comes back." if Party.is_hired(i) else ""
+			mm.say("Let %s go for good?%s Press R again." % [Party.candidate(i).name, refund])
+			return true
+		mm.data.confirm = -1
+		Sfx.play("coin")
+		mm.say(Party.release(i))
+		Game.save_run()
+		return true
+	m.detail = _detail_hire
+	m.refresh()
+	Game.msg("They fight on their own down there -- you pay them, you don't command them.", Gfx.GREY)
+
+
+func _detail_hire(ci: CanvasItem, r: Rect2, _m: Menu, it: Dictionary) -> void:
+	if it.is_empty():
+		return
+	var live := Party.by_roster(it.i)
+	var c: Hero = live if live else Party.candidate(it.i)
+	var p := r.position
+	Gfx.portrait(ci, p + Vector2(14, 14), c.look, "happy" if live else "neutral")
+	var cs: Dictionary = ClassesData.CLASSES[c.class_id]
+	Gfx.text(ci, p + Vector2(92, 12), cs.name, Party.color_of(c) if live else Gfx.GOLD, 2)
+	Gfx.text(ci, p + Vector2(92, 34), "%s  /  %s" % [C.ARCHETYPE_NAMES[c.archetype], Party.PERSONALITY_NAMES[c.personality]], Gfx.GREY)
+	Gfx.text(ci, p + Vector2(92, 48), ("Lv %d   %d kills" % [c.level, c.kills]) if live else "Lv %d" % c.level, Gfx.GREY)
+	var stats := [["HP", ("%d/%d" % [c.hp, Party.max_hp(c)]) if live else str(c.maxhp)], ["ATK", c.eff_atk()],
+		["DEF", c.eff_def()], ["Reach", Party.reach(c)]]
+	for i in stats.size():
+		var x := p.x + 14 + (i % 2) * 140
+		var y := p.y + 90 + (i / 2) * 15
+		Gfx.text(ci, Vector2(x, y), stats[i][0], Gfx.CYAN)
+		Gfx.text_right(ci, Vector2(x + 120, y), str(stats[i][1]), Gfx.WHITE)
+	var y2 := p.y + 128
+	for line in Gfx.wrap(Party.weapon_line(c), int(r.size.x - 28)):
+		Gfx.text(ci, Vector2(p.x + 14, y2), line, Gfx.WHITE)
+		y2 += 13
+	y2 += 4
+	Gfx.text(ci, Vector2(p.x + 14, y2), Party.ABILITY_NAMES[c.archetype], Gfx.GOLD)
+	y2 += 13
+	for line in Gfx.wrap(Party.ABILITY_DESCS[c.archetype], int(r.size.x - 28)):
+		Gfx.text(ci, Vector2(p.x + 14, y2), line, Gfx.GREY)
+		y2 += 13
+	for g in c.gear:
+		Gfx.text(ci, Vector2(p.x + 14, y2), "%s  +%d/+%d/+%d" % [g.name, g.atk, g.def, g.hp], Gfx.GREEN)
+		y2 += 13
+	if Party.has_fallen(it.i):
+		Gfx.text(ci, Vector2(p.x + 14, y2 + 2), "Died in your service. A quarter to take them back.", Gfx.RED)
 
 
 func _open_gladiator() -> void:
@@ -1063,7 +1181,9 @@ func _open_death() -> void:
 				Game.log_lines = []
 				Game.msg("You wake in your room at the Inn, whole, and some hours older.", Color8(150, 200, 255))
 				Game.msg("Whatever happened on floor %d, you are not carrying it." % died_on, Gfx.GREY)
-				Game.hero.hp = Game.hero.maxhp
+				for b in Game.party:
+					if b.alive:
+						b.hp = Party.max_hp(b)
 				Game.enter_town(Vector2i(5, 16))
 				Game.save_run()
 				view.snap()

@@ -21,6 +21,7 @@ const BUILDINGS := [
 	["oracle", "The Oracle", 18, 13, 5, 3, "roof_teal"],
 	["junkyard", "Junkyard", 24, 12, 7, 4, "roof_slate"],
 	["blackmarket", "The Black Market", 32, 12, 6, 4, "roof_red"],
+	["tavern", "The Brass Lantern", 2, 7, 6, 4, "roof_slate"],
 ]
 
 
@@ -63,7 +64,7 @@ static func generate() -> GameMap:
 		m.set_t(p.x, p.y, C.Tile.FOUNTAIN)
 	for p in [Vector2i(9, 7), Vector2i(31, 7), Vector2i(9, 10), Vector2i(31, 10)]:
 		m.set_t(p.x, p.y, C.Tile.PLANTER)
-	for p in [Vector2i(5, 8), Vector2i(6, 8), Vector2i(5, 9), Vector2i(34, 8), Vector2i(35, 9), Vector2i(34, 9),
+	for p in [Vector2i(34, 8), Vector2i(35, 9), Vector2i(34, 9),
 			Vector2i(17, 10), Vector2i(23, 10), Vector2i(17, 6), Vector2i(23, 6)]:
 		m.set_t(p.x, p.y, C.Tile.TOWN_FLOWERS)
 	m.reveal_all()

@@ -17,14 +17,9 @@ var t := 0.0
 var hud_visible := true
 var show_full_map := false
 
-var hero_vis := Vector2.ZERO
-var hero_steps := 0
-var hero_attack_t := 99.0
-var hero_lunge := Vector2.ZERO
-var hero_cast_t := 99.0
-var hero_cast_col := Color.WHITE
-var hero_flash_t := 99.0
-var hero_flash_col := Color.WHITE
+var hero_vis := Vector2.ZERO    # where the driven body is drawn: the camera follows it
+var body_vis := {}         # instance id -> {h, pos, steps, attack_t, lunge, cast_t, cast_col, flash_t, flash_col}
+var fallen: Array = []     # party members going down: {h, pos, t}
 var mon_vis := {}          # instance id -> {pos, flash_t, flash_col, lunge, lunge_t, phase}
 var dying: Array = []      # {m, pos, t}
 var floaters: Array = []   # {text, pos, t, col, scale}
@@ -59,6 +54,8 @@ func hero_settled() -> bool:
 
 func snap() -> void:
 	hero_vis = Vector2(Game.hero.pos()) * TS
+	body_vis.clear()
+	fallen.clear()
 	mon_vis.clear()
 	dying.clear()
 	projectiles.clear()
@@ -67,23 +64,49 @@ func snap() -> void:
 	_map_ref = null
 
 
+## The controller has moved to another body: the camera goes with it.
+func snap_camera() -> void:
+	hero_vis = _bv(Game.hero).pos
+
+
+func _bv(h: Hero) -> Dictionary:
+	var k := h.get_instance_id()
+	if not body_vis.has(k):
+		body_vis[k] = {"h": h, "pos": Vector2(h.pos()) * TS, "steps": 0, "attack_t": 99.0, "lunge": Vector2.ZERO,
+			"cast_t": 99.0, "cast_col": Color.WHITE, "flash_t": 99.0, "flash_col": Color.WHITE}
+	return body_vis[k]
+
+
 func _process(delta: float) -> void:
 	t += delta
 	if Game.hero == null or Game.map == null:
 		return
 	if _map_ref != Game.map:
 		_map_ref = Game.map
-		hero_vis = Vector2(Game.hero.pos()) * TS
+		body_vis.clear()
+		fallen.clear()
 		mon_vis.clear()
 		dying.clear()
 		_rebuild_minimap()
 	_consume_fx()
-	var target := Vector2(Game.hero.pos()) * TS
 	var speed := TS / STEP_TIME * delta
-	if hero_vis.distance_to(target) > TS * 3:
-		hero_vis = target
-	else:
-		hero_vis = hero_vis.move_toward(target, speed)
+	for k in body_vis.keys():
+		var v: Dictionary = body_vis[k]
+		var b: Hero = v.h
+		if not b in Game.party:
+			body_vis.erase(k)
+			continue
+		var bt := Vector2(b.pos()) * TS
+		v.pos = bt if v.pos.distance_to(bt) > TS * 3 else v.pos.move_toward(bt, speed)
+		v.attack_t += delta
+		v.cast_t += delta
+		v.flash_t += delta
+	for b in Game.party:
+		_bv(b)
+	hero_vis = _bv(Game.hero).pos
+	for f in fallen:
+		f.t += delta
+	fallen = fallen.filter(func(f): return f.t < 0.8)
 	for k in mon_vis.keys():
 		var v: Dictionary = mon_vis[k]
 		var mo: Monster = v.m
@@ -104,9 +127,6 @@ func _process(delta: float) -> void:
 	for b in bursts:
 		b.t += delta
 	bursts = bursts.filter(func(b): return b.t < 0.4)
-	hero_attack_t += delta
-	hero_cast_t += delta
-	hero_flash_t += delta
 	screen_flash = maxf(0.0, screen_flash - delta * 3.0)
 	# the camera: centred on the hero, clamped to the map
 	var m := Game.map
@@ -144,24 +164,29 @@ func _consume_fx() -> void:
 	for e in Game.fx:
 		match e.type:
 			"move":
-				if e.who == h:
-					hero_steps += 1
+				if e.who is Hero:
+					_bv(e.who).steps += 1
 			"attack":
-				if e.who == h:
-					hero_attack_t = 0.0
-					hero_lunge = (Vector2(e.target.pos()) - Vector2(h.pos())).normalized()
-					_block(0.2)
+				if e.who is Hero:
+					var bv := _bv(e.who)
+					bv.attack_t = 0.0
+					bv.lunge = (Vector2(e.target.pos()) - Vector2(e.who.pos())).normalized()
+					if e.who == h:
+						_block(0.2)
 				else:
 					var v := _vis_for(e.who)
-					v.lunge = (Vector2(h.pos()) - Vector2(e.who.pos())).normalized()
+					v.lunge = (Vector2(e.target.pos()) - Vector2(e.who.pos())).normalized()
 					v.lunge_t = 0.0
-					_block(0.12)
+					if e.target == h:
+						_block(0.12)
 			"hurt":
 				var who = e.who
 				if who is Hero:
-					hero_flash_t = 0.0
-					hero_flash_col = Color8(255, 80, 80)
-					_float(hero_vis + Vector2(16, -30), str(e.amount), Color8(255, 196, 196), 2, delay)
+					var bv := _bv(who)
+					bv.flash_t = 0.0
+					bv.flash_col = Color8(255, 80, 80)
+					_float(bv.pos + Vector2(16, -30), str(e.amount), Color8(255, 196, 196) if who == h else Color8(255, 220, 200),
+						2 if who == h else 1, delay)
 				else:
 					var v := _vis_for(who)
 					v.flash_t = -delay
@@ -173,10 +198,15 @@ func _consume_fx() -> void:
 				dying.append({"m": e.who, "pos": v.pos, "t": -delay})
 				_block(0.15)
 			"miss":
-				_float(hero_vis + Vector2(16, -30), "Miss", Gfx.CYAN, 1, delay)
+				var bp: Vector2 = _bv(e.who).pos if e.get("who") is Hero else hero_vis
+				_float(bp + Vector2(16, -30), "Miss", Gfx.CYAN, 1, delay)
 			"heal":
-				_float(hero_vis + Vector2(16, -30), "+%d" % e.amount, Gfx.GREEN, 2, delay)
-				bursts.append({"at": hero_vis + Vector2(16, 16), "radius": 1, "t": 0.0, "col": Gfx.GREEN})
+				var bp: Vector2 = _bv(e.who).pos if e.get("who") is Hero else hero_vis
+				_float(bp + Vector2(16, -30), "+%d" % e.amount, Gfx.GREEN, 2, delay)
+				bursts.append({"at": bp + Vector2(16, 16), "radius": 1, "t": 0.0, "col": Gfx.GREEN})
+			"fall":
+				fallen.append({"h": e.who, "pos": _bv(e.who).pos, "t": -delay})
+				_block(0.3)
 			"bolt", "shot":
 				var dist := Vector2(e.from).distance_to(Vector2(e.to))
 				var dur := clampf(dist * 0.03, 0.08, 0.25)
@@ -188,15 +218,20 @@ func _consume_fx() -> void:
 				bursts.append({"at": Vector2(e.at) * TS + Vector2(16, 16), "radius": e.radius, "t": -delay, "col": e.color})
 				_block(0.25)
 			"cast":
-				hero_cast_t = 0.0
-				hero_cast_col = e.color
-				_block(0.18)
+				var bv := _bv(e.get("who") if e.get("who") is Hero else h)
+				bv.cast_t = 0.0
+				bv.cast_col = e.color
+				if bv.h == h:
+					_block(0.18)
 			"levelup":
-				_float(hero_vis + Vector2(16, -40), "LEVEL UP!" if Game.hero.xp < 3 else "GEAR!", Gfx.GOLD, 1, delay + 0.2, 1.4)
+				var lh: Hero = e.get("who") if e.get("who") is Hero else h
+				_float(_bv(lh).pos + Vector2(16, -40), "LEVEL UP!" if lh.xp < 3 else "GEAR!", Gfx.GOLD, 1, delay + 0.2, 1.4)
 			"pickup":
 				_float(Vector2(e.at) * TS + Vector2(16, -24), e.text, e.color, 1, delay, 1.0)
 			"warp", "teleport":
 				screen_flash = 1.0
+				for b in Game.party:
+					_bv(b).pos = Vector2(b.pos()) * TS
 				hero_vis = Vector2(h.pos()) * TS
 			"sense":
 				screen_flash = 0.5
@@ -352,13 +387,23 @@ func _draw_world() -> void:
 			actors.append([v.pos.y, 0, mo, v])
 		for d in dying:
 			actors.append([d.pos.y, 2, d])
-	actors.append([hero_vis.y + 0.5, 1])
+		for f in fallen:
+			actors.append([f.pos.y, 3, f])
+	# the party: in town only whoever you are driving walks the streets
+	for b in Game.party:
+		if not Party.is_up(b) or (Game.depth == 0 and b != Game.hero):
+			continue
+		if Game.depth > 0 and b != Game.hero and not m.is_visible(b.x, b.y):
+			continue
+		var bv := _bv(b)
+		actors.append([bv.pos.y + (0.5 if b == Game.hero else 0.4), 1, b, bv])
 	actors.sort_custom(func(a, b): return a[0] < b[0])
 	for a in actors:
 		match a[1]:
 			0: _draw_monster(ci, a[2], a[3])
-			1: _draw_hero(ci)
+			1: _draw_hero(ci, a[2], a[3])
 			2: _draw_dying(ci, a[2])
+			3: _draw_fallen(ci, a[2])
 	# effects
 	for p in projectiles:
 		if p.t < 0:
@@ -392,36 +437,61 @@ func _draw_world() -> void:
 		Gfx.text_center(ci, f.pos.x, f.pos.y - rise, f.text, col, f.scale, Color(Gfx.INK, alpha))
 
 
-func _draw_hero(ci: CanvasItem) -> void:
-	var h := Game.hero
+func _draw_hero(ci: CanvasItem, h: Hero, v: Dictionary) -> void:
 	var frame := "walk0"
 	var target := Vector2(h.pos()) * TS
-	var moving := hero_vis.distance_to(target) > 0.5
-	if hero_attack_t < 0.22:
-		frame = "atk0" if hero_attack_t < 0.06 else ("atk1" if hero_attack_t < 0.14 else "atk2")
-	elif hero_cast_t < 0.3:
+	var at: Vector2 = v.pos
+	var moving := at.distance_to(target) > 0.5
+	if v.attack_t < 0.22:
+		frame = "atk0" if v.attack_t < 0.06 else ("atk1" if v.attack_t < 0.14 else "atk2")
+	elif v.cast_t < 0.3:
 		frame = "cast"
 	elif moving:
-		frame = "walk1" if hero_steps % 2 == 0 else "walk3"
-		if hero_vis.distance_to(target) < TS * 0.35:
-			frame = "walk2" if hero_steps % 2 == 0 else "walk0"
+		frame = "walk1" if v.steps % 2 == 0 else "walk3"
+		if at.distance_to(target) < TS * 0.35:
+			frame = "walk2" if v.steps % 2 == 0 else "walk0"
 	var lunge := Vector2.ZERO
-	if hero_attack_t < 0.22:
-		lunge = hero_lunge * 6.0 * sin(clampf(hero_attack_t / 0.22, 0, 1) * PI)
+	if v.attack_t < 0.22:
+		lunge = v.lunge * 6.0 * sin(clampf(v.attack_t / 0.22, 0, 1) * PI)
 	var cell: Vector2i = ArtLayout.HERO_CELL
-	var feet := hero_vis + Vector2(TS / 2.0, TS - 3) + lunge
+	var feet: Vector2 = at + Vector2(TS / 2.0, TS - 3) + lunge
 	var mod := _tile_light(Game.map, h.x, h.y) if Game.depth > 0 else Color.WHITE
 	mod.a = 1
-	if hero_flash_t < 0.16 and int(hero_flash_t * 30) % 2 == 0:
-		mod = hero_flash_col
+	if v.flash_t < 0.16 and int(v.flash_t * 30) % 2 == 0:
+		mod = v.flash_col
 	_shadow(ci, feet, 22)
-	if hero_cast_t < 0.35:
-		var f := hero_cast_t / 0.35
-		ci.draw_arc(feet - Vector2(0, 20), 10 + f * 18, 0, TAU, 32, Color(hero_cast_col, 1 - f), 2.0)
+	if v.cast_t < 0.35:
+		var f: float = v.cast_t / 0.35
+		ci.draw_arc(feet - Vector2(0, 20), 10 + f * 18, 0, TAU, 32, Color(v.cast_col, 1 - f), 2.0)
+	if h.guard_turns > 0:
+		ci.draw_arc(feet - Vector2(0, 18), 17, 0, TAU, 24, Color(0.8, 0.88, 1.0, 0.55), 2.0)
 	var pos := (feet - Vector2(cell.x / 2.0, ArtLayout.HERO_FEET_Y)).round()
 	ci.draw_texture_rect_region(Gfx.heroes, Rect2(pos, Vector2(cell)), Gfx.hero_src(h.look, h.facing, frame), mod)
-	if Game.recall_countdown > 0:
-		ci.draw_arc(feet - Vector2(0, 22), 18 + sin(t * 6) * 2, 0, TAU, 32, Color(0.5, 0.95, 1.0, 0.8), 2.0)
+	if h == Game.hero:
+		if Game.recall_countdown > 0:
+			ci.draw_arc(feet - Vector2(0, 22), 18 + sin(t * 6) * 2, 0, TAU, 32, Color(0.5, 0.95, 1.0, 0.8), 2.0)
+		return
+	# one of yours: a marker in their colour, and their health once it is hurt
+	var col := Party.color_of(h)
+	var top := feet - Vector2(0, ArtLayout.HERO_FEET_Y + 2 + sin(t * 3 + h.roster_idx) * 1.0)
+	ci.draw_colored_polygon(PackedVector2Array([top + Vector2(-4, -5), top + Vector2(4, -5), top]), Gfx.INK)
+	ci.draw_colored_polygon(PackedVector2Array([top + Vector2(-3, -4), top + Vector2(3, -4), top + Vector2(0, -1)]), col)
+	var mx := Party.max_hp(h)
+	if h.hp < mx:
+		Gfx.bar(ci, feet + Vector2(-11, 2), 22, float(h.hp) / mx, Color8(88, 216, 96) if h.hp * 2 > mx else Color8(240, 200, 64), 2)
+
+
+func _draw_fallen(ci: CanvasItem, f: Dictionary) -> void:
+	if f.t < 0:
+		return
+	var h: Hero = f.h
+	var k: float = f.t / 0.8
+	if int(f.t * 20) % 2 == 0 and k < 0.5:
+		return
+	var cell: Vector2i = ArtLayout.HERO_CELL
+	var feet: Vector2 = f.pos + Vector2(TS / 2.0, TS - 3)
+	var pos := (feet - Vector2(cell.x / 2.0, ArtLayout.HERO_FEET_Y - k * 12)).round()
+	ci.draw_texture_rect_region(Gfx.heroes, Rect2(pos, Vector2(cell)), Gfx.hero_src(h.look, "down", "atk2"), Color(1, 0.5, 0.5, 1 - k))
 
 
 func _draw_monster(ci: CanvasItem, mo: Monster, v: Dictionary) -> void:
@@ -555,11 +625,17 @@ func _draw_hud() -> void:
 		ci.draw_rect(Rect2(Vector2.ZERO, SCREEN), Color(1, 1, 1, screen_flash * 0.6))
 	# the party panel
 	Gfx.window(ci, Rect2(4, 4, 236, 64))
-	var expr := "hurt" if h.hp * 3 < h.maxhp else ("angry" if hero_attack_t < 0.5 else "neutral")
+	var expr := "hurt" if h.hp * 3 < h.maxhp else ("angry" if _bv(h).attack_t < 0.5 else "neutral")
 	ci.draw_texture_rect_region(Gfx.portraits, Rect2(10, 12, 44, 44), Gfx.portrait_crop(h.look, expr, Vector2(10, 8), Vector2(44, 44)))
-	Gfx.text(ci, Vector2(60, 12), h.name, Gfx.WHITE)
-	Gfx.text(ci, Vector2(60 + Gfx.text_width(h.name) + 8, 12), "Lv %d" % h.level, Gfx.GREY)
-	Gfx.text_right(ci, Vector2(232, 12), h.class_name_str(), Gfx.DIM)
+	var lv := "Lv %d" % h.level
+	var cls := h.class_name_str()
+	var nm := h.name
+	if 60 + Gfx.text_width(nm) + Gfx.text_width(lv) + Gfx.text_width(cls) + 16 > 232:
+		nm = Party.short_name(h)
+	Gfx.text(ci, Vector2(60, 12), nm, Party.color_of(h) if h.is_hire else Gfx.WHITE)
+	Gfx.text(ci, Vector2(60 + Gfx.text_width(nm) + 8, 12), lv, Gfx.GREY)
+	if 60 + Gfx.text_width(nm) + Gfx.text_width(lv) + Gfx.text_width(cls) + 16 <= 232:
+		Gfx.text_right(ci, Vector2(232, 12), cls, Gfx.DIM)
 	Gfx.text(ci, Vector2(60, 27), "HP", Gfx.CYAN)
 	var hp_col := Color8(88, 216, 96) if h.hp * 2 > h.maxhp else (Color8(240, 200, 64) if h.hp * 4 > h.maxhp else Color8(240, 72, 72))
 	Gfx.bar(ci, Vector2(78, 28), 96, float(h.hp) / h.maxhp, hp_col)
@@ -589,6 +665,23 @@ func _draw_hud() -> void:
 		Gfx.window(ci, Rect2(cx, 70, w, 14), Color8(30, 30, 80), Color8(12, 12, 40))
 		Gfx.text(ci, Vector2(cx + 4, 73), chip[0], chip[1], 1, false)
 		cx += w + 2
+	# the rest of the party: a face, a name and a bar each
+	var py := 88.0 if not chips.is_empty() else 72.0
+	for b in Game.party:
+		if b == h:
+			continue
+		var up := Party.is_up(b)
+		Gfx.window(ci, Rect2(4, py, 132, 22), Color8(30, 30, 80), Color8(12, 12, 40))
+		ci.draw_texture_rect_region(Gfx.portraits, Rect2(8, py + 3, 16, 16),
+			Gfx.portrait_crop(b.look, "hurt" if not up or b.hp * 3 < Party.max_hp(b) else "neutral", Vector2(14, 10), Vector2(36, 36)),
+			Color.WHITE if up else Color(0.4, 0.4, 0.45))
+		Gfx.text(ci, Vector2(28, py + 3), Party.short_name(b), Party.color_of(b) if up else Gfx.DIM, 1, false)
+		if up:
+			Gfx.bar(ci, Vector2(28, py + 14), 72, float(b.hp) / Party.max_hp(b), Color8(88, 216, 96) if b.hp * 2 > Party.max_hp(b) else Color8(240, 200, 64), 3)
+			Gfx.text_right(ci, Vector2(132, py + 3), "Lv%d" % b.level, Gfx.GREY)
+		else:
+			Gfx.text(ci, Vector2(28, py + 12), "fallen", Gfx.DIM, 1, false)
+		py += 24
 	# where you are, and the purse
 	Gfx.window(ci, Rect2(SCREEN.x - 168, 4, 164, 40))
 	if Game.depth == 0:
@@ -615,6 +708,10 @@ func _draw_hud() -> void:
 		var origin := Vector2(clampf(h.x - span.x / 2, 0, m.w - span.x), clampf(h.y - span.y / 2, 0, m.h - span.y)).floor()
 		var dst := Rect2(r.position + Vector2(6, 6) + (Vector2(box.x - 8, box.y - 8) - span * 2) / 2, span * 2)
 		ci.draw_texture_rect_region(_mini_tex, dst, Rect2(origin, span))
+		for b in Party.others():
+			var bp := (Vector2(b.pos()) - origin) * 2
+			if bp.x >= 0 and bp.y >= 0 and bp.x < span.x * 2 and bp.y < span.y * 2:
+				ci.draw_rect(Rect2(dst.position + bp - Vector2(1, 1), Vector2(2, 2)), Party.color_of(b))
 		var hp := dst.position + (Vector2(h.pos()) - origin) * 2
 		if int(t * 4) % 2 == 0:
 			ci.draw_rect(Rect2(hp - Vector2(1, 1), Vector2(3, 3)), Color.WHITE)
@@ -644,6 +741,8 @@ func _draw_full_map(ci: CanvasItem) -> void:
 	var pos := ((SCREEN - size) / 2).round() + Vector2(0, 8)
 	Gfx.window(ci, Rect2(pos - Vector2(8, 8), size + Vector2(16, 16)), Color8(24, 24, 64), Color8(8, 8, 32))
 	ci.draw_texture_rect(_mini_tex, Rect2(pos, size), false)
+	for b in Party.others():
+		ci.draw_circle(pos + Vector2(b.pos()) * scale, 2, Party.color_of(b))
 	var hp := pos + Vector2(Game.hero.pos()) * scale
 	ci.draw_circle(hp, 3, Color.WHITE if int(t * 4) % 2 == 0 else Gfx.GOLD)
 	Gfx.text_center(ci, SCREEN.x / 2, 6, "Floor %d -- %s" % [Game.depth, C.BIOME_NAMES[m.biome]], Gfx.GOLD)

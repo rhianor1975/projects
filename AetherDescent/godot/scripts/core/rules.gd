@@ -31,6 +31,7 @@ static func refresh_vision() -> void:
 	if m.district_at(h.x, h.y) == C.District.MIRE:
 		radius = mini(radius, C.MIRE_FOV_RADIUS)
 	m.compute_fov(h.x, h.y, radius)
+	Party.reveal()
 
 
 # ---- the damage model --------------------------------------------------------------
@@ -41,8 +42,9 @@ static func damage_after_defence(attack: int, defence: int, variance: int) -> in
 	return maxi(1, attack * attack / (attack + defence) + variance)
 
 
-static func grant_xp(xp: int) -> void:
-	var h := H()
+## Experience goes to the body that earned it -- grant_xp() in combat.c.
+static func grant_xp(xp: int, who: Hero = null) -> void:
+	var h := who if who != null else H()
 	if Game.is_swarm():
 		xp = maxi(1, xp / C.SWARM_MONSTER_FRACTION)
 	var bonus := h.effective_stat(C.Acc.XP)
@@ -58,8 +60,11 @@ static func grant_xp(xp: int) -> void:
 		if h.level % 2 == 0:
 			h.base_def += 1
 		h.xp_next = 20 + (h.level - 1) * 15
-		Game.good("You reach level %d! Max HP now %d." % [h.level, h.maxhp])
-		Game.emit_fx({"type": "levelup", "at": h.pos()})
+		if h == H():
+			Game.good("You reach level %d! Max HP now %d." % [h.level, h.maxhp])
+		else:
+			Game.good("%s reaches level %d." % [h.name, h.level])
+		Game.emit_fx({"type": "levelup", "at": h.pos(), "who": h})
 	Game.update_escalation()
 
 
@@ -81,7 +86,9 @@ static func sell_level() -> bool:
 	return true
 
 
-static func monster_take_damage(mo: Monster, dmg: int) -> void:
+## Every blow anybody lands goes through here, so a kill by a hire pays the
+## party's gold, counts for the bounty, and ends the run if it was the Warden.
+static func monster_take_damage(mo: Monster, dmg: int, killer: Hero = null) -> void:
 	var m := M()
 	if not mo.alive:
 		return
@@ -114,7 +121,7 @@ static func monster_take_damage(mo: Monster, dmg: int) -> void:
 	Game.emit_fx({"type": "die", "who": mo})
 	var gold := Game.gain_gold(mo.gold_reward)
 	Game.msg("The %s falls. (+%d gold)" % [mo.name, gold], Color8(255, 232, 150))
-	grant_xp(mo.xp_reward)
+	grant_xp(mo.xp_reward, killer)
 	var q := Game.quest
 	if not q.is_empty() and int(q.get("depth", -1)) == Game.depth:
 		if q.type == "kill" and q.monster == mo.name:
@@ -228,6 +235,8 @@ static func _set_proc(mo: Monster) -> void:
 
 static func hero_take_damage(dmg: int, source: String) -> void:
 	var h := H()
+	if h.guard_turns > 0:
+		dmg = (dmg + 1) / 2
 	h.hp -= dmg
 	Game.emit_fx({"type": "hurt", "who": h, "amount": dmg})
 	if h.hp <= 0:
@@ -238,69 +247,106 @@ static func hero_take_damage(dmg: int, source: String) -> void:
 
 static func _die() -> void:
 	var h := H()
+	# The party will not let you die with a charm in your pack...
+	if Party.attempt_rescue():
+		return
 	h.alive = false
+	Game.emit_fx({"type": "fall", "who": h})
+	# ...and if they cannot save you, one of them carries on.
+	if Party.pass_the_torch():
+		return
 	Game.game_over = true
 	request = {"open": "gameover"}
 
 
-static func monster_hit_hero(mo: Monster) -> void:
-	var h := H()
+## Damage landing on any body. The driven one goes through hero_take_damage;
+## anybody else takes it here -- the Vanguard's guard halves it -- and a death
+## puts them back on the Tavern's books.
+static func body_take_damage(c: Hero, dmg: int, source: String) -> void:
+	if c == H():
+		hero_take_damage(dmg, source)
+		return
+	if not Party.is_up(c):
+		return
+	if c.guard_turns > 0:
+		dmg = (dmg + 1) / 2
+	dmg = maxi(dmg, 1)
+	c.hp -= dmg
+	Game.emit_fx({"type": "hurt", "who": c, "amount": dmg})
+	if c.hp > 0:
+		return
+	c.hp = 0
+	c.alive = false
+	Game.emit_fx({"type": "fall", "who": c})
+	Game.warn("%s goes down and does not get up." % c.name)
+
+
+static func monster_hit_hero(mo: Monster, target: Hero = null) -> void:
+	var h := target if target != null else H()
+	var you := h == H()
 	mo.facing_left = h.x < mo.x
 	Game.emit_fx({"type": "attack", "who": mo, "target": h})
 	if rnd(100) < C.MONSTER_CRIT_PCT:
-		var dmg := maxi(1, h.maxhp * (4 + rnd(4)) / 100)
-		Game.warn("A critical blow from the %s finds a gap in your guard! (-%d)" % [mo.name, dmg])
-		hero_take_damage(dmg, mo.name)
-		_reflect(mo, dmg)
-		_inflict_status(mo)
+		var dmg := maxi(1, Party.max_hp(h) * (4 + rnd(4)) / 100)
+		if you:
+			Game.warn("A critical blow from the %s finds a gap in your guard! (-%d)" % [mo.name, dmg])
+		body_take_damage(h, dmg, mo.name)
+		_reflect(mo, dmg, h)
+		_inflict_status(mo, h)
 		return
 	var ev := h.effective_stat(C.Acc.EVASION) + h.evasion_buff
 	if ev > 0 and rnd(100) < ev:
-		Game.msg("You dodge the %s's attack." % mo.name, Color8(150, 220, 255))
+		if you:
+			Game.msg("You dodge the %s's attack." % mo.name, Color8(150, 220, 255))
 		Game.emit_fx({"type": "miss", "who": h})
 		return
 	var wd := h.effective_stat(C.Acc.WARD)
 	if wd > 0 and rnd(100) < wd:
-		Game.msg("Something wards off the %s's blow entirely." % mo.name, Color8(150, 220, 255))
+		if you:
+			Game.msg("Something wards off the %s's blow entirely." % mo.name, Color8(150, 220, 255))
 		Game.emit_fx({"type": "miss", "who": h})
 		return
 	var atk := mo.atk
 	if mo.jinx_turns > 0:
 		atk -= mo.jinx_pen
 	var dmg := damage_after_defence(maxi(atk, 0), h.eff_def(), rnd(4) - 1)
-	Game.msg("The %s hits you for %d." % [mo.name, dmg], Color8(255, 190, 170))
-	hero_take_damage(dmg, mo.name)
-	_reflect(mo, dmg)
-	_inflict_status(mo)
+	if you:
+		Game.msg("The %s hits you for %d." % [mo.name, dmg], Color8(255, 190, 170))
+	body_take_damage(h, dmg, mo.name)
+	_reflect(mo, dmg, h)
+	_inflict_status(mo, h)
 
 
-static func _reflect(mo: Monster, dmg: int) -> void:
-	var h := H()
+static func _reflect(mo: Monster, dmg: int, h: Hero) -> void:
 	if not mo.alive or h.reflect_turns <= 0 or h.reflect_pct <= 0 or not h.alive:
 		return
 	var back := dmg * h.reflect_pct / 100
 	if back >= 1:
-		Game.msg("The ward turns %d of it back into the %s." % [back, mo.name])
-		monster_take_damage(mo, back)
+		if h == H():
+			Game.msg("The ward turns %d of it back into the %s." % [back, mo.name])
+		monster_take_damage(mo, back, h)
 
 
-static func _inflict_status(mo: Monster) -> void:
-	var h := H()
+static func _inflict_status(mo: Monster, h: Hero) -> void:
 	if not h.alive:
 		return
+	var you := h == H()
 	var proc := maxi(3, 15 - (h.hazard_resist_pct + h.set_bonus_hazard) / 4)
 	if rnd(100) >= proc:
 		return
 	if mo.is_boss or mo.biome_boss or mo.family == 1 or mo.family == 4:
 		h.stun_turns += 1
-		Game.warn("The %s's blow leaves you reeling, stunned!" % mo.name)
+		if you:
+			Game.warn("The %s's blow leaves you reeling, stunned!" % mo.name)
 	elif mo.family == 0 or mo.family == 3:
 		h.poison_turns = 4 + rnd(3)
 		h.poison_dmg = 2 + rnd(3)
-		Game.warn("The %s's bite leaves you poisoned!" % mo.name)
+		if you:
+			Game.warn("The %s's bite leaves you poisoned!" % mo.name)
 	else:
 		h.slow_turns = 3 + rnd(3)
-		Game.warn("Something about the %s's touch slows your blood." % mo.name)
+		if you:
+			Game.warn("Something about the %s's touch slows your blood." % mo.name)
 
 
 # ---- monster turns ---------------------------------------------------------------
@@ -319,6 +365,13 @@ static func monster_turn(mo: Monster) -> void:
 	if mo.slow_turns > 0:
 		mo.slow_turns -= 1
 		if rnd(2) == 0:
+			return
+	# A hired hero next to a monster gets hit like anyone else -- checked
+	# before the player, so a monster boxed in by the party fights the party.
+	for d in C.DIRS8:
+		var c := Party.other_at(mo.x + d.x, mo.y + d.y)
+		if c:
+			monster_hit_hero(mo, c)
 			return
 	var dx := h.x - mo.x
 	var dy := h.y - mo.y
@@ -340,7 +393,7 @@ static func monster_turn(mo: Monster) -> void:
 		if rnd(4) == 0:
 			var nx := mo.x + rnd(3) - 1
 			var ny := mo.y + rnd(3) - 1
-			if m.walkable_monster(nx, ny) and not m.monster_at(nx, ny) and Vector2i(nx, ny) != h.pos():
+			if m.walkable_monster(nx, ny) and not m.monster_at(nx, ny) and not Party.body_at(nx, ny):
 				m.move_monster(mo, nx, ny)
 		return
 	# chase: take the axis step that closes the most, else any step that helps
@@ -356,7 +409,7 @@ static func monster_turn(mo: Monster) -> void:
 			continue
 		var nx: int = mo.x + st.x
 		var ny: int = mo.y + st.y
-		if m.walkable_monster(nx, ny) and not m.monster_at(nx, ny) and Vector2i(nx, ny) != h.pos():
+		if m.walkable_monster(nx, ny) and not m.monster_at(nx, ny) and not Party.body_at(nx, ny):
 			m.move_monster(mo, nx, ny)
 			return
 	var best := Vector2i(-1, -1)
@@ -364,7 +417,7 @@ static func monster_turn(mo: Monster) -> void:
 	for d in C.DIRS8:
 		var nx: int = mo.x + d.x
 		var ny: int = mo.y + d.y
-		if not m.walkable_monster(nx, ny) or m.monster_at(nx, ny) or Vector2i(nx, ny) == h.pos():
+		if not m.walkable_monster(nx, ny) or m.monster_at(nx, ny) or Party.body_at(nx, ny):
 			continue
 		var dd: int = (h.x - nx) * (h.x - nx) + (h.y - ny) * (h.y - ny)
 		if dd <= best_d:
@@ -375,14 +428,20 @@ static func monster_turn(mo: Monster) -> void:
 
 
 static func process_monsters() -> void:
-	var h := H()
 	var m := M()
+	var bodies: Array = Game.party.filter(func(b): return Party.is_up(b))
 	for mo in m.monsters.duplicate():
-		if not h.alive or Game.won:
+		if not H().alive or Game.won or Game.game_over:
 			break
 		if not mo.alive:
 			continue
-		if absi(mo.x - h.x) > C.ACTIVE_RADIUS or absi(mo.y - h.y) > C.ACTIVE_RADIUS:
+		# a monster acts if any of the party is near enough to matter
+		var near := false
+		for b in bodies:
+			if absi(mo.x - b.x) <= C.ACTIVE_RADIUS and absi(mo.y - b.y) <= C.ACTIVE_RADIUS:
+				near = true
+				break
+		if not near:
 			continue
 		monster_turn(mo)
 	m.remove_dead()
@@ -404,7 +463,7 @@ static func maybe_respawn() -> void:
 				break
 			var x := rnd(m.w)
 			var y := rnd(m.h)
-			if m.t(x, y) != C.Tile.FLOOR or m.in_haven(x, y) or m.monster_at(x, y):
+			if m.t(x, y) != C.Tile.FLOOR or m.in_haven(x, y) or m.monster_at(x, y) or Party.body_at(x, y):
 				continue
 			if (x - h.x) * (x - h.x) + (y - h.y) * (y - h.y) < C.RESPAWN_MIN_DIST * C.RESPAWN_MIN_DIST:
 				continue
@@ -493,11 +552,14 @@ static func end_turn() -> void:
 		hero_take_damage(h.poison_dmg, "poison")
 		if h.poison_turns == 0 and h.alive:
 			Game.msg("The poison finally fades from your veins.")
-	if not h.alive:
+	if Game.game_over:
 		return
 	if Game.depth > 0:
+		Party.take_turn()
+		if Game.won:
+			return
 		process_monsters()
-		if not h.alive or Game.won:
+		if Game.game_over or Game.won:
 			return
 		maybe_respawn()
 		refresh_vision()
@@ -573,6 +635,14 @@ static func try_move(dx: int, dy: int) -> bool:
 			return true
 		hero_attack(mo)
 		h.still_turns = 0
+		end_turn()
+		return true
+	if Party.other_at(nx, ny):
+		if _hindered():
+			return true
+		Party.displace_into(h, nx, ny)
+		h.still_turns = 0
+		_pickup()
 		end_turn()
 		return true
 	if tt == C.Tile.LOCKED_DOOR:
@@ -744,7 +814,7 @@ static func trigger_feature(f: Dictionary) -> void:
 				for tries in 20:
 					var nx := h.x + rnd(7) - 3
 					var ny := h.y + rnd(7) - 3
-					if Vector2i(nx, ny) != h.pos() and m.walkable_monster(nx, ny) and not m.monster_at(nx, ny):
+					if not Party.body_at(nx, ny) and m.walkable_monster(nx, ny) and not m.monster_at(nx, ny):
 						var mo := Monster.for_floor(Game.depth, nx, ny, Game.rng)
 						mo.aggro = true
 						m.add_monster(mo)
@@ -1004,13 +1074,22 @@ static func cast_spell(slot: int) -> bool:
 			h.atk_buff = mag
 			h.atk_buff_turns = dur
 			Game.msg("%s courses through you. +%d attack for %d turns." % [s.name, mag, dur], col.lightened(0.4))
-		C.Effect.HEAL_SELF, C.Effect.PARTY_HEAL:
-			if h.hp >= h.maxhp and s.effect == C.Effect.PARTY_HEAL:
-				Game.msg("%s finds nobody who needs it." % s.name)
-				return false
+		C.Effect.HEAL_SELF:
 			h.hp = mini(h.maxhp, h.hp + mag)
 			Game.emit_fx({"type": "heal", "who": h, "amount": mag})
 			Game.msg("%s knits you back together for %d HP." % [s.name, mag], col.lightened(0.4))
+		C.Effect.PARTY_HEAL:
+			# everybody standing within reach of the song, you included
+			var hurt: Array = Game.party.filter(func(b): return Party.is_up(b) and b.hp < Party.max_hp(b) \
+				and (b.x - h.x) * (b.x - h.x) + (b.y - h.y) * (b.y - h.y) <= 36)
+			if hurt.is_empty():
+				Game.msg("%s finds nobody who needs it." % s.name)
+				return false
+			for b in hurt:
+				b.hp = mini(Party.max_hp(b), b.hp + mag)
+				Game.emit_fx({"type": "heal", "who": b, "amount": mag})
+			Game.msg("%s washes over the party for %d HP." % [s.name, mag] if hurt.size() > 1
+				else "%s knits you back together for %d HP." % [s.name, mag], col.lightened(0.4))
 		C.Effect.WARD_SHIELD:
 			h.def_buff = mag
 			h.def_buff_turns = dur
@@ -1046,7 +1125,7 @@ static func cast_spell(slot: int) -> bool:
 			for tries in 30:
 				var nx := h.x + rnd(mag * 2 + 1) - mag
 				var ny := h.y + rnd(mag * 2 + 1) - mag
-				if Vector2i(nx, ny) != h.pos() and m.walkable_player(nx, ny) and not m.monster_at(nx, ny) and m.t(nx, ny) == C.Tile.FLOOR:
+				if not Party.body_at(nx, ny) and m.walkable_player(nx, ny) and not m.monster_at(nx, ny) and m.t(nx, ny) == C.Tile.FLOOR:
 					h.x = nx
 					h.y = ny
 					ok = true

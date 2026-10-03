@@ -107,6 +107,24 @@ var y := 0
 var facing := "down"
 var alive := true
 
+# ---- a hire (companions.c) ---------------------------------------------------------
+# The character and the heroes from the Tavern are the same kind of body; these
+# are what a hire carries on top. The character has roster_idx -1 and none of it.
+var is_hire := false
+var roster_idx := -1
+var personality := 1           # Party.BOLD / STEADY / CAUTIOUS
+var tier := 0                  # which price step was paid
+var kills := 0
+var gear: Array = []           # [{name, atk, def, hp}] -- found on their own kills
+var potions: Array = []        # [{name, heal}] -- picked up and kept
+var shot_cd := 0
+var guard_turns := 0           # Bulwark
+var last_x := -1
+var last_y := -1
+var scout_x := -1
+var scout_y := -1
+var scout_turns := 0
+
 
 static func make(class_id_: int, name_: String) -> Hero:
 	var h := Hero.new()

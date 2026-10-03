@@ -10,12 +10,16 @@ static var _idle := 0
 static var _last_seen := 0
 static var _visited := {}
 static var _floor := -1
+static var _chase := {}        # monster id -> [best distance so far, steps without closing]
+static var _ignored := {}      # monsters given up on: across water, round a wall that never ends
 
 
 static func reset() -> void:
 	_idle = 0
 	_last_seen = 0
 	_visited = {}
+	_chase = {}
+	_ignored = {}
 
 
 static func step() -> String:
@@ -48,12 +52,27 @@ static func step() -> String:
 		if not mo.alive or not m.is_visible(mo.x, mo.y):
 			continue
 		var d := maxi(absi(mo.x - h.x), absi(mo.y - h.y))
+		if d > 1 and _ignored.has(mo.get_instance_id()):
+			continue
 		if (mo.aggro or d <= 2) and d < fd:
 			fd = d
 			foe = mo
 	if foe and fd <= 1:
 		Rules.try_move(foe.x - h.x, foe.y - h.y)
 		return ""
+	if foe and fd <= 6:
+		# A foe that never gets any closer is on the far side of something:
+		# chasing it is a dance, not a fight. Give up on it after a while.
+		var id := foe.get_instance_id()
+		var c: Array = _chase.get(id, [fd, 0])
+		if fd < c[0]:
+			c = [fd, 0]
+		else:
+			c[1] += 1
+		_chase[id] = c
+		if c[1] > 8:
+			_ignored[id] = true
+			foe = null
 	if foe and fd <= 6:
 		var p := _path_step(func(x, y): return x == foe.x and y == foe.y, true)
 		if p != Vector2i.ZERO:

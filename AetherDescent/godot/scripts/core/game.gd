@@ -11,7 +11,8 @@ signal state_changed
 var rng := RandomNumberGenerator.new()
 var persist := true           # tests turn this off: nothing they do reaches the save files
 
-var hero: Hero
+var hero: Hero                 # the body being driven: one of `party`
+var party: Array = []          # every body: [0] the character, then the hires
 var map: GameMap
 var difficulty := C.Difficulty.NORMAL
 var world := C.WorldSize.SHAFT
@@ -34,6 +35,10 @@ var rested := false            # has taken a room at the Inn: a place to wake
 var quest := {}
 var oracle_reading := ""       # "stairs" or "depth": spent on the next floor
 var writs := 0
+var tavern_seed := 1           # the Tavern's twenty, regenerated from this
+var tavern_reroll: Array = []  # per seat: how many times it has been let go
+var tavern_hired := 0          # bitmask of seats out with you
+var tavern_fallen := 0         # bitmask of seats who died in your service
 var game_over := false
 var won := false
 var killed_by := ""
@@ -101,6 +106,13 @@ func new_run(class_id: int, name: String, diff: int, wsize: int, seed_ := 0) -> 
 	world = wsize
 	run_seed = seed_ if seed_ != 0 else (rng.randi() % 99999 + 1)
 	hero = Hero.make(class_id, name)
+	party = [hero]
+	tavern_seed = rng.randi() % 0x7FFFFFFF + 1
+	tavern_reroll = []
+	tavern_reroll.resize(Party.TAVERN_ROSTER)
+	tavern_reroll.fill(0)
+	tavern_hired = 0
+	tavern_fallen = 0
 	depth = 0
 	deepest_floor = 0
 	gold = C.NEW_GAME_GOLD
@@ -161,6 +173,14 @@ func _starting_kit() -> void:
 			give("Field Rations, Preserved", 2)
 
 
+## Hand the controller to another body of the party.
+func controlled_set(h: Hero) -> void:
+	hero = h
+	if depth > 0:
+		Rules.refresh_vision()
+	state_changed.emit()
+
+
 func update_escalation() -> void:
 	escalation_pct = Monster.escalation_for(hero.level, floor_entries)
 
@@ -168,8 +188,12 @@ func update_escalation() -> void:
 func enter_town(at: Vector2i) -> void:
 	depth = 0
 	map = Town.generate()
+	Party.reap_fallen()
 	hero.x = at.x
 	hero.y = at.y
+	for h in party:
+		h.stance_atk_pct = 0
+		h.stance_def_pct = 0
 	recall_countdown = 0
 	hero.stance_atk_pct = 0
 	hero.stance_def_pct = 0
@@ -186,6 +210,7 @@ func enter_floor(n: int, arrive_down := true) -> void:
 	var at := map.stairs_up if arrive_down or map.stairs_down.x < 0 else map.stairs_down
 	hero.x = at.x
 	hero.y = at.y
+	Party.place()
 	recall_countdown = 0
 	_spend_oracle()
 	Rules.refresh_vision()
@@ -283,14 +308,22 @@ func quest_wants_fetch(floor_num: int) -> bool:
 
 
 # ---- persistence -----------------------------------------------------------------
+## Whose run this is: the character it started as, whoever is being driven.
+func owner() -> Hero:
+	return party[0] if not party.is_empty() else hero
+
+
 func _slot_path(kind: String) -> String:
-	var safe := hero.name.to_lower().replace(" ", "_").validate_filename()
+	var safe := owner().name.to_lower().replace(" ", "_").validate_filename()
 	return SAVE_DIR + "%s_%s.json" % [kind, safe]
 
 
 func snapshot() -> Dictionary:
 	return {
-		"version": 1, "hero": hero.to_dict(), "difficulty": difficulty, "world": world,
+		"version": 2, "hero": hero.to_dict(),
+		"party": party.map(func(h): return h.to_dict()), "controlled": party.find(hero),
+		"tavern_seed": tavern_seed, "tavern_reroll": tavern_reroll,
+		"tavern_hired": tavern_hired, "tavern_fallen": tavern_fallen, "difficulty": difficulty, "world": world,
 		"run_seed": run_seed, "depth": depth, "deepest_floor": deepest_floor, "gold": gold,
 		"gold_mult": gold_mult, "gold_boon_until": gold_boon_until, "inventory": inventory,
 		"keys": keys, "turns": turns, "floor_entries": floor_entries, "steps": steps,
@@ -301,9 +334,21 @@ func snapshot() -> Dictionary:
 
 
 func restore(d: Dictionary) -> void:
-	hero = Hero.from_dict(d.hero)
-	hero.known_spells = hero.known_spells.map(func(v): return int(v))
-	hero.spell_cd = hero.spell_cd.map(func(v): return int(v))
+	party = []
+	for hd in d.get("party", [d.hero]):
+		var h := Hero.from_dict(hd)
+		h.known_spells = h.known_spells.map(func(v): return int(v))
+		h.spell_cd = h.spell_cd.map(func(v): return int(v))
+		party.append(h)
+	hero = party[clampi(int(d.get("controlled", 0)), 0, party.size() - 1)]
+	tavern_seed = int(d.get("tavern_seed", run_seed if d.has("run_seed") else 1))
+	tavern_reroll = Array(d.get("tavern_reroll", [])).map(func(v): return int(v))
+	tavern_reroll.resize(Party.TAVERN_ROSTER)
+	for i in tavern_reroll.size():
+		if tavern_reroll[i] == null:
+			tavern_reroll[i] = 0
+	tavern_hired = int(d.get("tavern_hired", 0))
+	tavern_fallen = int(d.get("tavern_fallen", 0))
 	difficulty = int(d.difficulty)
 	world = int(d.world)
 	run_seed = int(d.run_seed)
@@ -357,7 +402,7 @@ func save_run() -> void:
 		return
 	_write(_slot_path("run"), snapshot())
 	var idx := _read(SAVE_DIR + "runs.json")
-	idx[hero.name] = {"class": hero.class_name_str(), "level": hero.level, "deepest": deepest_floor,
+	idx[owner().name] = {"class": owner().class_name_str(), "level": owner().level, "deepest": deepest_floor,
 		"difficulty": difficulty, "time": Time.get_unix_time_from_system()}
 	_write(SAVE_DIR + "runs.json", idx)
 
@@ -369,15 +414,15 @@ func list_runs() -> Dictionary:
 func load_run(name: String) -> bool:
 	var tmp := Hero.new()
 	tmp.name = name
-	var keep := hero
-	hero = tmp
+	var keep := party
+	party = [tmp]
 	var d := _read(_slot_path("run"))
-	hero = keep
+	party = keep
 	if d.is_empty():
 		return false
 	restore(d)
 	log_lines = []
-	msg("Welcome back, %s." % hero.name, Color8(150, 200, 255))
+	msg("Welcome back, %s." % owner().name, Color8(150, 200, 255))
 	return true
 
 
@@ -387,7 +432,7 @@ func delete_run() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(_slot_path("run")))
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(_slot_path("inn")))
 	var idx := _read(SAVE_DIR + "runs.json")
-	idx.erase(hero.name)
+	idx.erase(owner().name)
 	_write(SAVE_DIR + "runs.json", idx)
 
 

@@ -189,10 +189,13 @@ func line_of_sight(x0: int, y0: int, x1: int, y1: int) -> bool:
 var _lit: PackedInt32Array = PackedInt32Array()
 
 
-func compute_fov(px: int, py: int, radius: int) -> void:
-	for i in _lit:
-		visible[i] = 0
-	_lit.clear()
+## Light what (px,py) can see. `fresh` clears the last pass first; the
+## party's own eyes add to the driver's with fresh = false.
+func compute_fov(px: int, py: int, radius: int, fresh := true) -> void:
+	if fresh:
+		for i in _lit:
+			visible[i] = 0
+		_lit.clear()
 	var r2 := radius * radius
 	for y in range(py - radius, py + radius + 1):
 		if y < 0 or y >= h:
@@ -206,6 +209,8 @@ func compute_fov(px: int, py: int, radius: int) -> void:
 				continue
 			if line_of_sight(px, py, x, y):
 				var i := y * w + x
+				if visible[i] == 1:
+					continue
 				visible[i] = 1
 				seen[i] = 1
 				_lit.append(i)

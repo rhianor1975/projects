@@ -16,6 +16,7 @@ var rebuild: Callable          # (menu) -> refill items after a change or tab sw
 var on_select: Callable        # (menu, item) -> true to close
 var on_cancel: Callable        # (menu) -> true to close (default: close)
 var detail: Callable           # (ci, rect, menu, item) -> draws the right panel
+var on_key: Callable           # (menu, keycode) -> true if it used a key the list did not
 var footer := "Z/Enter: choose    X/Esc: back"
 var list_width := 340
 var rows := 11
@@ -91,6 +92,8 @@ func input(ev: InputEvent) -> bool:
 		Sfx.play("back")
 		if not on_cancel.is_valid() or on_cancel.call(self):
 			closed = true
+	elif ev is InputEventKey and on_key.is_valid() and on_key.call(self, ev.keycode):
+		refresh()
 	else:
 		return false
 	return true
