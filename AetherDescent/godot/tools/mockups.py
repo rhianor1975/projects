@@ -231,7 +231,7 @@ def damage_number(img, x, y, n, col=WHITE):
 
 
 # ---- screens ----------------------------------------------------------------------
-def screen_title():
+def screen_title(ui=True):
     img = Image.new("RGBA", (W, H))
     px = img.load()
     top, mid, bot = (20, 14, 56), (132, 52, 112), (248, 156, 80)
@@ -278,6 +278,8 @@ def screen_title():
     for y in range(ground, H):
         for x in range(W):
             px[x, y] = (14, 36, 28, 255) if (x * 7 + y * 3) % 11 else (22, 60, 40, 255)
+    if not ui:
+        return img
     gold = [(255, 250, 210), (255, 232, 140), (250, 196, 72), (224, 148, 40), (184, 104, 32), (152, 72, 24), (112, 48, 24)]
     title = "AETHER DESCENT"
     draw_text(img, (W - text_width(title) * 5) // 2, 44, title, col=gold, outline=(32, 16, 40), scale=5)

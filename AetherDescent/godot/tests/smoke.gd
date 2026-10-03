@@ -4,6 +4,7 @@ extends Node
 ##   godot --headless --path . tests/smoke.tscn
 
 func _ready() -> void:
+	Game.persist = false
 	var game = Game
 	var failures := 0
 	var t0 := Time.get_ticks_msec()

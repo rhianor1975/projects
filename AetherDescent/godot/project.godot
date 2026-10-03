@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 Game="*res://scripts/core/game.gd"
+Sfx="*res://scripts/core/sfx.gd"
 
 [display]
 

@@ -431,6 +431,9 @@ def main():
     if want("props"):
         sheet([prop(k) for k in PROP_KINDS], len(PROP_KINDS), T, T).save(os.path.join(ASSETS, "props.png"))
         print("props", round(time.time() - t0, 1))
+    if want("title"):
+        import mockups
+        mockups.screen_title(ui=False).convert("RGB").save(os.path.join(ASSETS, "title_bg.png"))
     fimg, chars, widths = font_sheet()
     fimg.save(os.path.join(ASSETS, "font.png"))
 

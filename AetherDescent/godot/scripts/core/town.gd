@@ -5,9 +5,9 @@ class_name Town
 ## the door in it -- but holds the same buildings doing the same jobs.
 
 const W := 40
-const H := 24
-const START := Vector2i(20, 12)
-const TEMPLE := Vector2i(20, 10)
+const H := 18
+const START := Vector2i(20, 10)
+const TEMPLE := Vector2i(20, 8)
 
 # id, label, x, y, w, h, roof style
 const BUILDINGS := [
@@ -16,11 +16,11 @@ const BUILDINGS := [
 	["apothecary", "Apothecary", 18, 1, 5, 5, "roof_teal"],
 	["arcanist", "Arcanist's Guild", 24, 2, 7, 4, "roof_teal"],
 	["bank", "Bank of the Deep Well", 32, 1, 6, 5, "roof_slate"],
-	["inn", "The Inn", 2, 15, 7, 4, "roof_red"],
-	["gladiator", "Gladiator School", 10, 15, 7, 4, "roof_red"],
-	["oracle", "The Oracle", 18, 16, 5, 3, "roof_teal"],
-	["junkyard", "Junkyard", 24, 15, 7, 4, "roof_slate"],
-	["blackmarket", "The Black Market", 32, 15, 6, 4, "roof_red"],
+	["inn", "The Inn", 2, 12, 7, 4, "roof_red"],
+	["gladiator", "Gladiator School", 10, 12, 7, 4, "roof_red"],
+	["oracle", "The Oracle", 18, 13, 5, 3, "roof_teal"],
+	["junkyard", "Junkyard", 24, 12, 7, 4, "roof_slate"],
+	["blackmarket", "The Black Market", 32, 12, 6, 4, "roof_red"],
 ]
 
 
@@ -59,12 +59,12 @@ static func generate() -> GameMap:
 	# the plaza: fountains, beds, and the temple mouth in the middle
 	m.set_t(TEMPLE.x, TEMPLE.y, C.Tile.TEMPLE)
 	m.stairs_down = TEMPLE
-	for p in [Vector2i(14, 10), Vector2i(26, 10)]:
+	for p in [Vector2i(14, 8), Vector2i(26, 8)]:
 		m.set_t(p.x, p.y, C.Tile.FOUNTAIN)
-	for p in [Vector2i(9, 8), Vector2i(31, 8), Vector2i(9, 12), Vector2i(31, 12)]:
+	for p in [Vector2i(9, 7), Vector2i(31, 7), Vector2i(9, 10), Vector2i(31, 10)]:
 		m.set_t(p.x, p.y, C.Tile.PLANTER)
-	for p in [Vector2i(5, 9), Vector2i(6, 9), Vector2i(5, 10), Vector2i(34, 9), Vector2i(35, 10), Vector2i(34, 10),
-			Vector2i(17, 13), Vector2i(23, 13), Vector2i(17, 7), Vector2i(23, 7)]:
+	for p in [Vector2i(5, 8), Vector2i(6, 8), Vector2i(5, 9), Vector2i(34, 8), Vector2i(35, 9), Vector2i(34, 9),
+			Vector2i(17, 10), Vector2i(23, 10), Vector2i(17, 6), Vector2i(23, 6)]:
 		m.set_t(p.x, p.y, C.Tile.TOWN_FLOWERS)
 	m.reveal_all()
 	m.visible.fill(1)

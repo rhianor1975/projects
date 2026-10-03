@@ -1,6 +1,7 @@
 extends Node
 
 func _ready() -> void:
+	Game.persist = false
 	Game.new_run(5, "Dbg", C.Difficulty.NORMAL, C.WorldSize.SHAFT, 4247)
 	Game.hero.maxhp *= 20
 	Game.hero.hp = Game.hero.maxhp

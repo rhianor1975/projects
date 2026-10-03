@@ -9,6 +9,7 @@ extends Node
 signal state_changed
 
 var rng := RandomNumberGenerator.new()
+var persist := true           # tests turn this off: nothing they do reaches the save files
 
 var hero: Hero
 var map: GameMap
@@ -338,7 +339,7 @@ func _read(path: String) -> Dictionary:
 
 
 func save_run() -> void:
-	if hero == null or game_over:
+	if not persist or hero == null or game_over:
 		return
 	_write(_slot_path("run"), snapshot())
 	var idx := _read(SAVE_DIR + "runs.json")
@@ -377,6 +378,8 @@ func delete_run() -> void:
 
 
 func save_inn_snapshot() -> void:
+	if not persist:
+		return
 	var s := snapshot()
 	s.depth = 0
 	s.map = {}
@@ -392,6 +395,8 @@ func load_inn_snapshot() -> bool:
 
 
 func record_highscore() -> int:
+	if not persist:
+		return deepest_floor
 	var hs := _read(SAVE_DIR + "highscores.json")
 	var best := int(hs.get("best", 0))
 	if deepest_floor > best:
