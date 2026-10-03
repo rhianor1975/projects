@@ -22,7 +22,25 @@ static var warden: Texture2D = preload("res://assets/warden.png")
 static var props: Texture2D = preload("res://assets/props.png")
 static var font: Texture2D = preload("res://assets/font.png")
 static var torch: Texture2D = preload("res://assets/torch.png")
+## The art set: "16bit" or "classic". Classic sheets share the 16-bit
+## layout at half the resolution and are drawn at 2x, so every lookup below
+## divides its source rectangle by `k` and nothing else needs to know.
+static var art := "16bit"
+static var k := 1
 static var _glyph := {}
+
+
+static func set_art(which: String) -> void:
+	art = which if which in ["16bit", "classic"] else "16bit"
+	k = 2 if art == "classic" else 1
+	var dir := "res://assets/" if art == "16bit" else "res://assets/classic/"
+	tiles = load(dir + "tiles.png")
+	heroes = load(dir + "heroes.png")
+	portraits = load(dir + "portraits.png")
+	monsters = load(dir + "monsters.png")
+	warden = load(dir + "warden.png")
+	props = load(dir + "props.png")
+	torch = load(dir + "torch.png")
 
 
 static func _glyphs() -> Dictionary:
@@ -130,7 +148,7 @@ static func cursor(ci: CanvasItem, pos: Vector2, t: float) -> void:
 
 # ---- sprite lookups --------------------------------------------------------------
 static func tile_src(row: int, col: int) -> Rect2:
-	var ts := ArtLayout.TILE
+	var ts := ArtLayout.TILE / k
 	return Rect2(col * ts, row * ts, ts, ts)
 
 
@@ -143,25 +161,36 @@ static func town_col(kind: String) -> int:
 
 
 static func hero_src(look: int, facing: String, frame: String) -> Rect2:
-	var cell: Vector2i = ArtLayout.HERO_CELL
+	var cell: Vector2i = ArtLayout.HERO_CELL / k
 	var row := look * 4 + ArtLayout.HERO_FACINGS.find(facing)
 	var col := ArtLayout.HERO_FRAMES.find(frame)
 	return Rect2(col * cell.x, row * cell.y, cell.x, cell.y)
 
 
 static func portrait_src(look: int, expr := "neutral") -> Rect2:
-	var p := ArtLayout.PORTRAIT
+	var p := ArtLayout.PORTRAIT / k
 	return Rect2(ArtLayout.EXPRESSIONS.find(expr) * p, look * p, p, p)
 
 
 static func monster_src(family_row: int, kind: int, frame: int) -> Rect2:
-	var c := ArtLayout.MON_CELL
+	var c := ArtLayout.MON_CELL / k
 	return Rect2((kind * 3 + frame) * c, family_row * c, c, c)
 
 
 static func prop_src(kind: String) -> Rect2:
-	var ts := ArtLayout.TILE
+	var ts := ArtLayout.TILE / k
 	return Rect2(ArtLayout.PROP_KINDS.find(kind) * ts, 0, ts, ts)
+
+
+## A square crop of a portrait, in 16-bit pixel units, for the HUD.
+static func portrait_crop(look: int, expr: String, offset: Vector2, size: Vector2) -> Rect2:
+	var src := portrait_src(look, expr)
+	return Rect2(src.position + offset / k, size / k)
+
+
+static func warden_src(frame: int) -> Rect2:
+	var c := ArtLayout.BOSS_CELL / k
+	return Rect2(frame * c, 0, c, c)
 
 
 static func portrait(ci: CanvasItem, pos: Vector2, look: int, expr := "neutral", framed := true) -> void:

@@ -45,8 +45,22 @@ const LOG_CAP := 200
 const SAVE_DIR := "user://"
 
 
+var settings := {"art": "16bit", "sound": true}
+
+
 func _ready() -> void:
 	rng.randomize()
+	var s := _read(SAVE_DIR + "settings.json")
+	for k in s:
+		settings[k] = s[k]
+	Gfx.set_art(settings.art)
+	Sfx.enabled = settings.sound
+
+
+func save_settings() -> void:
+	settings.art = Gfx.art
+	settings.sound = Sfx.enabled
+	_write(SAVE_DIR + "settings.json", settings)
 
 
 # ---- messages and effects --------------------------------------------------------

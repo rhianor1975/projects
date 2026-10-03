@@ -76,7 +76,13 @@ func _open_title() -> void:
 		title_menu.items.append({"label": "Continue: %s" % name, "id": "load", "name": name,
 			"desc": "%s, level %d, deepest floor %d (%s)" % [r.get("class", "?"), int(r.get("level", 1)),
 				int(r.get("deepest", 0)), C.DIFFICULTY_NAMES[int(r.get("difficulty", 0))]]})
+	title_menu.items.append({"label": _art_label(), "id": "art",
+		"desc": "16-bit: shaded anime sprites.  Classic: the flat look of the first sketches."})
 	title_menu.items.append({"label": "Quit", "id": "quit"})
+
+
+func _art_label() -> String:
+	return "Art: %s" % ("16-bit" if Gfx.art == "16bit" else "Classic")
 
 
 func _title_input(ev: InputEvent) -> void:
@@ -103,6 +109,10 @@ func _title_input(ev: InputEvent) -> void:
 			"load":
 				if Game.load_run(it.name):
 					_start_game()
+			"art":
+				Gfx.set_art("classic" if Gfx.art == "16bit" else "16bit")
+				Game.save_settings()
+				it.label = _art_label()
 			"quit":
 				get_tree().quit()
 
@@ -669,6 +679,7 @@ func _open_pause() -> void:
 	var m := _menu("Menu")
 	m.items = [{"label": "Resume", "id": "resume"}, {"label": "Keys", "id": "help"},
 		{"label": "Sound: %s" % ("on" if Sfx.enabled else "off"), "id": "sound"},
+		{"label": _art_label(), "id": "art", "desc": "16-bit: shaded anime sprites.  Classic: the flat look of the first sketches."},
 		{"label": "Save and quit to title", "id": "quit"}]
 	m.detail = _detail_hero
 	m.on_select = func(mm: Menu, it: Dictionary) -> bool:
@@ -680,6 +691,12 @@ func _open_pause() -> void:
 			"sound":
 				Sfx.enabled = not Sfx.enabled
 				it.label = "Sound: %s" % ("on" if Sfx.enabled else "off")
+				Game.save_settings()
+				return false
+			"art":
+				Gfx.set_art("classic" if Gfx.art == "16bit" else "16bit")
+				Game.save_settings()
+				it.label = _art_label()
 				return false
 			"quit":
 				Game.save_run()

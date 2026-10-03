@@ -314,7 +314,7 @@ func _draw_world() -> void:
 				ci.draw_rect(Rect2(x * TS, y * TS + 1, TS, 2), Color(0.6, 0.8, 1.0, 0.45 * light.r))
 			if tt == C.Tile.WALL and m.t(x, y + 1) != C.Tile.WALL and _hash(x, y) % 11 == 0:
 				var flick := 0.85 + 0.15 * sin(t * 9.0 + x)
-				ci.draw_texture(Gfx.torch, Vector2(x * TS, y * TS - 4), light * Color(1, 1, 1, flick))
+				ci.draw_texture_rect(Gfx.torch, Rect2(x * TS, y * TS - 4, TS, TS), false, light * Color(1, 1, 1, flick))
 				if m.is_visible(x, y):
 					torches.append(Vector2(x * TS + 16, y * TS + 8))
 	# torch glow: additive-looking warm pools
@@ -448,7 +448,7 @@ func _draw_monster(ci: CanvasItem, mo: Monster, v: Dictionary) -> void:
 	if flip:
 		dst = Rect2(pos + Vector2(size, 0), Vector2(-size, size))
 	if big:
-		ci.draw_texture_rect_region(Gfx.warden, dst, Rect2(frame * size, 0, size, size), mod)
+		ci.draw_texture_rect_region(Gfx.warden, dst, Gfx.warden_src(frame), mod)
 	else:
 		var src := Gfx.monster_src(Monster.family_row(mo), mo.kind, frame)
 		if mo.biome_boss or mo.is_elite:
@@ -483,7 +483,7 @@ func _draw_dying(ci: CanvasItem, d: Dictionary) -> void:
 		size = ArtLayout.BOSS_CELL
 	var pos := (feet - Vector2(size / 2.0, size - 3 - f * 10)).round()
 	if mo.is_boss:
-		ci.draw_texture_rect_region(Gfx.warden, Rect2(pos, Vector2(size, size)), Rect2(2 * size, 0, size, size), Color(1, 0.6, 0.6, 1 - f))
+		ci.draw_texture_rect_region(Gfx.warden, Rect2(pos, Vector2(size, size)), Gfx.warden_src(2), Color(1, 0.6, 0.6, 1 - f))
 	else:
 		ci.draw_texture_rect_region(Gfx.monsters, Rect2(pos, Vector2(size, size)), src, Color(1, 0.6, 0.6, 1 - f))
 
@@ -556,7 +556,7 @@ func _draw_hud() -> void:
 	# the party panel
 	Gfx.window(ci, Rect2(4, 4, 236, 64))
 	var expr := "hurt" if h.hp * 3 < h.maxhp else ("angry" if hero_attack_t < 0.5 else "neutral")
-	ci.draw_texture_rect_region(Gfx.portraits, Rect2(10, 12, 44, 44), Rect2(Gfx.portrait_src(h.look, expr).position + Vector2(10, 8), Vector2(44, 44)))
+	ci.draw_texture_rect_region(Gfx.portraits, Rect2(10, 12, 44, 44), Gfx.portrait_crop(h.look, expr, Vector2(10, 8), Vector2(44, 44)))
 	Gfx.text(ci, Vector2(60, 12), h.name, Gfx.WHITE)
 	Gfx.text(ci, Vector2(60 + Gfx.text_width(h.name) + 8, 12), "Lv %d" % h.level, Gfx.GREY)
 	Gfx.text_right(ci, Vector2(232, 12), h.class_name_str(), Gfx.DIM)

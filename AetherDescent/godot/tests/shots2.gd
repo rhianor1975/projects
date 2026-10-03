@@ -11,6 +11,8 @@ func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	if args.size() > 0:
 		out = args[0]
+	if "classic" in args:
+		Gfx.set_art("classic")
 	main = load("res://scenes/main.tscn").instantiate()
 	add_child(main)
 	await _run()

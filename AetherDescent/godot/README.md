@@ -83,8 +83,20 @@ and the material-gated upgrade rungs past +20; dynamic difficulty and biome
 bands; and the Well (1400×800) world size. Each of these is self-contained
 in the C source and slots into the same structure.
 
-A **Classic art mode** — the flat 16×24 style of the first mockups, with its
-own walk and attack animations — is planned next.
+## Art: 16-bit or Classic
+
+Two art sets, switched from the title screen or the Esc menu (and
+remembered):
+
+- **16-bit** — shaded, modelled anime sprites: 32×48 heroes, 48×48
+  monsters, 64×64 portraits, textured 32px tiles.
+- **Classic** — the flat look of the first mockups: hand-drawn 16×24 heroes
+  and 16×16 monsters, 32px portraits, 16px tiles, drawn at 2×. It has its
+  own front, back and side views, a four-frame walk, a three-frame attack
+  with the class's weapon and a slash, and a cast pose.
+
+Both sets share one sheet layout (Classic is exactly half-size), so the game
+code does not know which one it is drawing.
 
 ## How it is built
 
@@ -123,6 +135,7 @@ change. Faces get hand-painted anime eyes on top.
 pip install pillow numpy
 python3 tools/gen_data.py      # class/spell/monster tables from ../src
 python3 tools/gen_art.py       # every texture, ~90 s
+python3 tools/classic/gen_classic.py   # the Classic set (after gen_art.py)
 python3 tools/mockups.py       # the mockup screens and the walk/attack GIF
 ```
 
