@@ -121,6 +121,22 @@ The print-and-play game in a terminal. Six lands — Frostburn, the Tar'ri Ocean
 
 ---
 
+### ⚙️ [Aether Descent](./AetherDescent/) – Terminal Roguelike
+
+Your ether-ship came down through the canopy and the jungle let you out into a city on no Imperial chart: brass domes gone green, ether-lanterns still guttering, vine roots thick as a man's waist through every window. At the heart of it a temple sinks into the ground, and the locals call the bottom of it the Deep Well in the tone people use for a debt. One hundred floors, and nobody has come back up to say whether that is really where it ends.
+
+* Seven archetypes and a hundred classes between them, unlocked by how deep your earlier characters got
+* A city that is half the game: the Bank, the Black Market, the Ashfall Kitchen, the Venusian Track, a gladiator school, an oracle, an altar and a bazaar
+* Six aether attributes, spell schools, ranged weapons with their own ammunition, and hired heroes who come down with you
+* Waygates up every five floors, recall charms, and a death that costs you the run but not the character — except on Hardcore
+* Two backends from one source: ncurses, or notcurses for colour and tile art
+* Three test suites and a headless winnability harness, so the balance is measured rather than argued
+
+**Build:** cd AetherDescent && make
+**Run:** ./bin/aether-descent — or ./bin/aether-descent --seed 44815 for a particular world
+
+---
+
 ## 🔧 Dependencies
 
 ### Common
@@ -145,6 +161,10 @@ The print-and-play game in a terminal. Six lands — Frostburn, the Tar'ri Ocean
 
 ### Talisman, Prophecy and Djarhun (board games)
 * `ncurses` – UI library. Nothing else: the cards are compiled in
+
+### Aether Descent (roguelike)
+* `ncurses` – UI library
+* `notcurses` – optional, only for the colour/tile-art build (`make notcurses`)
 
 ---
 
@@ -195,6 +215,10 @@ PROPHECY_RACES=1 PROPHECY_DRAGON=1 PROPHECY_WATER=1 ./prophecy
 ### Djarhun (board game):
 cd Djarhun && make
 ./djarhun
+
+### Aether Descent (roguelike):
+cd AetherDescent && make
+./bin/aether-descent
 
 ---
 

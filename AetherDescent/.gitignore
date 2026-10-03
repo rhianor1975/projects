@@ -1,0 +1,15 @@
+# Build products
+build/
+build-nc/
+bin/
+
+# Tool output
+*.ppm
+*.png
+run.log
+trace.csv
+silentrun-state/
+
+# Save/state files, if anyone points AETHER_STATE_DIR at the tree
+.aether_descent_*
+.DS_Store
