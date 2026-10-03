@@ -186,6 +186,21 @@ static func level_sale_price(level: int) -> int:
 	return C.MARKET_GOLD_PER_XP * (20 + (level - 1) * 15)
 
 
+## What `count` levels off `level` fetch together -- the sum of the single
+## prices, clamped at level 1, so the screen and the sale cannot disagree.
+static func level_sale_batch_price(level: int, count: int) -> int:
+	var total := 0
+	for i in clampi(count, 0, maxi(level - 1, 0)):
+		total += level_sale_price(level - i)
+	return total
+
+
+## Defence comes on even levels, so it goes back on the even levels sold.
+static func level_sale_def_loss(level: int, count: int) -> int:
+	count = clampi(count, 0, maxi(level - 1, 0))
+	return level / 2 - (level - count) / 2
+
+
 static func junk_worth(floor_num: int) -> int:
 	var biome_step := floor_num / 20
 	return (8 + floor_num) * (1 << mini(biome_step, 4))

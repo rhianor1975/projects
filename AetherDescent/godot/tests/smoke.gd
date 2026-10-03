@@ -247,6 +247,20 @@ func _ready() -> void:
 	game.restore(JSON.parse_string(json))
 	if game.depth != 2 or game.map.monsters.size() != snap.map.monsters.size():
 		print("FAIL save round trip"); failures += 1
+	# every door in town opens onto something: a shop with nothing in its list
+	# is a screen that forgot to fill itself (the black market once did)
+	game.new_run(0, "Shopper", C.Difficulty.NORMAL, C.WorldSize.SHAFT, 5)
+	game.hero.level = 12
+	var ui = load("res://scenes/main.tscn").instantiate()
+	add_child(ui)
+	ui._start_game()
+	for b in Town.BUILDINGS:
+		ui.modal = null
+		ui._open_building(b[0])
+		if ui.modal is Menu and (ui.modal as Menu).items.is_empty():
+			print("FAIL %s opens empty" % b[1]); failures += 1
+	ui.modal = null
+	ui.queue_free()
 	print("spells in pool: ", SpellBook.count())
 	print("done in %d ms, %d failures" % [Time.get_ticks_msec() - t0, failures])
 	get_tree().quit(1 if failures else 0)

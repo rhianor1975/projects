@@ -39,6 +39,8 @@ var meat: Array = [0, 0, 0, 0]  # the larder: cuts by grade, for the Kitchen
 var kitchen_rep := 0
 var kitchen_nights := 0        # service nights cooked since you last went down
 var kitchen_earned := 0
+var levels_sold := 0           # the black market's ledger, for the character sheet
+var levels_sold_gold := 0
 var races_this_visit := 0      # the bookmaker's memory is short
 var bazaar_day := 0            # the Bazaar re-prices once a trip
 var dda_pressure := 0          # how the finished floors went: Dda.MIN..Dda.MAX
@@ -131,6 +133,8 @@ func new_run(class_id: int, name: String, diff: int, wsize: int, seed_ := 0) -> 
 	kitchen_rep = 0
 	kitchen_nights = 0
 	kitchen_earned = 0
+	levels_sold = 0
+	levels_sold_gold = 0
 	races_this_visit = 0
 	bazaar_day = 0
 	depth = 0
@@ -390,7 +394,7 @@ func snapshot() -> Dictionary:
 		"tavern_seed": tavern_seed, "tavern_reroll": tavern_reroll,
 		"tavern_hired": tavern_hired, "tavern_fallen": tavern_fallen,
 		"meat": meat, "kitchen_rep": kitchen_rep, "dda_pressure": dda_pressure, "kitchen_nights": kitchen_nights,
-		"kitchen_earned": kitchen_earned, "races_this_visit": races_this_visit, "bazaar_day": bazaar_day, "difficulty": difficulty, "world": world,
+		"kitchen_earned": kitchen_earned, "levels_sold": levels_sold, "levels_sold_gold": levels_sold_gold, "races_this_visit": races_this_visit, "bazaar_day": bazaar_day, "difficulty": difficulty, "world": world,
 		"run_seed": run_seed, "depth": depth, "deepest_floor": deepest_floor, "gold": gold,
 		"gold_mult": gold_mult, "gold_boon_until": gold_boon_until, "inventory": inventory,
 		"keys": keys, "turns": turns, "floor_entries": floor_entries, "steps": steps,
@@ -422,6 +426,8 @@ func restore(d: Dictionary) -> void:
 	dda_pressure = int(d.get("dda_pressure", 0))
 	kitchen_nights = int(d.get("kitchen_nights", 0))
 	kitchen_earned = int(d.get("kitchen_earned", 0))
+	levels_sold = int(d.get("levels_sold", 0))
+	levels_sold_gold = int(d.get("levels_sold_gold", 0))
 	races_this_visit = int(d.get("races_this_visit", 0))
 	bazaar_day = int(d.get("bazaar_day", 0))
 	tavern_hired = int(d.get("tavern_hired", 0))

@@ -92,6 +92,9 @@ func input(ev: InputEvent) -> bool:
 		Sfx.play("back")
 		if not on_cancel.is_valid() or on_cancel.call(self):
 			closed = true
+	elif (left or right) and ev is InputEventJoypadButton and on_key.is_valid() \
+			and on_key.call(self, KEY_RIGHT if right else KEY_LEFT):
+		refresh()   # a pad's d-pad steers a screen's number the way arrow keys do
 	elif ev is InputEventKey and on_key.is_valid() and on_key.call(self, ev.keycode):
 		refresh()
 	else:

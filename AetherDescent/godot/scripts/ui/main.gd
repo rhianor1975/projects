@@ -1578,21 +1578,96 @@ func _open_junkyard() -> void:
 	m.refresh()
 
 
+## It buys experience off the driven body, and asks nothing -- no limit, no
+## cooldown. Everything the trade costs is on the right before you agree.
 func _open_blackmarket() -> void:
 	var h := Game.hero
 	var m := _menu("The Black Market")
+	m.data = {"n": 1}
 	m.rebuild = func(mm: Menu):
-		var p := ItemsData.level_sale_price(h.level)
-		mm.items = [{"label": "Sell a level (%d -> %d)" % [h.level, h.level - 1], "right": Gfx.comma(p), "price": p,
-			"enabled": h.level > 1, "why": "There is nothing underneath level 1.",
-			"desc": "You lose 8 max HP, a point of attack, a point of defence on an even level, and progress to the next. You walk out with coin."}]
+		var top := maxi(h.level - 1, 0)
+		mm.data.n = clampi(int(mm.data.n), 1, maxi(top, 1))
+		var n: int = mm.data.n
+		if top <= 0:
+			mm.items = [{"label": "Sell a level", "enabled": false, "n": 0,
+				"why": "\"You've nothing left I want.\" There is no level below the first.",
+				"desc": "\"There's nothing under the first,\" he says. \"Go and earn some.\""}]
+			return
+		mm.items = [
+			{"label": "< Sell %d level%s >" % [n, "" if n == 1 else "s"], "n": n,
+				"right": Gfx.comma(ItemsData.level_sale_batch_price(h.level, n)),
+				"desc": "Left/Right: one level.  +/-: ten at a time.  You walk out level %d." % (h.level - n)},
+			{"label": "Sell everything", "n": top,
+				"right": Gfx.comma(ItemsData.level_sale_batch_price(h.level, top)),
+				"desc": "All the way down to level 1. You can earn the cheap levels back somewhere safe."},
+		]
+	m.on_key = func(mm: Menu, key: int) -> bool:
+		var top := maxi(h.level - 1, 1)
+		var n: int = mm.data.n
+		match key:
+			KEY_LEFT, KEY_H: n -= 1
+			KEY_RIGHT, KEY_L: n += 1
+			# snapped to tens, so you can steer by a round target level
+			KEY_EQUAL, KEY_PLUS, KEY_KP_ADD, KEY_PAGEUP: n = (n / 10 + 1) * 10
+			KEY_MINUS, KEY_KP_SUBTRACT, KEY_PAGEDOWN: n = n - 10 if n % 10 == 0 else (n / 10) * 10
+			KEY_A: n = top
+			_: return false
+		mm.data.n = clampi(n, 1, top)
+		mm.cursor = 0
+		Sfx.play("cursor")
+		return true
 	m.on_select = func(mm: Menu, it: Dictionary) -> bool:
-		if Rules.sell_level():
-			Game.gold += it.price
-			Sfx.play("coin")
-			mm.say("A cold hand on your wrist, and the feeling of something leaving. +%s gold." % Gfx.comma(it.price))
+		var from := h.level
+		var price := ItemsData.level_sale_batch_price(from, it.n)
+		var sold := 0
+		while sold < it.n and Rules.sell_level():
+			sold += 1
+		if sold <= 0:
+			return false
+		var paid := Game.gain_gold(price)
+		Game.levels_sold += sold
+		Game.levels_sold_gold += paid
+		Sfx.play("coin")
+		mm.say("A cold hand on your wrist. %d level%s across the counter: +%s gold, %d -> %d." %
+			[sold, "" if sold == 1 else "s", Gfx.comma(paid), from, h.level])
+		mm.data.n = 1
+		Game.save_run()
 		return false
-	m.detail = _detail_hero
+	m.detail = func(ci: CanvasItem, r: Rect2, mm: Menu, it: Dictionary):
+		var p := r.position + Vector2(14, 12)
+		var n: int = it.get("n", 0)
+		Gfx.text(ci, p, "Level %d   HP %d/%d   ATK %d  DEF %d" % [h.level, h.hp, h.maxhp, h.eff_atk(), h.eff_def()], Gfx.WHITE)
+		if n <= 0:
+			Gfx.text(ci, p + Vector2(0, 24), "\"You've nothing left I want.\"", Gfx.GOLD, 2)
+			return
+		var to := h.level - n
+		Gfx.text(ci, p + Vector2(0, 22), "%d  ->  %d" % [h.level, to], Gfx.GOLD, 2)
+		Gfx.text(ci, p + Vector2(0, 46), "They pay", Gfx.CYAN)
+		Gfx.text(ci, p + Vector2(96, 46), "%s gold" % Gfx.comma(ItemsData.level_sale_batch_price(h.level, n)), Gfx.GOLD)
+		var y := 66.0
+		Gfx.text(ci, p + Vector2(0, y), "You give up", Gfx.CYAN)
+		var lines := ["%d max HP  (%d -> %d)" % [8 * n, h.maxhp, maxi(1, h.maxhp - 8 * n)], "%d attack" % n]
+		var def_off := ItemsData.level_sale_def_loss(h.level, n)
+		if def_off > 0:
+			lines.append("%d defence" % def_off)
+		if h.xp > 0:
+			lines.append("%d xp toward level %d" % [h.xp, h.level + 1])
+		for l in lines:
+			Gfx.text(ci, p + Vector2(96, y), l, Gfx.WHITE)
+			y += 14
+		y += 6
+		var now := Monster.escalation_for(h.level, Game.floor_entries)
+		var after := Monster.escalation_for(to, Game.floor_entries)
+		Gfx.text(ci, p + Vector2(0, y), "Monsters", Gfx.CYAN)
+		Gfx.text(ci, p + Vector2(96, y), "+%d%%  ->  +%d%%" % [now, after], Gfx.WHITE)
+		y += 14
+		Gfx.text(ci, p + Vector2(96, y), "no change: floors entered account for it" if now == after
+			else "from the next time you go down", Gfx.GREY)
+		if Game.levels_sold > 0:
+			y += 22
+			Gfx.text(ci, p + Vector2(0, y), "Sold so far: %d level%s for %s gold." % [Game.levels_sold,
+				"" if Game.levels_sold == 1 else "s", Gfx.comma(Game.levels_sold_gold)], Gfx.GREY)
+	m.refresh()
 
 
 func _open_oracle() -> void:
