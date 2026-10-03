@@ -449,7 +449,9 @@ func _draw_world() -> void:
 		var pos: Vector2 = p.from.lerp(p.to, k)
 		if p.t <= p.dur:
 			var tail: Vector2 = p.from.lerp(p.to, maxf(0, k - 0.25))
-			ci.draw_line(tail, pos, Color(p.col, 0.6), 3.0 if not p.shot else 2.0)
+			# a wide line is drawn as a quad: one with no length cannot be
+			if tail.distance_squared_to(pos) > 0.25:
+				ci.draw_line(tail, pos, Color(p.col, 0.6), 3.0 if not p.shot else 2.0)
 			ci.draw_circle(pos, 4.0 if not p.shot else 2.5, p.col)
 			ci.draw_circle(pos, 2.0 if not p.shot else 1.2, Color.WHITE)
 		else:
@@ -511,8 +513,13 @@ func _draw_hero(ci: CanvasItem, h: Hero, v: Dictionary) -> void:
 	# one of yours: a marker in their colour, and their health once it is hurt
 	var col := Party.color_of(h)
 	var top := feet - Vector2(0, ArtLayout.HERO_FEET_Y + 2 + sin(t * 3 + h.roster_idx) * 1.0)
-	ci.draw_colored_polygon(PackedVector2Array([top + Vector2(-4, -5), top + Vector2(4, -5), top]), Gfx.INK)
-	ci.draw_colored_polygon(PackedVector2Array([top + Vector2(-3, -4), top + Vector2(3, -4), top + Vector2(0, -1)]), col)
+	# Drawn around the origin and moved into place: a polygon this small, out
+	# at thirty thousand pixels on a big floor, fails triangulation on float
+	# precision alone.
+	ci.draw_set_transform(top.round())
+	ci.draw_colored_polygon(PackedVector2Array([Vector2(-4, -5), Vector2(4, -5), Vector2.ZERO]), Gfx.INK)
+	ci.draw_colored_polygon(PackedVector2Array([Vector2(-3, -4), Vector2(3, -4), Vector2(0, -1)]), col)
+	ci.draw_set_transform(Vector2.ZERO)
 	var mx := Party.max_hp(h)
 	if h.hp < mx:
 		Gfx.bar(ci, feet + Vector2(-11, 2), 22, float(h.hp) / mx, Color8(88, 216, 96) if h.hp * 2 > mx else Color8(240, 200, 64), 2)
@@ -621,8 +628,10 @@ func _shadow(ci: CanvasItem, feet: Vector2, w: float) -> void:
 	var pts := PackedVector2Array()
 	for i in 16:
 		var a := i * TAU / 16
-		pts.append(feet + Vector2(cos(a) * w / 2.0, sin(a) * 3.5 - 1))
+		pts.append(Vector2(cos(a) * w / 2.0, sin(a) * 3.5 - 1))
+	ci.draw_set_transform(feet.round())      # local, for the same reason as the markers
 	ci.draw_colored_polygon(pts, Color(0, 0, 0, 0.32))
+	ci.draw_set_transform(Vector2.ZERO)
 
 
 # ---- minimap ---------------------------------------------------------------------

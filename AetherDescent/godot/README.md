@@ -214,6 +214,9 @@ godot --headless --path . tests/smoke.tscn
 plays several characters down through the floors on auto-explore, checks
 that nobody stands in a wall or on top of anybody else, that every generated
 floor's stairs connect on two world sizes, and that a save round-trips.
+`tests/fuzz.tscn` (`-- <presses> <seed>`) drives the real game with
+thousands of random key and pad presses -- creation, every building, the
+dungeon, menus, parties, deaths -- and its log should hold no errors.
 `tests/shots.tscn` and `tests/shots2.tscn` drive the real game with key
 presses and write screenshots (run them with a display, or under
 `xvfb-run`).
