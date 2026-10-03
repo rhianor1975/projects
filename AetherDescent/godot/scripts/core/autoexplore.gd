@@ -60,8 +60,8 @@ static func step() -> String:
 	var may_fight := Districts.allows(h.x, h.y, C.Act.MELEE)
 	var foe: Monster = null
 	var fd := 1 << 30
-	for mo in m.monsters:
-		if not mo.alive or not m.is_visible(mo.x, mo.y):
+	for mo in m.monsters_near(h.x, h.y, h.fov_radius + 1):
+		if not m.is_visible(mo.x, mo.y):
 			continue
 		var d := maxi(absi(mo.x - h.x), absi(mo.y - h.y))
 		if d > 1 and _ignored.has(mo.get_instance_id()):
@@ -111,7 +111,7 @@ static func step() -> String:
 			return "No progress for a while."
 	# loot in sight, then the frontier, then the stairs
 	var want_item := {}
-	for it in m.items:
+	for it in m.items_near(h.x, h.y, 30):
 		if m.is_seen(it.x, it.y):
 			want_item[it.y * m.w + it.x] = true
 	var goal := func(x, y) -> bool:
@@ -165,6 +165,10 @@ static var _cross_shut := false
 
 
 static var _prev := PackedInt32Array()
+# A search marks what it reached with its own number instead of clearing a
+# map-sized array first: on a Well floor the clearing was most of the cost.
+static var _stamp := PackedInt32Array()
+static var _gen := 0
 
 
 static func _bfs(goal: Callable, to_monster: bool, avoid_hazard: bool) -> Vector2i:
@@ -175,9 +179,13 @@ static func _bfs(goal: Callable, to_monster: bool, avoid_hazard: bool) -> Vector
 	var shut_in := _cross_shut or m.district_at(h.x, h.y) in [C.District.ARENA, C.District.GAUNTLET]
 	if _prev.size() != m.w * m.h:
 		_prev.resize(m.w * m.h)
-	_prev.fill(-2)
+		_stamp.resize(m.w * m.h)
+		_stamp.fill(0)
+		_gen = 0
+	_gen += 1
 	var start := h.y * m.w + h.x
 	_prev[start] = -1
+	_stamp[start] = _gen
 	var q := PackedInt32Array([start])
 	var head := 0
 	while head < q.size():
@@ -196,7 +204,7 @@ static func _bfs(goal: Callable, to_monster: bool, avoid_hazard: bool) -> Vector
 			if nx < 0 or ny < 0 or nx >= m.w or ny >= m.h:
 				continue
 			var ni := ny * m.w + nx
-			if _prev[ni] != -2:
+			if _stamp[ni] == _gen:
 				continue
 			if not (to_monster and goal.call(nx, ny)):
 				var tt := m.tiles[ni]
@@ -214,5 +222,6 @@ static func _bfs(goal: Callable, to_monster: bool, avoid_hazard: bool) -> Vector
 				if avoid_hazard and (tt == C.Tile.LAVA or tt == C.Tile.MIASMA or tt == C.Tile.CURRENT or tt == C.Tile.BELT):
 					continue
 			_prev[ni] = c
+			_stamp[ni] = _gen
 			q.append(ni)
 	return Vector2i.ZERO

@@ -305,10 +305,16 @@ func _draw_name_entry(ci: CanvasItem) -> void:
 	Gfx.text(ci, Vector2(136, 132), "What are you called?", Gfx.GOLD, 2)
 	Gfx.window(ci, Rect2(136, 162, 368, 26), Color8(20, 20, 60), Color8(8, 8, 30))
 	Gfx.text(ci, Vector2(146, 169), c_name + ("_" if int(t * 2) % 2 == 0 else " "), Gfx.WHITE, 1)
-	Gfx.text(ci, Vector2(136, 200), "Type a name.  Enter: begin   Tab: another   Esc: back", Gfx.GREY)
+	Gfx.text(ci, Vector2(136, 200), "Type a name.  Enter (A): begin   Tab (Y): another   Esc (B): back", Gfx.GREY)
 
 
 func _name_input(ev: InputEvent) -> void:
+	if ev is InputEventJoypadButton and ev.pressed:
+		var k := InputEventKey.new()
+		k.pressed = true
+		k.keycode = {JOY_BUTTON_A: KEY_ENTER, JOY_BUTTON_START: KEY_ENTER, JOY_BUTTON_Y: KEY_TAB,
+			JOY_BUTTON_B: KEY_ESCAPE}.get(ev.button_index, KEY_NONE)
+		ev = k
 	if not (ev is InputEventKey and ev.pressed):
 		return
 	match ev.keycode:
@@ -415,6 +421,10 @@ func _pad_input(ev: InputEventJoypadButton) -> void:
 	if auto:
 		auto = false
 		return
+	if working:
+		working = false
+		Districts.work_abandon("You straighten up and leave it.")
+		return
 	if PAD_MOVE.has(ev.button_index):
 		hold_dir = PAD_MOVE[ev.button_index]
 		hold_t = 0.0
@@ -441,8 +451,41 @@ func _pad_input(ev: InputEventJoypadButton) -> void:
 			if Party.switch_next():
 				Game.msg("You are %s now." % Game.hero.name, Party.color_of(Game.hero))
 				view.snap_camera()
-		JOY_BUTTON_START, JOY_BUTTON_B:
+		JOY_BUTTON_B:
+			if Game.depth > 0:
+				auto = true
+				AutoExplore.reset()
+			else:
+				Game.msg("Auto-explore works in the temple. The way down is in the middle of the plaza.", Gfx.GREY)
+		JOY_BUTTON_START:
 			_open_pause()
+
+
+var _trigger_down := {}
+
+
+## The triggers are axes: left works what is beside you, right cracks a recall charm.
+func _pad_trigger(ev: InputEventJoypadMotion) -> void:
+	if not ev.axis in [JOY_AXIS_TRIGGER_LEFT, JOY_AXIS_TRIGGER_RIGHT]:
+		return
+	var down := ev.axis_value > 0.6
+	var was: bool = _trigger_down.get(ev.axis, false)
+	_trigger_down[ev.axis] = down
+	if not down or was:
+		return
+	if auto or working:
+		auto = false
+		if working:
+			working = false
+			Districts.work_abandon("You straighten up and leave it.")
+		return
+	if view.busy():
+		return
+	if ev.axis == JOY_AXIS_TRIGGER_LEFT:
+		if Game.depth > 0 and Districts.work_begin():
+			working = true
+	else:
+		_do(Rules.start_recall)
 
 
 ## A big floor is being built: say where you are going while the frame waits.
@@ -459,6 +502,9 @@ func _draw_descent(ci: CanvasItem) -> void:
 
 func _game_input(ev: InputEvent) -> void:
 	if not Game.pending_floor.is_empty():
+		return
+	if ev is InputEventJoypadMotion:
+		_pad_trigger(ev)
 		return
 	if ev is InputEventJoypadButton:
 		_pad_input(ev)
@@ -774,12 +820,14 @@ func _open_help() -> void:
 		"p: take over the next of your party -- hires fight on their own until you do.",
 		"g: work what is beside you -- an ore vein, a rod, a vent, a wreck -- for materials.",
 		"Shift+R: records. Rings in the dark are things you can hear but not see.",
+		"Pad: A wait  B auto-explore  X ability  Y fire  LB spells  RB pack  LT work  RT recall  stick-click party  Start menu",
 	])
 
 
 func _open_pause() -> void:
 	var m := _menu("Menu")
-	m.items = [{"label": "Resume", "id": "resume"}, {"label": "Keys", "id": "help"},
+	m.items = [{"label": "Resume", "id": "resume"}, {"label": "Character", "id": "character"},
+		{"label": "Records", "id": "records"}, {"label": "Keys", "id": "help"},
 		{"label": "Sound: %s" % ("on" if Sfx.enabled else "off"), "id": "sound"},
 		{"label": _art_label(), "id": "art", "desc": "16-bit: shaded anime sprites.  Classic: the flat look of the first sketches."},
 		{"label": _guardian_label(), "id": "guardian",
@@ -788,6 +836,14 @@ func _open_pause() -> void:
 	m.detail = _detail_hero
 	m.on_select = func(mm: Menu, it: Dictionary) -> bool:
 		match it.id:
+			"character":
+				modal = null
+				_open_character()
+				return false
+			"records":
+				modal = null
+				_open_records()
+				return true
 			"help":
 				modal = null
 				_open_help()

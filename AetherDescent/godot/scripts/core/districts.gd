@@ -187,6 +187,13 @@ static func _carry(pos: Vector2i, dir: Vector2i, dist: int, self_obj) -> Vector2
 
 static func _convey() -> void:
 	var m := M()
+	var moving := false
+	for d in m.districts:
+		if d.kind == C.District.ASSEMBLY or d.kind == C.District.AQUEDUCT:
+			moving = true
+			break
+	if not moving:
+		return
 	for h in Game.party:
 		if not Party.is_up(h):
 			continue
@@ -208,6 +215,9 @@ static func _convey() -> void:
 				Game.msg(spec[2], Color8(180, 180, 210))
 	for mo in m.monsters.duplicate():
 		if not mo.alive:
+			continue
+		var under := m.tiles[mo.y * m.w + mo.x]
+		if under != C.Tile.BELT and under != C.Tile.CURRENT:
 			continue
 		for dir in [_belt_flow(mo.x, mo.y), _current_flow(mo.x, mo.y)]:
 			if dir == Vector2i.ZERO:
@@ -399,7 +409,7 @@ static func _eye_tick() -> void:
 				Game.warn("The ceiling turns over you -- %d damage. The quiet is elsewhere." % dmg)
 			Rules.body_take_damage(h, dmg, "the eye of the storm")
 		for mo in m.monsters.duplicate():
-			if mo.alive and m.district_index(mo.x, mo.y) == i and not eye_sheltered(d, mo.x, mo.y):
+			if mo.alive and _inside(d, mo.x, mo.y) and m.district_index(mo.x, mo.y) == i and not eye_sheltered(d, mo.x, mo.y):
 				Rules.monster_take_damage(mo, C.EYE_DAMAGE)
 
 

@@ -133,6 +133,24 @@ func monster_at(x: int, y: int) -> Monster:
 	return null
 
 
+## Live monsters within `r` squares (a box) of (x,y). Through the position
+## grid when the box is smaller than the roster -- a Well floor holds six
+## thousand of them, and most questions are about the few nearby.
+func monsters_near(x: int, y: int, r: int) -> Array:
+	var out: Array = []
+	if (2 * r + 1) * (2 * r + 1) < monsters.size():
+		for yy in range(maxi(0, y - r), mini(h, y + r + 1)):
+			for xx in range(maxi(0, x - r), mini(w, x + r + 1)):
+				var mo = mgrid.get(yy * w + xx)
+				if mo != null and mo.alive:
+					out.append(mo)
+	else:
+		for mo in monsters:
+			if mo.alive and absi(mo.x - x) <= r and absi(mo.y - y) <= r:
+				out.append(mo)
+	return out
+
+
 func move_monster(m: Monster, nx: int, ny: int) -> void:
 	if mgrid.get(m.y * w + m.x) == m:
 		mgrid.erase(m.y * w + m.x)
@@ -146,6 +164,8 @@ func move_monster(m: Monster, nx: int, ny: int) -> void:
 
 
 func remove_dead() -> void:
+	if monsters.all(func(mo): return mo.alive):
+		return
 	var live: Array = []
 	for m in monsters:
 		if m.alive:
@@ -162,11 +182,56 @@ func rebuild_mgrid() -> void:
 			mgrid[m.y * w + m.x] = m
 
 
+# Items by cell. Built once; a pickup goes through take_item(), which keeps
+# it right, and anything else that changes the list's size forces a rebuild.
+var _item_idx := {}
+var _item_idx_n := -1
+
+
+## Pick an item up off the floor.
+func take_item(it: Dictionary) -> void:
+	items.erase(it)
+	if _item_idx_n < 0:
+		return
+	var k: int = int(it.y) * w + int(it.x)
+	if _item_idx.has(k):
+		_item_idx[k].erase(it)
+		if _item_idx[k].is_empty():
+			_item_idx.erase(k)
+	_item_idx_n = items.size()
+
+
+func _items_index() -> Dictionary:
+	if items.size() != _item_idx_n:
+		_item_idx = {}
+		for it in items:
+			var k: int = int(it.y) * w + int(it.x)
+			if _item_idx.has(k):
+				_item_idx[k].append(it)
+			else:
+				_item_idx[k] = [it]
+		_item_idx_n = items.size()
+	return _item_idx
+
+
 func items_at(x: int, y: int) -> Array:
+	if items.size() < 64:
+		return items.filter(func(it): return it.x == x and it.y == y)
+	# a copy: callers erase from `items` while walking what they got
+	return _items_index().get(y * w + x, []).duplicate()
+
+
+## Items within `r` squares (a box) of (x,y).
+func items_near(x: int, y: int, r: int) -> Array:
+	if (2 * r + 1) * (2 * r + 1) >= items.size():
+		return items.filter(func(it): return absi(it.x - x) <= r and absi(it.y - y) <= r)
+	var idx := _items_index()
 	var out: Array = []
-	for it in items:
-		if it.x == x and it.y == y:
-			out.append(it)
+	for yy in range(maxi(0, y - r), mini(h, y + r + 1)):
+		for xx in range(maxi(0, x - r), mini(w, x + r + 1)):
+			var here = idx.get(yy * w + xx)
+			if here != null:
+				out.append_array(here)
 	return out
 
 

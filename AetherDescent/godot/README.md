@@ -39,18 +39,18 @@ Saves, the Inn snapshot and high scores live in Godot's user folder
 |---|---|---|
 | Move / attack | arrows, `hjkl` `yubn`, number pad | D-pad |
 | Wait | `.` `Space` numpad `5` | A |
-| Auto-explore | `x` (any key stops it) | |
+| Auto-explore | `x` (any key stops it) | B |
 | Cast a spell / recast last | `m` / `s` | LB |
 | Fire ranged weapon | `f` | Y |
 | Class ability | `a` | X |
 | Pack | `i` | RB |
-| Character sheet | `c` | |
+| Character sheet | `c` | Start menu |
 | Whole-floor map | `Tab` or `M` | Back |
-| Recall charm | `r` | |
-| Work what is beside you | `g` (any key stops) | |
-| Records (this run, best by class, the fallen) | `Shift+R` | |
+| Recall charm | `r` | RT |
+| Work what is beside you | `g` (any key stops) | LT |
+| Records (this run, best by class, the fallen) | `Shift+R` | Start menu |
 | Take over the next of your party | `p` | stick click |
-| Menu (save & quit) | `Esc` | Start / B |
+| Menu (save & quit) | `Esc` | Start |
 | Menus | arrows, `Z`/`Enter`, `X`/`Esc`, Left/Right for tabs | D-pad, A, B |
 
 Walk into a door in the city to go inside; the temple stairs in the middle of

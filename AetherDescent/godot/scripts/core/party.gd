@@ -632,7 +632,7 @@ static func _maybe_find_gear(c: Hero, mo: Monster) -> void:
 static func _loot_here(c: Hero) -> void:
 	var m := Game.map
 	for it in m.items_at(c.x, c.y):
-		m.items.erase(it)
+		m.take_item(it)
 		match it.kind:
 			"gold":
 				var g := Game.gain_gold(int(it.amount))
@@ -663,7 +663,7 @@ static func _loot_target(c: Hero) -> Vector2i:
 	var mem := _mem(c)
 	var best := LOOT_RANGE * LOOT_RANGE + 1
 	var out := Vector2i(-1, -1)
-	for it in m.items:
+	for it in m.items_near(c.x, c.y, LOOT_RANGE):
 		var d: int = (it.x - c.x) * (it.x - c.x) + (it.y - c.y) * (it.y - c.y)
 		if d == 0 or d >= best or mem[it.y * m.w + it.x] == 0:
 			continue
@@ -738,6 +738,10 @@ static func _move_to(c: Hero, x: int, y: int) -> void:
 
 
 static var _prev := PackedInt32Array()
+# A search marks what it reached with its own number instead of clearing a
+# map-sized array first: on a Well floor the clearing was most of the cost.
+static var _stamp := PackedInt32Array()
+static var _gen := 0
 
 
 ## What `c` knows of the floor: their own memory, or the map you see if
@@ -747,24 +751,45 @@ static func _mem(c: Hero) -> PackedByteArray:
 
 
 ## The first step of a shortest walk over seen ground from `c` to `goal`.
+# The rest of each hire's last planned walk, by uid: a hire heading for the
+# same place as last turn follows it rather than searching again.
+static var _paths := {}
+
+
 static func _path_step(c: Hero, goal: Vector2i) -> Vector2i:
 	var m := Game.map
+	var plan: Dictionary = _paths.get(c.uid, {})
+	if not plan.is_empty() and plan.goal == goal and plan.map == m and not plan.steps.is_empty():
+		var nxt: Vector2i = plan.steps[0]
+		if maxi(absi(nxt.x - c.x), absi(nxt.y - c.y)) == 1 and m.walkable_monster(nxt.x, nxt.y):
+			plan.steps.remove_at(0)
+			return nxt - c.pos()
+	_paths.erase(c.uid)
 	var mem := _mem(c)
 	if _prev.size() != m.w * m.h:
 		_prev.resize(m.w * m.h)
-	_prev.fill(-2)
+		_stamp.resize(m.w * m.h)
+		_stamp.fill(0)
+		_gen = 0
+	_gen += 1
 	var start := c.y * m.w + c.x
 	var target := goal.y * m.w + goal.x
 	_prev[start] = -1
+	_stamp[start] = _gen
 	var q := PackedInt32Array([start])
 	var head := 0
 	while head < q.size() and head < 1500:
 		var cur := q[head]
 		head += 1
 		if cur == target:
-			while _prev[cur] != start and _prev[cur] >= 0:
+			# keep the whole walk, so the next turn need not search again
+			var steps: Array = []
+			while cur != start and cur >= 0:
+				steps.push_front(Vector2i(cur % m.w, cur / m.w))
 				cur = _prev[cur]
-			return Vector2i(cur % m.w - c.x, cur / m.w - c.y)
+			var first: Vector2i = steps.pop_front()
+			_paths[c.uid] = {"goal": goal, "steps": steps, "map": m}
+			return first - c.pos()
 		var cx := cur % m.w
 		var cy := cur / m.w
 		for d in C.DIRS8:
@@ -773,12 +798,15 @@ static func _path_step(c: Hero, goal: Vector2i) -> Vector2i:
 			if nx < 0 or ny < 0 or nx >= m.w or ny >= m.h:
 				continue
 			var ni := ny * m.w + nx
-			if _prev[ni] != -2:
+			if _stamp[ni] == _gen:
 				continue
-			if ni != target and (mem[ni] == 0 or not m.walkable_monster(nx, ny)
-					or m.tiles[ni] in [C.Tile.STAIRS_DOWN, C.Tile.STAIRS_UP, C.Tile.PORTAL]):
-				continue
+			if ni != target:
+				var tt := m.tiles[ni]
+				if mem[ni] == 0 or not m.walkable_monster(nx, ny) or tt == C.Tile.STAIRS_DOWN \
+						or tt == C.Tile.STAIRS_UP or tt == C.Tile.PORTAL:
+					continue
 			_prev[ni] = cur
+			_stamp[ni] = _gen
 			q.append(ni)
 	return Vector2i.ZERO
 
@@ -789,9 +817,13 @@ static func _frontier(c: Hero) -> Vector2i:
 	var mem := _mem(c)
 	if _prev.size() != m.w * m.h:
 		_prev.resize(m.w * m.h)
-	_prev.fill(-2)
+		_stamp.resize(m.w * m.h)
+		_stamp.fill(0)
+		_gen = 0
+	_gen += 1
 	var start := c.y * m.w + c.x
 	_prev[start] = -1
+	_stamp[start] = _gen
 	var q := PackedInt32Array([start])
 	var head := 0
 	while head < q.size() and head < 3000:
@@ -809,11 +841,13 @@ static func _frontier(c: Hero) -> Vector2i:
 			if nx < 0 or ny < 0 or nx >= m.w or ny >= m.h:
 				continue
 			var ni := ny * m.w + nx
-			if _prev[ni] != -2 or mem[ni] == 0 or not m.walkable_monster(nx, ny):
+			if _stamp[ni] == _gen or mem[ni] == 0 or not m.walkable_monster(nx, ny):
 				continue
-			if m.tiles[ni] in [C.Tile.STAIRS_DOWN, C.Tile.STAIRS_UP, C.Tile.PORTAL]:
+			var ft := m.tiles[ni]
+			if ft == C.Tile.STAIRS_DOWN or ft == C.Tile.STAIRS_UP or ft == C.Tile.PORTAL:
 				continue
 			_prev[ni] = cur
+			_stamp[ni] = _gen
 			q.append(ni)
 	return Vector2i(-1, -1)
 
@@ -871,7 +905,7 @@ static func _step_away(c: Hero, tx: int, ty: int) -> bool:
 static func _nearest(c: Hero, radius: int) -> Monster:
 	var best: Monster = null
 	var best_d := radius * radius + 1
-	for mo in Game.map.monsters:
+	for mo in Game.map.monsters_near(c.x, c.y, radius):
 		if not mo.alive:
 			continue
 		var d: int = (mo.x - c.x) * (mo.x - c.x) + (mo.y - c.y) * (mo.y - c.y)
@@ -887,9 +921,7 @@ static func _in_reach(c: Hero) -> Monster:
 	var r := reach(c)
 	var best: Monster = null
 	var best_d := r * r + 1
-	for mo in m.monsters:
-		if not mo.alive:
-			continue
+	for mo in m.monsters_near(c.x, c.y, r):
 		var d: int = (mo.x - c.x) * (mo.x - c.x) + (mo.y - c.y) * (mo.y - c.y)
 		if d > r * r or d >= best_d:
 			continue

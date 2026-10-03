@@ -475,10 +475,18 @@ static func monster_turn(mo: Monster) -> void:
 static func process_monsters() -> void:
 	var m := M()
 	var bodies: Array = Game.party.filter(func(b): return Party.is_up(b))
+	# one box round the whole party first: most of a Well floor is outside it
+	var lo := Vector2i(1 << 30, 1 << 30)
+	var hi := Vector2i(-(1 << 30), -(1 << 30))
+	for b in bodies:
+		lo = Vector2i(mini(lo.x, b.x), mini(lo.y, b.y))
+		hi = Vector2i(maxi(hi.x, b.x), maxi(hi.y, b.y))
+	lo -= Vector2i(C.ACTIVE_RADIUS, C.ACTIVE_RADIUS)
+	hi += Vector2i(C.ACTIVE_RADIUS, C.ACTIVE_RADIUS)
 	for mo in m.monsters.duplicate():
 		if not H().alive or Game.won or Game.game_over:
 			break
-		if not mo.alive:
+		if not mo.alive or mo.x < lo.x or mo.y < lo.y or mo.x > hi.x or mo.y > hi.y:
 			continue
 		# a monster acts if any of the party is near enough to matter
 		var near := false
@@ -790,7 +798,7 @@ static func _pickup() -> void:
 	var h := H()
 	var m := M()
 	for it in m.items_at(h.x, h.y):
-		m.items.erase(it)
+		m.take_item(it)
 		match it.kind:
 			"gold":
 				var g := Game.gain_gold(int(it.amount))
