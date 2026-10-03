@@ -33,7 +33,10 @@ var gold_rush := false
 var turns_on_floor := 0
 var infest_target := 0
 var spawn_density := 1
-var heard: Array = []                     # positions heard but not seen: a mark, not an identity
+var heard: Array = []
+# Each body's own memory of the floor, by Hero.uid. `seen` is always the
+# memory of whoever is being played; the others live here until they are.
+var memories := {}                     # positions heard but not seen: a mark, not an identity
 # what the floor's districts remember between turns: the arena's wave, the
 # barrow's, the next lightning strike -- src/common.h's Map fields
 var dstate := {"arena_wave": 0, "arena_district": -1, "arena_paid": false,
@@ -202,9 +205,23 @@ func line_of_sight(x0: int, y0: int, x1: int, y1: int) -> bool:
 var _lit: PackedInt32Array = PackedInt32Array()
 
 
+## The memory of body `uid` -- what they have seen of this floor.
+func memory(uid: int) -> PackedByteArray:
+	var k := str(uid)
+	if not memories.has(k):
+		var b := PackedByteArray()
+		b.resize(w * h)
+		memories[k] = b
+	return memories[k]
+
+
 ## Light what (px,py) can see. `fresh` clears the last pass first; the
-## party's own eyes add to the driver's with fresh = false.
-func compute_fov(px: int, py: int, radius: int, fresh := true) -> void:
+## party's own eyes add to the driver's with fresh = false, and to their own
+## memory (`mem_uid`) as well.
+func compute_fov(px: int, py: int, radius: int, fresh := true, mem_uid := 0) -> void:
+	var mem := PackedByteArray()
+	if mem_uid != 0:
+		mem = memory(mem_uid)
 	if fresh:
 		for i in _lit:
 			visible[i] = 0
@@ -222,11 +239,16 @@ func compute_fov(px: int, py: int, radius: int, fresh := true) -> void:
 				continue
 			if line_of_sight(px, py, x, y):
 				var i := y * w + x
+				if mem_uid != 0:
+					mem[i] = 1
 				if visible[i] == 1:
 					continue
 				visible[i] = 1
 				seen[i] = 1
 				_lit.append(i)
+	# packed arrays copy on write: put the marked memory back
+	if mem_uid != 0:
+		memories[str(mem_uid)] = mem
 
 
 func reveal_all() -> void:
@@ -348,7 +370,15 @@ func to_dict() -> Dictionary:
 		"haven": [haven.position.x, haven.position.y, haven.size.x, haven.size.y],
 		"event_name": event_name, "event_desc": event_desc, "overrun": overrun, "gold_rush": gold_rush,
 		"turns_on_floor": turns_on_floor, "infest_target": infest_target, "dstate": dstate,
+		"memories": _pack_memories(),
 	}
+
+
+func _pack_memories() -> Dictionary:
+	var out := {}
+	for k in memories:
+		out[k] = Marshalls.raw_to_base64(memories[k].compress(FileAccess.COMPRESSION_DEFLATE))
+	return out
 
 
 static func _v(a) -> Vector2i:
@@ -397,6 +427,8 @@ static func from_dict(d: Dictionary) -> GameMap:
 	m.portal_a = _v(d.portal_a)
 	m.portal_b = _v(d.portal_b)
 	m.haven = Rect2i(int(d.haven[0]), int(d.haven[1]), int(d.haven[2]), int(d.haven[3]))
+	for k in d.get("memories", {}):
+		m.memories[k] = Marshalls.base64_to_raw(d.memories[k]).decompress(m.w * m.h, FileAccess.COMPRESSION_DEFLATE)
 	for k in d.get("dstate", {}):
 		var v = d.dstate[k]
 		m.dstate[k] = v if v is bool else int(v)

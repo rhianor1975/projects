@@ -195,6 +195,10 @@ func _starting_kit() -> void:
 
 ## Hand the controller to another body of the party.
 func controlled_set(h: Hero) -> void:
+	# it is their map now: what you knew is kept for when you come back
+	if depth > 0 and map != null and hero != null and h != hero:
+		map.memories[str(hero.uid)] = map.seen.duplicate()
+		map.seen = map.memory(h.uid).duplicate()
 	hero = h
 	if depth > 0:
 		Rules.refresh_vision()
@@ -404,6 +408,9 @@ func restore(d: Dictionary) -> void:
 		h.spell_cd = h.spell_cd.map(func(v): return int(v))
 		party.append(h)
 	hero = party[clampi(int(d.get("controlled", 0)), 0, party.size() - 1)]
+	for i in party.size():
+		if party[i].uid == 0:
+			party[i].uid = i + 1       # a save from before bodies had their own memory
 	tavern_seed = int(d.get("tavern_seed", run_seed if d.has("run_seed") else 1))
 	tavern_reroll = Array(d.get("tavern_reroll", [])).map(func(v): return int(v))
 	tavern_reroll.resize(Party.TAVERN_ROSTER)

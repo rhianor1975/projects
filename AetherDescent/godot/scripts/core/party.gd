@@ -562,7 +562,7 @@ static func reveal() -> void:
 	if Game.depth == 0:
 		return
 	for c in others():
-		Game.map.compute_fov(c.x, c.y, COMPANION_FOV, false)
+		Game.map.compute_fov(c.x, c.y, COMPANION_FOV, false, c.uid)
 
 
 static func _say(c: Hero, text: String, col := Color8(200, 205, 225)) -> void:
@@ -660,16 +660,17 @@ static func _loot_here(c: Hero) -> void:
 
 static func _loot_target(c: Hero) -> Vector2i:
 	var m := Game.map
+	var mem := _mem(c)
 	var best := LOOT_RANGE * LOOT_RANGE + 1
 	var out := Vector2i(-1, -1)
 	for it in m.items:
 		var d: int = (it.x - c.x) * (it.x - c.x) + (it.y - c.y) * (it.y - c.y)
-		if d == 0 or d >= best or not m.is_seen(it.x, it.y):
+		if d == 0 or d >= best or mem[it.y * m.w + it.x] == 0:
 			continue
 		best = d
 		out = Vector2i(it.x, it.y)
 	for f in m.features:
-		if f.type != C.Feature.RELIC or f.get("used", false) or not m.is_seen(f.x, f.y):
+		if f.type != C.Feature.RELIC or f.get("used", false) or mem[f.y * m.w + f.x] == 0:
 			continue
 		var d: int = (f.x - c.x) * (f.x - c.x) + (f.y - c.y) * (f.y - c.y)
 		if d == 0 or d >= best:
@@ -739,9 +740,16 @@ static func _move_to(c: Hero, x: int, y: int) -> void:
 static var _prev := PackedInt32Array()
 
 
+## What `c` knows of the floor: their own memory, or the map you see if
+## they are the one being played.
+static func _mem(c: Hero) -> PackedByteArray:
+	return Game.map.seen if c == Game.hero else Game.map.memory(c.uid)
+
+
 ## The first step of a shortest walk over seen ground from `c` to `goal`.
 static func _path_step(c: Hero, goal: Vector2i) -> Vector2i:
 	var m := Game.map
+	var mem := _mem(c)
 	if _prev.size() != m.w * m.h:
 		_prev.resize(m.w * m.h)
 	_prev.fill(-2)
@@ -767,7 +775,7 @@ static func _path_step(c: Hero, goal: Vector2i) -> Vector2i:
 			var ni := ny * m.w + nx
 			if _prev[ni] != -2:
 				continue
-			if ni != target and (m.seen[ni] == 0 or not m.walkable_monster(nx, ny)
+			if ni != target and (mem[ni] == 0 or not m.walkable_monster(nx, ny)
 					or m.tiles[ni] in [C.Tile.STAIRS_DOWN, C.Tile.STAIRS_UP, C.Tile.PORTAL]):
 				continue
 			_prev[ni] = cur
@@ -778,6 +786,7 @@ static func _path_step(c: Hero, goal: Vector2i) -> Vector2i:
 ## The nearest seen, walkable square next to unseen ground.
 static func _frontier(c: Hero) -> Vector2i:
 	var m := Game.map
+	var mem := _mem(c)
 	if _prev.size() != m.w * m.h:
 		_prev.resize(m.w * m.h)
 	_prev.fill(-2)
@@ -792,7 +801,7 @@ static func _frontier(c: Hero) -> Vector2i:
 		var cy := cur / m.w
 		if cur != start:
 			for d in C.DIRS8:
-				if m.inb(cx + d.x, cy + d.y) and m.seen[(cy + d.y) * m.w + cx + d.x] == 0:
+				if m.inb(cx + d.x, cy + d.y) and mem[(cy + d.y) * m.w + cx + d.x] == 0:
 					return Vector2i(cx, cy)
 		for d in C.DIRS8:
 			var nx: int = cx + d.x
@@ -800,7 +809,7 @@ static func _frontier(c: Hero) -> Vector2i:
 			if nx < 0 or ny < 0 or nx >= m.w or ny >= m.h:
 				continue
 			var ni := ny * m.w + nx
-			if _prev[ni] != -2 or m.seen[ni] == 0 or not m.walkable_monster(nx, ny):
+			if _prev[ni] != -2 or mem[ni] == 0 or not m.walkable_monster(nx, ny):
 				continue
 			if m.tiles[ni] in [C.Tile.STAIRS_DOWN, C.Tile.STAIRS_UP, C.Tile.PORTAL]:
 				continue

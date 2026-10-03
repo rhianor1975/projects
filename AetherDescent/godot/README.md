@@ -104,7 +104,8 @@ the plaza take you down to any floor you have already reached.
   and back off or press on according to temperament (Bold, Steady,
   Cautious). Monsters fight whoever is next to them. A fallen hire can be
   taken back for a quarter; one you let go hands back half the fee. Press `p`
-  to take over any of them -- and if you fall, one of them carries on, or
+  to take over any of them -- and see the floor as they know it, since
+  every body keeps its own map -- -- and if you fall, one of them carries on, or
   spends a recall charm to drag you home.
 - **The east side of the plaza** — the Ashfall Kitchen (meat comes only off
   your own blade, graded stringy to mythic; cook a seven-cover service night

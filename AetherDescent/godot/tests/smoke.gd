@@ -103,6 +103,22 @@ func _ready() -> void:
 		game.party.filter(func(b): return Party.is_up(b)).size(), hire_kills, game.hero.name, game.gold])
 	if hire_kills == 0:
 		print("FAIL the hires never killed anything"); failures += 1
+	# every body keeps its own map: switching shows theirs, and back shows yours
+	var mine: int = game.map.seen.count(1)
+	var me: Hero = game.hero
+	var other: Hero = Party.others()[0] if not Party.others().is_empty() else null
+	if other:
+		var theirs: int = game.map.memory(other.uid).count(1)
+		Party.switch_next()
+		while game.hero != other:
+			Party.switch_next()
+		if theirs == 0 or game.map.seen.count(1) < theirs:
+			print("FAIL switching did not bring their map (%d, knew %d)" % [game.map.seen.count(1), theirs]); failures += 1
+		while game.hero != me:
+			Party.switch_next()
+		if game.map.seen.count(1) < mine:
+			print("FAIL switching back lost your map (%d < %d)" % [game.map.seen.count(1), mine]); failures += 1
+		print("maps: you knew %d tiles, %s knew %d" % [mine, other.name, theirs])
 	var psnap: Dictionary = JSON.parse_string(JSON.stringify(game.snapshot()))
 	var driving: String = game.hero.name
 	game.restore(psnap)

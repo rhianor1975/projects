@@ -67,6 +67,8 @@ func snap() -> void:
 ## The controller has moved to another body: the camera goes with it.
 func snap_camera() -> void:
 	hero_vis = _bv(Game.hero).pos
+	if Game.depth > 0:
+		_rebuild_minimap()      # their map now, not yours
 
 
 func _bv(h: Hero) -> Dictionary:

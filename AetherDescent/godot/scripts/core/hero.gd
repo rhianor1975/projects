@@ -110,6 +110,7 @@ var alive := true
 # ---- a hire (companions.c) ---------------------------------------------------------
 # The character and the heroes from the Tavern are the same kind of body; these
 # are what a hire carries on top. The character has roster_idx -1 and none of it.
+var uid := 0                   # who this body is, for its own memory of a floor
 var is_hire := false
 var roster_idx := -1
 var temporary := false         # built, not hired (the assembly golem): gone when you leave the floor
@@ -134,6 +135,7 @@ var scout_turns := 0
 
 static func make(class_id_: int, name_: String) -> Hero:
 	var h := Hero.new()
+	h.uid = randi() % 0x7FFFFFFF + 1
 	h.create(class_id_, name_)
 	return h
 
