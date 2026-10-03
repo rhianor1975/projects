@@ -55,7 +55,12 @@ godot --headless --path . --export-release "Web"             ../build/godot/web/
 The Windows and Linux builds are a single file with the game packed inside.
 None of the builds are signed:
 - On Windows, SmartScreen may ask first: choose *More info → Run anyway*.
-- On macOS, right-click the app and choose *Open* the first time.
+- On macOS, right-click the app and choose *Open* the first time. If macOS
+  still refuses, open *System Settings → Privacy & Security* and click
+  *Open Anyway*. The macOS preset ad-hoc signs the app with Godot's built-in
+  signer and builds a universal binary. To make a smaller Intel-only copy,
+  run `lipo "Aether Descent" -thin x86_64 -output "Aether Descent"` inside
+  `Contents/MacOS`.
 
 The Web build has to be served over http, not opened as a file. For example,
 run `python3 -m http.server` in its folder and visit `localhost:8000`.
