@@ -54,7 +54,8 @@ def ramp(base, n=6, hue_shift=0.06, lo=0.30, hi=1.18, sat_lo=1.15, sat_hi=0.70):
 
 
 class Canvas:
-    def __init__(self, w, h, ss=4, ambient=0.30, ox=0.0, oy=0.0, cel=False):
+    def __init__(self, w, h, ss=4, ambient=0.30, ox=0.0, oy=0.0, cel=False, scale=1.0):
+        # `scale` is pixels per model unit: the same model drawn bigger, with more detail
         self.w, self.h, self.ss = w, h, ss
         self.cel = cel
         self.groups = []
@@ -63,8 +64,9 @@ class Canvas:
         self.part = np.full((H, W), -1, dtype=np.int32)
         self.inten = np.zeros((H, W))
         ys, xs = np.mgrid[0:H, 0:W]
-        self.X = (xs + 0.5) / ss - ox
-        self.Y = (ys + 0.5) / ss - oy
+        self.scale = scale
+        self.X = (xs + 0.5) / ss / scale - ox
+        self.Y = (ys + 0.5) / ss / scale - oy
         self.ramps = []        # per part
         self.flat = []         # per part: no outline/contour logic
         self.ambient = ambient
@@ -129,7 +131,7 @@ class Canvas:
             dist = np.minimum(dist, np.sqrt(qx * qx + qy * qy))
         s = np.clip(dist / round_, 0, 1)
         hgt = np.sqrt(np.clip(1 - (1 - s) ** 2, 0, 1))
-        gy, gx = np.gradient(hgt * round_ / self.ss)
+        gy, gx = np.gradient(hgt * round_ * self.scale / self.ss)
         return self._put(inside, -gx * self.ss, -gy * self.ss, np.ones_like(X) * 0.6, rmp, **kw)
 
     # -- resolve --------------------------------------------------------------

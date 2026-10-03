@@ -31,8 +31,18 @@ CLOTH_COLOURS = {
 }
 
 
-FW, FH = 32, 40      # field sprite canvas
-OX, OY = 4, 7        # where the 24x32 body sits inside it (room for hats, weapons)
+# The body is modelled in a 24x32 unit box and drawn at FS pixels per unit:
+# a 36x48 hero in a 48x60 cell, with room around it for hats and weapons.
+FS = 1.5
+FW, FH = 32, 40      # the cell, in model units
+OX, OY = 4, 7        # where the body box sits inside it
+CELL_W, CELL_H = int(FW * FS), int(FH * FS)
+FEET_Y = int((OY + 31) * FS)   # the pixel row the boots stand on
+
+
+def _px(mx, my):
+    """Model units to pixels on the field cell."""
+    return int(round((mx + OX) * FS)), int(round((my + OY) * FS))
 
 
 # Skin is hand-picked rather than generated: a generated ramp greys out in the
@@ -111,7 +121,7 @@ def field_sprite(spec, pose=None, frame=None):
         from PIL import ImageOps
         p2 = Pose(facing="left", walk=pose.walk, attack=pose.attack, cast=pose.cast, hurt=pose.hurt)
         return ImageOps.mirror(field_sprite(spec, p2))
-    c = Canvas(FW, FH, ox=OX, oy=OY, cel=True)
+    c = Canvas(CELL_W, CELL_H, ox=OX, oy=OY, cel=True, scale=FS)
     m = _Mats(spec)
     if pose.facing == "left":
         _side(c, spec, pose, m)
@@ -416,28 +426,36 @@ def _side_bangs(c, spec, hair, b):
             c.limb(13, 6.5 + b, 13 + math.cos(ang) * 10, 7.5 + b + math.sin(ang) * 8, 2.8, 0.6, hair, gloss=0.7)
 
 
+_EYE_BIG = ["kkkkk", "kwwEk", "kwEeE", "EeieE", ".iii."]
+_EYE_NARROW = ["kkkkk", ".EeiE"]
+
+
 def _front_face(img, spec, pose):
     ep = _eye_pal(spec)
-    b = int(round(_bob(pose)))
-    y = OY + 9 + b
-    if pose.attack == 1:          # eyes narrowed in effort
-        overlay(img, OX + 7, y + 1, ["kkk", ".ie"], ep)
-        overlay(img, OX + 14, y + 1, ["kkk", "ei."], ep)
-    else:
-        overlay(img, OX + 7, y, ["kkk", "wEk", "Eei", ".i."], ep)
-        overlay(img, OX + 14, y, ["kkk", "kEw", "ieE", ".i."], ep)
-    overlay(img, OX + 6, y + 4, ["b"], ep)
-    overlay(img, OX + 17, y + 4, ["b"], ep)
-    overlay(img, OX + 11, y + 5, ["mm"] if pose.attack != 1 else ["MM"], ep)
+    b = _bob(pose)
+    narrow = pose.attack == 1
+    eye = _EYE_NARROW if narrow else _EYE_BIG
+    lx, ey = _px(6.6, 9.4 + b + (0.7 if narrow else 0))
+    rx, _ = _px(14.1, 0)
+    overlay(img, lx, ey, eye, ep)
+    overlay(img, rx, ey, eye, ep)
+    bx, by = _px(6.0, 13.6 + b)
+    overlay(img, bx, by, ["bb"], ep)
+    bx, _ = _px(16.6, 0)
+    overlay(img, bx, by, ["bb"], ep)
+    mx, my = _px(11.2, 14.6 + b)
+    overlay(img, mx, my, ["MM"] if narrow else ["mmm"], ep)
 
 
 def _side_face(img, spec, pose):
     ep = _eye_pal(spec)
-    b = int(round(_bob(pose)))
-    y = OY + 9 + b
-    overlay(img, OX + 6, y, ["kk", "wE", "Ei"] if pose.attack != 1 else ["kk", "ie"], ep)
-    overlay(img, OX + 9, y + 4, ["b"], ep)
-    overlay(img, OX + 6, y + 5, ["m"], ep)
+    b = _bob(pose)
+    x, y = _px(5.6, 9.4 + b)
+    overlay(img, x, y, ["kkk", "kwE", "Eei", ".ii"] if pose.attack != 1 else ["kkk", ".ie"], ep)
+    x, y = _px(8.4, 13.4 + b)
+    overlay(img, x, y, ["bb"], ep)
+    x, y = _px(5.8, 14.6 + b)
+    overlay(img, x, y, ["mm"], ep)
 
 
 def _slash(img, pose):
@@ -445,11 +463,11 @@ def _slash(img, pose):
     import math
     px = img.load()
     if pose.facing in ("down", "up"):
-        cx, cy, r, a0, a1 = OX + 12, OY + 14, 13, -40, 130
+        cx, cy, r, a0, a1 = (OX + 12) * FS, (OY + 14) * FS, 13 * FS, -40, 130
     else:
-        cx, cy, r, a0, a1 = OX + 11, OY + 15, 12, 110, 250
-    for k in range(40):
-        a = math.radians(a0 + (a1 - a0) * k / 39)
+        cx, cy, r, a0, a1 = (OX + 11) * FS, (OY + 15) * FS, 12 * FS, 110, 250
+    for k in range(60):
+        a = math.radians(a0 + (a1 - a0) * k / 59)
         for dr, col in ((0, (255, 255, 255, 255)), (-1, (200, 232, 255, 220)), (1, (160, 200, 255, 140))):
             x = int(round(cx + math.cos(a) * (r + dr)))
             y = int(round(cy + math.sin(a) * (r + dr)))
@@ -462,27 +480,33 @@ def _slash(img, pose):
 # 48x48, head and shoulders, for menus and dialogue. Modelled like the field
 # sprite and finished by hand where a face needs it: the eyes are painted.
 
+# Painted at 64x64: the model is 48 units across, drawn at PS pixels a unit.
+PS = 4 / 3
+PORTRAIT = 64
+
 _PORTRAIT_EYE_L = [
-    "kkkkkkk.",
-    "kKwwEEEk",
-    ".kwEEEEk",
-    ".kEEeeEk",
-    ".kEeiieK",
-    "..keiiK.",
-    "...KKK..",
+    "kkkkkkkk..",
+    ".kkKwwEEk.",
+    ".kKwwEEEEk",
+    ".kwwEEEEEk",
+    ".kEEEeeeEk",
+    ".kEEeeieeK",
+    ".kEeeiiieK",
+    "..keeiiiK.",
+    "...KKKKK..",
 ]
 _PORTRAIT_EYE_SHUT = [
-    "........",
-    "........",
-    "kkkkkkk.",
-    ".KKKKKk.",
-    "........",
+    "..........",
+    "..........",
+    "..........",
+    "kkkkkkkkk.",
+    ".KKKKKKKk.",
 ]
 
 
 def portrait(spec, expression="neutral"):
     import math
-    c = Canvas(48, 48)
+    c = Canvas(PORTRAIT, PORTRAIT, scale=PS)
     m = _Mats(spec)
     hair = m.hair
     long_ = spec.hair_style in ("long", "bob")
@@ -544,19 +568,21 @@ def portrait(spec, expression="neutral"):
     shut = expression in ("happy", "hurt")
     eye = _PORTRAIT_EYE_SHUT if shut else _PORTRAIT_EYE_L
     if expression == "happy":
-        eye = ["........", "..kkkk..", ".k....k.", "k......k"]
-    overlay(img, 14, 22, eye, ep)
-    overlay(img, 26, 22, [r[::-1] for r in eye], ep)
-    brow = {"neutral": ["..HHHH", "HH...."], "angry": ["HH....", "..HHHH"],
-            "happy": [".HHHH.", "H....H"], "hurt": ["....HH", "HHHH.."]}.get(expression, ["..HHHH", "HH...."])
-    overlay(img, 15, 19, brow, ep)
-    overlay(img, 27, 19, [r[::-1] for r in brow], ep)
-    overlay(img, 24, 29, ["n", "n"], ep)
-    mouth = {"neutral": [".MMM."], "happy": ["M...M", ".MMM.", "..m.."], "angry": ["MMMMM"],
-             "hurt": [".MMM.", "M...M"]}.get(expression, [".MMM."])
-    overlay(img, 22, 33, mouth, ep)
-    overlay(img, 14, 29, ["bbb"], ep)
-    overlay(img, 31, 29, ["bbb"], ep)
+        eye = ["..........", "..........", "...kkkk...", "..k....k..", ".k......k."]
+    w = len(eye[0])
+    overlay(img, 18, 29, eye, ep)
+    overlay(img, PORTRAIT - 18 - w, 29, [r[::-1] for r in eye], ep)
+    brow = {"neutral": ["...HHHHH", "HHH....."], "angry": ["HHH.....", "...HHHHH"],
+            "happy": [".HHHHHH.", "H......H"], "hurt": [".....HHH", "HHHHH..."]}.get(
+        expression, ["...HHHHH", "HHH....."])
+    overlay(img, 19, 25, brow, ep)
+    overlay(img, PORTRAIT - 19 - 8, 25, [r[::-1] for r in brow], ep)
+    overlay(img, 32, 38, ["n", "n"], ep)
+    mouth = {"neutral": ["..MMM.."], "happy": ["M.....M", ".MMMMM.", "..mmm.."], "angry": [".MMMMM."],
+             "hurt": ["..MMM..", ".M...M."]}.get(expression, ["..MMM.."])
+    overlay(img, 29, 44, mouth, ep)
+    overlay(img, 18, 39, ["bbbb"], ep)
+    overlay(img, PORTRAIT - 18 - 4, 39, ["bbbb"], ep)
     return img
 
 

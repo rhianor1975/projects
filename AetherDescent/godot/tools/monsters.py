@@ -1,4 +1,4 @@
-"""Modelled monsters, 32x32, each with a 2-frame idle and a lunge frame.
+"""Modelled monsters, drawn 48x48 from a 32-unit model, each with a 2-frame idle and a lunge frame.
 
 A body is drawn once per family palette, so a Vine Rat and an Ashen Rat are
 the same rat in different colours -- the way the C game's generated variants
@@ -27,15 +27,20 @@ def _mats(family):
     return ramp(body), ramp(acc), glow
 
 
-def _eyes(img, pts, glow):
+MS = 1.5          # pixels per model unit: 32-unit bodies drawn at 48x48
+MON_SIZE = 48
+BOSS_SIZE = 72
+
+
+def _eyes(img, pts, glow, scale=MS):
     pal = {"g": glow, "w": (255, 255, 255), "d": tuple(int(v * 0.55) for v in glow)}
     for (x, y) in pts:
-        overlay(img, int(x), int(y), ["wg", "gd"], pal)
+        overlay(img, int(round(x * scale)), int(round(y * scale)), ["wgg", "gdd"], pal)
 
 
 def monster(kind, family, frame=0):
     """frame 0/1 idle bob, 2 lunge."""
-    c = Canvas(32, 32)
+    c = Canvas(MON_SIZE, MON_SIZE, scale=MS, cel=True)
     body, acc, glow = _mats(family)
     bob = [0.0, -0.8, 0.0][frame]
     lunge = 3.0 if frame == 2 else 0.0
@@ -145,8 +150,8 @@ BOSS_KINDS = ("warden",)
 
 
 def warden(frame=0):
-    """The Warden of the Deep Well, 48x48: the last thing in the game."""
-    c = Canvas(48, 48)
+    """The Warden of the Deep Well, 72x72: the last thing in the game."""
+    c = Canvas(BOSS_SIZE, BOSS_SIZE, scale=MS, cel=True)
     body, acc, glow = _mats("boss")
     dark = ramp((48, 28, 64))
     bob = [0.0, -1.0, 0.0][frame]
