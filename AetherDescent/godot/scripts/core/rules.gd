@@ -125,11 +125,11 @@ static func monster_take_damage(mo: Monster, dmg: int, killer: Hero = null) -> v
 	var q := Game.quest
 	if not q.is_empty() and int(q.get("depth", -1)) == Game.depth:
 		if q.type == "kill" and q.monster == mo.name:
-			_complete_quest("You've slain the %s." % mo.name)
+			Quests._pay("Bounty complete! You've slain the %s." % mo.name)
 		elif q.type == "clear":
 			q.done = int(q.get("done", 0)) + 1
 			if q.done >= int(q.needed):
-				_complete_quest("Floor %d is clear enough now." % Game.depth)
+				Quests._pay("Bounty complete! Floor %d is clear enough now." % Game.depth)
 			else:
 				Game.msg("Bounty progress: %d/%d." % [q.done, q.needed])
 	if mo.is_boss:
@@ -140,14 +140,6 @@ static func monster_take_damage(mo: Monster, dmg: int, killer: Hero = null) -> v
 	elif mo.is_elite:
 		if rnd(100) < (60 if mo.biome_boss else 12):
 			grant_random_set_piece(m.biome)
-
-
-static func _complete_quest(why: String) -> void:
-	var q := Game.quest
-	var g := Game.gain_gold(int(q.gold))
-	grant_xp(int(q.xp))
-	Game.good("Bounty complete! %s (+%d gold, +%d xp)" % [why, g, int(q.xp)])
-	Game.quest = {}
 
 
 static func find_target(radius: int, exclude: Monster = null) -> Monster:
@@ -622,6 +614,9 @@ static func try_move(dx: int, dy: int) -> bool:
 		if tt == C.Tile.TEMPLE:
 			request = {"open": "temple"}
 			return false
+		if tt == C.Tile.QUEST_BOARD:
+			request = {"open": "board"}
+			return false
 		if not m.walkable_player(nx, ny):
 			return false
 		var from := h.pos()
@@ -931,6 +926,7 @@ static func start_recall() -> bool:
 		Game.msg("You have no recall charm.")
 		return false
 	Game.recall_countdown = H().recall_turns
+	Quests.note_recall()
 	Game.msg("You crack a recall charm. Hold steady -- %d turns." % Game.recall_countdown, Color8(150, 230, 255))
 	Game.emit_fx({"type": "burst", "at": H().pos(), "radius": 2, "color": Color8(120, 230, 255)})
 	end_turn()

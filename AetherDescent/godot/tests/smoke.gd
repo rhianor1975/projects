@@ -108,6 +108,72 @@ func _ready() -> void:
 	game.restore(psnap)
 	if game.party.size() != psnap.party.size() or game.hero.name != driving:
 		print("FAIL party save round trip"); failures += 1
+	# the bounty board: every kind pays when it should and fails when it should
+	game.new_run(20, "Bounty", C.Difficulty.NORMAL, C.WorldSize.SHAFT, 31)
+	game.deepest_floor = 3
+	game.give("Recall Charm", 3)
+	var g0: int = game.gold
+	Quests.offer("timed")
+	var qd := int(game.quest.depth)
+	game.enter_floor(qd)
+	if Quests.active() or game.gold <= g0:
+		print("FAIL timed bounty did not pay on arrival"); failures += 1
+	game.enter_town(Town.START)
+	Quests.offer("timed")
+	game.turns += 100000
+	game.enter_floor(int(game.quest.depth))
+	if Quests.active():
+		print("FAIL expired timed bounty still open"); failures += 1
+	game.enter_town(Town.START)
+	Quests.offer("norecall")
+	qd = int(game.quest.depth)
+	game.enter_floor(maxi(1, qd - 1) if qd > 1 else 2)
+	Rules.start_recall()
+	if not game.quest.get("broken", false):
+		print("FAIL a charm did not break the no-recall bounty"); failures += 1
+	game.enter_floor(qd)
+	if Quests.active():
+		print("FAIL broken no-recall bounty still open"); failures += 1
+	game.enter_town(Town.START)
+	Quests.offer("escort")
+	var cl := Quests.client()
+	if cl == null or not cl in game.party:
+		print("FAIL escort client did not join the party"); failures += 1
+	g0 = game.gold
+	game.enter_floor(int(game.quest.depth))
+	if Quests.active() or Quests.client() != null or game.gold <= g0:
+		print("FAIL escort did not pay and release the client"); failures += 1
+	game.enter_town(Town.START)
+	Quests.offer("escort")
+	Quests.client().hp = 0
+	Quests.client().alive = false
+	Party.reap_fallen()
+	game.enter_floor(int(game.quest.depth))
+	if Quests.active():
+		print("FAIL escort with a dead client still open"); failures += 1
+	game.enter_town(Town.START)
+	Quests.offer("fetch")
+	game.enter_floor(int(game.quest.depth))
+	var qi: Array = game.map.items.filter(func(it): return it.kind == "quest")
+	if qi.is_empty():
+		print("FAIL no fetch item on the bounty floor"); failures += 1
+	else:
+		game.hero.x = qi[0].x
+		game.hero.y = qi[0].y
+		Rules._pickup()
+		game.enter_town(Town.START)
+		g0 = game.gold
+		if not Quests.turn_in() or game.gold <= g0:
+			print("FAIL fetch bounty did not pay at the board"); failures += 1
+	Quests.offer("kill")
+	var want: String = game.quest.monster
+	game.enter_floor(int(game.quest.depth))
+	var mo := Monster.for_floor(game.depth, game.hero.x + 1, game.hero.y, game.rng)
+	mo.name = want
+	Rules.monster_take_damage(mo, 999999)
+	if Quests.active():
+		print("FAIL kill bounty did not pay"); failures += 1
+	print("bounties checked")
 	# generation sweep: every floor is connected stairs-to-stairs
 	for f in [1, 7, 15, 22, 35, 48, 60, 77, 85, 99, 100]:
 		for ws in [C.WorldSize.SHAFT, C.WorldSize.HALLS]:

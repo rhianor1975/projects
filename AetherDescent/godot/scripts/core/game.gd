@@ -216,6 +216,7 @@ func enter_floor(n: int, arrive_down := true) -> void:
 	Rules.refresh_vision()
 	msg("You descend to floor %d -- %s." % [n, C.BIOME_NAMES[map.biome]] if arrive_down
 		else "You climb back to floor %d." % n, Color8(150, 200, 255))
+	Quests.check_arrival()
 	if map.event_name != "":
 		msg("%s %s" % [map.event_name, map.event_desc], Color8(255, 220, 140))
 	if map.gold_rush:

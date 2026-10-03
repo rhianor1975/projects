@@ -73,7 +73,7 @@ static func blocks_walk(tt: int) -> bool:
 	return tt == C.Tile.WALL or tt == C.Tile.WATER or tt == C.Tile.LOCKED_DOOR \
 		or tt == C.Tile.SEALED_DOOR or tt == C.Tile.THICKET or tt == C.Tile.CRYSTAL \
 		or tt == C.Tile.ROOF or tt == C.Tile.HOUSE_WALL or tt == C.Tile.DOOR \
-		or tt == C.Tile.FOUNTAIN or tt == C.Tile.PLANTER
+		or tt == C.Tile.FOUNTAIN or tt == C.Tile.PLANTER or tt == C.Tile.QUEST_BOARD
 
 
 func walkable_player(x: int, y: int) -> bool:

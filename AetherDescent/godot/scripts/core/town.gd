@@ -8,6 +8,7 @@ const W := 40
 const H := 18
 const START := Vector2i(20, 10)
 const TEMPLE := Vector2i(20, 8)
+const BOARD := Vector2i(33, 8)
 
 # id, label, x, y, w, h, roof style
 const BUILDINGS := [
@@ -59,12 +60,13 @@ static func generate() -> GameMap:
 		m.doors[door.y * W + door.x] = b[0]
 	# the plaza: fountains, beds, and the temple mouth in the middle
 	m.set_t(TEMPLE.x, TEMPLE.y, C.Tile.TEMPLE)
+	m.set_t(BOARD.x, BOARD.y, C.Tile.QUEST_BOARD)
 	m.stairs_down = TEMPLE
 	for p in [Vector2i(14, 8), Vector2i(26, 8)]:
 		m.set_t(p.x, p.y, C.Tile.FOUNTAIN)
 	for p in [Vector2i(9, 7), Vector2i(31, 7), Vector2i(9, 10), Vector2i(31, 10)]:
 		m.set_t(p.x, p.y, C.Tile.PLANTER)
-	for p in [Vector2i(34, 8), Vector2i(35, 9), Vector2i(34, 9),
+	for p in [Vector2i(35, 8), Vector2i(35, 9), Vector2i(34, 9),
 			Vector2i(17, 10), Vector2i(23, 10), Vector2i(17, 6), Vector2i(23, 6)]:
 		m.set_t(p.x, p.y, C.Tile.TOWN_FLOWERS)
 	m.reveal_all()

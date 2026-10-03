@@ -350,6 +350,8 @@ func _after_action() -> void:
 			_open_building(req.id)
 		"temple":
 			_open_temple()
+		"board":
+			_open_board()
 		"merchant":
 			_open_merchant()
 		"gameover":
@@ -947,6 +949,66 @@ func _open_inn() -> void:
 	m.detail = _detail_hero
 
 
+# ---- the bounty board ---------------------------------------------------------------
+## One notice at a time. Take it, carry it out, come back -- or tear it down.
+func _open_board() -> void:
+	Sfx.play("door")
+	if Quests.turn_in():
+		Game.save_run()
+	var m := _menu("Bounty Board")
+	m.list_width = 260
+	m.rebuild = func(mm: Menu):
+		if Quests.active():
+			mm.items = [{"label": "Tear down the notice", "id": "abandon",
+				"desc": "Gives the bounty up%s. Nothing is paid." % (", and your client goes home" if Quests.client() else "")}]
+		else:
+			mm.items = [{"label": "Take a bounty", "id": "take",
+				"desc": "Posts a new notice for somewhere around the deepest floor you have reached."}]
+		mm.items.append({"label": "Leave", "id": "leave"})
+	m.on_select = func(mm: Menu, it: Dictionary) -> bool:
+		match it.id:
+			"take":
+				Sfx.play("confirm")
+				mm.say(Quests.offer())
+				Game.save_run()
+			"abandon":
+				Sfx.play("back")
+				Quests.abandon()
+				mm.say("The notice comes down.")
+				Game.save_run()
+			"leave":
+				return true
+		return false
+	m.detail = func(ci: CanvasItem, r: Rect2, _mm: Menu, _it: Dictionary):
+		var p := r.position
+		Gfx.text(ci, p + Vector2(14, 12), "The notice", Gfx.GOLD, 2)
+		var y := p.y + 40
+		if not Quests.active():
+			for line in Gfx.wrap("Nothing pinned up. Six kinds of work come through here: a kill, a thing to fetch, a floor to thin out, a floor to reach against the clock, a floor to reach without a charm, and somebody to get there alive.", int(r.size.x - 28)):
+				Gfx.text(ci, Vector2(p.x + 14, y), line, Gfx.GREY)
+				y += 14
+			return
+		var q := Game.quest
+		var kind: String = {"kill": "Hunt", "fetch": "Recovery", "clear": "Clearance", "timed": "Against the clock",
+			"norecall": "No charms", "escort": "Escort"}[q.type]
+		Gfx.text(ci, Vector2(p.x + 14, y), kind, Gfx.CYAN)
+		y += 18
+		for line in Gfx.wrap(Quests.summary(), int(r.size.x - 28)):
+			Gfx.text(ci, Vector2(p.x + 14, y), line, Gfx.WHITE)
+			y += 14
+		y += 10
+		Gfx.text(ci, Vector2(p.x + 14, y), "Pays", Gfx.CYAN)
+		Gfx.text(ci, Vector2(p.x + 70, y), "%s gold, %d xp" % [Gfx.comma(int(q.gold)), int(q.xp)], Gfx.GOLD)
+		var c := Quests.client()
+		if c:
+			Gfx.portrait(ci, Vector2(p.x + 14, y + 26), c.look, "neutral")
+			Gfx.text(ci, Vector2(p.x + 92, y + 26), c.name, Party.color_of(c))
+			Gfx.text(ci, Vector2(p.x + 92, y + 40), ClassesData.CLASSES[c.class_id].name, Gfx.GREY)
+			Gfx.text(ci, Vector2(p.x + 92, y + 54), "Fights for themselves. Keep them alive.", Gfx.GREY)
+	m.footer = "Z/Enter: choose    X/Esc: leave"
+	m.refresh()
+
+
 # ---- the Tavern ---------------------------------------------------------------------
 ## The Brass Lantern: heroes for hire, coin up front. Twenty on offer, each
 ## ten times the price of the last one you took; they fight on their own down
@@ -1254,6 +1316,13 @@ func _draw_door_labels(ci: CanvasItem) -> void:
 		var r := Rect2(roundi(sp.x - w / 2.0), sp.y - 46, w, 17)
 		Gfx.window(ci, r)
 		Gfx.text(ci, r.position + Vector2(7, 5), label, Gfx.WHITE)
+	if absi(Town.BOARD.x - h.x) <= 3 and absi(Town.BOARD.y - h.y) <= 3:
+		var sp := Vector2(Town.BOARD.x * 32 + 16, Town.BOARD.y * 32) + view.world.position
+		var label := "Bounty Board" + (" (1 notice)" if Quests.active() else "")
+		var w := Gfx.text_width(label) + 14
+		var r := Rect2(roundi(sp.x - w / 2.0), sp.y - 22, w, 17)
+		Gfx.window(ci, r)
+		Gfx.text(ci, r.position + Vector2(7, 5), label, Gfx.GOLD)
 	if absi(Town.TEMPLE.x - h.x) <= 3 and absi(Town.TEMPLE.y - h.y) <= 3:
 		var sp := Vector2(Town.TEMPLE.x * 32 + 16, Town.TEMPLE.y * 32) + view.world.position
 		var label := "Temple of the Deep Well"

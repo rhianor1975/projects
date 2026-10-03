@@ -89,6 +89,11 @@ the plaza take you down to any floor you have already reached.
   taken back for a quarter; one you let go hands back half the fee. Press `p`
   to take over any of them -- and if you fall, one of them carries on, or
   spends a recall charm to drag you home.
+- **The bounty board** — east of the temple, one notice at a time, six
+  kinds: slay a named monster, recover an item, clear a floor, reach a floor
+  against the clock, reach one without cracking a recall charm, or get a
+  client there alive. The client is an ordinary body in your party who
+  fights for themselves -- you can even take them over with `p`.
 - **Features** — shrines, fountains, machines, relics and the five gear sets,
   altars, tolls, waygates.
 - **Auto-explore**, recall charms, death and waking at the Inn (permanent on
@@ -97,7 +102,7 @@ the plaza take you down to any floor you have already reached.
 ## Not ported yet
 
 The Ashfall Kitchen, the lizard track, the
-Bazaar and the town Altar; quests; the remaining 14 district kinds (storm
+Bazaar and the town Altar; the remaining 14 district kinds (storm
 cage, colosseum, aqueduct, assembly line, watch, gauntlet, eye, mirror,
 petrified forest, shaft, boneyard, proving ground, chapel, geothermal); ore
 and the material-gated upgrade rungs past +20; dynamic difficulty and biome
@@ -130,6 +135,7 @@ scripts/core/   the rules: no nodes, no frames -- testable headless
   rules.gd        turns, combat, AI, spells, ranged, features   (combat.c ...)
   spellbook.gd    the 180-spell pool                            (spells.c)
   party.gd        the Tavern and hired heroes                   (companions.c)
+  quests.gd       the bounty board                              (quests.c)
   autoexplore.gd  `x`
   town.gd         the plaza
   sfx.gd          synthesised sound effects (autoload Sfx)

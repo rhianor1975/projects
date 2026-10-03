@@ -47,6 +47,20 @@ func _run() -> void:
 	Game.new_run(12, "Kael", C.Difficulty.NORMAL, C.WorldSize.SHAFT, 77)
 	Game.gold = 1200000
 	main._start_game()
+	# the bounty board, east of the temple
+	Game.deepest_floor = 4
+	Game.hero.x = Town.BOARD.x - 1
+	Game.hero.y = Town.BOARD.y + 1
+	main.view.snap()
+	await _wait(0.3)
+	await _shot("board-plaza")
+	main._open_board()
+	await _wait(0.1)
+	Quests.offer("escort")
+	main.modal.refresh()
+	await _wait(0.2)
+	await _shot("board")
+	await _key(KEY_ESCAPE)
 	# walk to the Tavern door: west of the plaza
 	Game.hero.x = 5
 	Game.hero.y = 11

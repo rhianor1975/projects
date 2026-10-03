@@ -112,6 +112,7 @@ var alive := true
 # are what a hire carries on top. The character has roster_idx -1 and none of it.
 var is_hire := false
 var roster_idx := -1
+var is_client := false         # walking with you on an escort bounty
 var personality := 1           # Party.BOLD / STEADY / CAUTIOUS
 var tier := 0                  # which price step was paid
 var kills := 0

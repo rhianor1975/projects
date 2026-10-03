@@ -278,6 +278,7 @@ func _src_for(m: GameMap, x: int, y: int, tt: int) -> Rect2:
 			C.Tile.PLANTER: return Gfx.tile_src(tr, Gfx.town_col("planter"))
 			C.Tile.FOUNTAIN: return Gfx.tile_src(tr, Gfx.town_col("fountain"))
 			C.Tile.TEMPLE: return Gfx.tile_src(tr, Gfx.town_col("temple"))
+			C.Tile.QUEST_BOARD: return Gfx.tile_src(tr, Gfx.town_col("quest_board"))
 		return Gfx.tile_src(tr, 0)
 	var k := "floor0"
 	match tt:
@@ -579,7 +580,7 @@ func _mini_color(m: GameMap, x: int, y: int) -> Color:
 		C.Tile.STAIRS_DOWN, C.Tile.TEMPLE: return Color8(255, 224, 96)
 		C.Tile.STAIRS_UP: return Color8(200, 200, 255)
 		C.Tile.THICKET, C.Tile.GRASS, C.Tile.FLOWERS: return Color8(72, 140, 72)
-		C.Tile.DOOR, C.Tile.LOCKED_DOOR, C.Tile.SEALED_DOOR: return Color8(220, 150, 80)
+		C.Tile.DOOR, C.Tile.LOCKED_DOOR, C.Tile.SEALED_DOOR, C.Tile.QUEST_BOARD: return Color8(220, 150, 80)
 	var d := m.district_at(x, y)
 	if d >= 0:
 		return C.DISTRICT_TINTS[d].darkened(0.25)
@@ -659,6 +660,17 @@ func _draw_hud() -> void:
 	if h.stance_atk_pct > 0: chips.append(["RED", Gfx.RED])
 	if h.stance_def_pct > 0: chips.append(["BLUE", Gfx.CYAN])
 	if Game.recall_countdown > 0: chips.append(["RECALL %d" % Game.recall_countdown, Gfx.CYAN])
+	if Quests.active():
+		var q := Game.quest
+		var here := Game.depth == int(q.depth)
+		var tag := "BOUNTY " + ("HERE" if here else "B%d" % int(q.depth))
+		if q.type == "fetch" and q.get("found", false):
+			tag = "BOUNTY: TO TOWN"
+		elif q.type == "timed" and not here:
+			tag += " %dt" % maxi(0, int(q.deadline) - Game.turns)
+		elif q.type == "clear" and here:
+			tag += " %d/%d" % [int(q.get("done", 0)), int(q.needed)]
+		chips.append([tag, Gfx.GOLD])
 	var cx := 8.0
 	for chip in chips:
 		var w := Gfx.text_width(chip[0]) + 8

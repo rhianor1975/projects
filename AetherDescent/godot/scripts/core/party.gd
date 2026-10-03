@@ -135,6 +135,8 @@ static func short_name(h: Hero) -> String:
 static func color_of(h: Hero) -> Color:
 	if not h.is_hire:
 		return Color8(128, 224, 248)
+	if h.is_client:
+		return Color8(255, 236, 190)
 	return COLORS[maxi(h.roster_idx, 0) % COLORS.size()]
 
 
@@ -1218,6 +1220,7 @@ static func attempt_rescue() -> bool:
 			best = c
 	if best == null or not Game.take("Recall Charm"):
 		return false
+	Quests.note_recall()
 	for d in C.DIRS8:
 		var nx: int = fallen.x + d.x
 		var ny: int = fallen.y + d.y
