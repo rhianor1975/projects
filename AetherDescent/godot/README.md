@@ -11,6 +11,12 @@ escalation, monster AI, floor generation, spells, ranged weapons, abilities,
 features and the town are ported function by function, with the C names kept
 in comments so you can find both halves of a rule.
 
+![The city](screenshots/3-town.png)
+![A fight on the first floor](screenshots/5-fight.png)
+
+More in [`screenshots/`](screenshots): the title, character creation, the
+Armory, and the Classic art set.
+
 ## Running it
 
 1. Install [Godot 4.3](https://godotengine.org/download) or newer (the
