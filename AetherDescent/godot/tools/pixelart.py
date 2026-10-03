@@ -1,81 +1,8 @@
-"""Shared pixel-art helpers: palettes, sprite rendering from character grids,
-and the SNES-style window frame. Used by gen_art.py and mockups.py."""
+"""Shared helpers for the art tools: the SNES window frame, compositing,
+drop shadows and the bitmap-font text renderer."""
 from PIL import Image
 
-# ---- palettes --------------------------------------------------------------
-OUTLINE = (24, 16, 40)
-
-SKIN = {"s": (252, 208, 168), "S": (220, 156, 124), "r": (240, 128, 128)}
-EYES = {"e": (40, 48, 104), "w": (255, 255, 255), "E": (88, 120, 200)}
-
-HAIR = {
-    "blonde": ((248, 224, 104), (208, 152, 48), (255, 248, 192)),
-    "red":    ((224, 72, 64), (152, 32, 48), (255, 152, 128)),
-    "navy":   ((72, 80, 152), (36, 36, 88), (136, 152, 216)),
-    "silver": ((216, 216, 240), (144, 144, 192), (255, 255, 255)),
-    "green":  ((96, 192, 112), (40, 120, 72), (176, 232, 168)),
-    "brown":  ((168, 104, 56), (104, 56, 32), (216, 160, 104)),
-    "pink":   ((248, 144, 192), (192, 72, 128), (255, 208, 232)),
-    "black":  ((64, 56, 80), (32, 24, 40), (112, 104, 144)),
-}
-CLOTH = {
-    "steel":  ((176, 184, 208), (104, 112, 144), (232, 236, 248)),
-    "teal":   ((48, 160, 160), (24, 96, 104), (128, 216, 208)),
-    "forest": ((72, 136, 72), (40, 80, 48), (144, 200, 112)),
-    "violet": ((128, 80, 192), (72, 40, 120), (184, 152, 240)),
-    "brass":  ((200, 144, 64), (128, 80, 32), (248, 208, 120)),
-    "rust":   ((176, 88, 56), (112, 48, 40), (232, 152, 104)),
-    "crimson": ((192, 40, 64), (112, 16, 40), (248, 112, 120)),
-    "white":  ((232, 232, 240), (168, 168, 192), (255, 255, 255)),
-}
-LEATHER = {"b": (112, 72, 48), "B": (64, 40, 32)}
-GOLD = {"g": (248, 208, 72), "G": (184, 128, 32)}
-
-
-def palette(hair="brown", cloth="teal", accent="crimson", extra=None):
-    """Map grid characters to colours for a hero/portrait sprite.
-
-    k outline   s/S skin   r blush   e/w/E eye
-    h/H/l hair (mid/dark/light)   c/C/L cloth   a/A accent   b/B leather
-    g/G gold    m/M metal
-    """
-    hm, hd, hl = HAIR[hair]
-    cm, cd, cl = CLOTH[cloth]
-    am, ad, _ = CLOTH[accent]
-    p = {"k": OUTLINE, "h": hm, "H": hd, "l": hl, "c": cm, "C": cd, "L": cl,
-         "a": am, "A": ad, "m": (200, 208, 224), "M": (120, 128, 152)}
-    p.update(SKIN)
-    p.update(EYES)
-    p.update(LEATHER)
-    p.update(GOLD)
-    if extra:
-        p.update(extra)
-    return p
-
-
-def grid_image(rows, pal):
-    """Render a list of equal-length strings; '.' is transparent."""
-    w = len(rows[0])
-    for i, r in enumerate(rows):
-        if len(r) != w:
-            raise ValueError("row %d is %d wide, expected %d: %r" % (i, len(r), w, r))
-    img = Image.new("RGBA", (w, len(rows)), (0, 0, 0, 0))
-    px = img.load()
-    for y, r in enumerate(rows):
-        for x, ch in enumerate(r):
-            if ch in ". ":
-                continue
-            if ch not in pal:
-                raise KeyError("no colour for %r (row %d)" % (ch, y))
-            c = pal[ch]
-            px[x, y] = c + (255,) if len(c) == 3 else c
-    return img
-
-
-def mirror(rows):
-    """Build symmetric rows from their left halves."""
-    return [r + r[::-1] for r in rows]
-
+from font5x7 import GLYPHS
 
 # ---- the window frame ------------------------------------------------------
 WIN_TOP = (64, 80, 200)
@@ -124,3 +51,42 @@ def shadow(w=12, h=4):
             if dx * dx + dy * dy <= 1.0:
                 px[xx, yy] = (0, 0, 0, 90)
     return img
+
+
+# ---- text ------------------------------------------------------------------
+WHITE = (248, 248, 248)
+TEXT_SHADOW = (16, 16, 48)
+
+
+def text_width(s):
+    return sum(len(GLYPHS.get(ch, GLYPHS['?'])[0]) + 1 for ch in s) - (1 if s else 0)
+
+
+def draw_text(img, x, y, s, col=WHITE, shadow_col=TEXT_SHADOW, scale=1, outline=None):
+    """Proportional 5x7 text. `col` may be a list for a vertical gradient."""
+    px = img.load()
+
+    def dot(xx, yy, c):
+        for sy in range(scale):
+            for sx in range(scale):
+                X, Y = xx * scale + sx + x, yy * scale + sy + y
+                if 0 <= X < img.width and 0 <= Y < img.height:
+                    px[X, Y] = c + (255,)
+
+    cx = 0
+    for ch in s:
+        g = GLYPHS.get(ch, GLYPHS['?'])
+        lit = [(gx, gy) for gy, row in enumerate(g) for gx, c in enumerate(row) if c == '#']
+        if outline:
+            for gx, gy in lit:
+                for dx in (-1, 0, 1):
+                    for dy in (-1, 0, 1):
+                        dot(cx + gx + dx, gy + dy, outline)
+        elif shadow_col:
+            for gx, gy in lit:
+                dot(cx + gx + 1, gy + 1, shadow_col)
+        for gx, gy in lit:
+            c = col[min(len(col) - 1, gy * len(col) // 7)] if isinstance(col, list) else col
+            dot(cx + gx, gy, c)
+        cx += len(g[0]) + 1
+    return cx * scale
