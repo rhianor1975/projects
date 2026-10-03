@@ -33,6 +33,33 @@ Saves, the Inn snapshot and high scores live in Godot's user folder
 (`user://`): `~/.local/share/godot/app_userdata/Aether Descent` on Linux,
 `%APPDATA%\Godot\app_userdata\Aether Descent` on Windows.
 
+### Building a game you can play without Godot
+
+`export_presets.cfg` holds four ready presets: Windows Desktop, Linux, macOS
+and Web. Each leaves out `tests/`, `tools/`, `mockups/` and `screenshots/`.
+Each exports into `../build/godot/`, which git ignores.
+
+1. In the editor, open **Editor → Manage Export Templates** and download the
+   templates for your Godot version (once).
+2. Open **Project → Export**, pick a preset, and press **Export Project**.
+
+You can also export from the command line:
+
+```sh
+godot --headless --path . --export-release "Windows Desktop" ../build/godot/windows/AetherDescent.exe
+godot --headless --path . --export-release "Linux"           ../build/godot/linux/AetherDescent.x86_64
+godot --headless --path . --export-release "macOS"           ../build/godot/macos/AetherDescent.zip
+godot --headless --path . --export-release "Web"             ../build/godot/web/index.html
+```
+
+The Windows and Linux builds are a single file with the game packed inside.
+None of the builds are signed:
+- On Windows, SmartScreen may ask first: choose *More info → Run anyway*.
+- On macOS, right-click the app and choose *Open* the first time.
+
+The Web build has to be served over http, not opened as a file. For example,
+run `python3 -m http.server` in its folder and visit `localhost:8000`.
+
 ## Controls
 
 | | Keyboard | Gamepad |
