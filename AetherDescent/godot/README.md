@@ -89,6 +89,13 @@ the plaza take you down to any floor you have already reached.
   taken back for a quarter; one you let go hands back half the fee. Press `p`
   to take over any of them -- and if you fall, one of them carries on, or
   spends a recall charm to drag you home.
+- **The east side of the plaza** — the Ashfall Kitchen (meat comes only off
+  your own blade, graded stringy to mythic; cook a seven-cover service night
+  once per trip down, and the house's reputation compounds), the Lizard
+  Track (six runners, a bookmaker whose prices shorten after three races), the
+  Barter Bazaar (the Apothecary's bottles at a price that moves every trip)
+  and the Altar (trade one attribute point for another, at half the
+  training price).
 - **The bounty board** — east of the temple, one notice at a time, six
   kinds: slay a named monster, recover an item, clear a floor, reach a floor
   against the clock, reach one without cracking a recall charm, or get a
@@ -101,8 +108,7 @@ the plaza take you down to any floor you have already reached.
 
 ## Not ported yet
 
-The Ashfall Kitchen, the lizard track, the
-Bazaar and the town Altar; the remaining 14 district kinds (storm
+The remaining 14 district kinds (storm
 cage, colosseum, aqueduct, assembly line, watch, gauntlet, eye, mirror,
 petrified forest, shaft, boneyard, proving ground, chapel, geothermal); ore
 and the material-gated upgrade rungs past +20; dynamic difficulty and biome
@@ -136,6 +142,7 @@ scripts/core/   the rules: no nodes, no frames -- testable headless
   spellbook.gd    the 180-spell pool                            (spells.c)
   party.gd        the Tavern and hired heroes                   (companions.c)
   quests.gd       the bounty board                              (quests.c)
+  kitchen.gd      the Kitchen, the lizard track, the Bazaar      (kitchen.c)
   autoexplore.gd  `x`
   town.gd         the plaza
   sfx.gd          synthesised sound effects (autoload Sfx)

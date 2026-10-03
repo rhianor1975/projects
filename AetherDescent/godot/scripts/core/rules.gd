@@ -7,6 +7,7 @@ class_name Rules
 ## Game-side `request` for the view to pick up after the action.
 
 static var request := {}
+static var _blade_clean := false   # the blow landing now came off your own blade
 
 
 static func H() -> Hero:
@@ -121,6 +122,11 @@ static func monster_take_damage(mo: Monster, dmg: int, killer: Hero = null) -> v
 	Game.emit_fx({"type": "die", "who": mo})
 	var gold := Game.gain_gold(mo.gold_reward)
 	Game.msg("The %s falls. (+%d gold)" % [mo.name, gold], Color8(255, 232, 150))
+	# only a blade leaves anything worth carrying up
+	if _blade_clean and killer == null:
+		var cut := Kitchen.on_clean_kill(mo)
+		if cut >= 0:
+			Game.msg("You take a %s cut off the %s." % [Kitchen.MEAT_NAMES[cut], mo.name], Color8(240, 180, 160))
 	grant_xp(mo.xp_reward, killer)
 	var q := Game.quest
 	if not q.is_empty() and int(q.get("depth", -1)) == Game.depth:
@@ -208,7 +214,9 @@ static func hero_attack(mo: Monster) -> void:
 		Game.msg("A flicker of bad luck settles over the %s." % mo.name, Color8(190, 140, 255))
 	if h.set_complete >= 0 and rnd(100) < C.SET_PROC_PCT:
 		_set_proc(mo)
+	_blade_clean = true
 	monster_take_damage(mo, dmg)
+	_blade_clean = false
 
 
 static func _set_proc(mo: Monster) -> void:

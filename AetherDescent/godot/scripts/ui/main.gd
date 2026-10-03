@@ -747,6 +747,10 @@ func _open_building(id: String) -> void:
 		"blackmarket": _open_blackmarket()
 		"oracle": _open_oracle()
 		"tavern": _open_tavern()
+		"kitchen": _open_kitchen()
+		"races": _open_races()
+		"bazaar": _open_bazaar()
+		"altar": _open_altar()
 
 
 func _open_store(title: String, stock: Array, hp_upgrade: bool) -> void:
@@ -947,6 +951,262 @@ func _open_inn() -> void:
 		Game.save_run()
 		return true
 	m.detail = _detail_hero
+
+
+# ---- the Ashfall Kitchen --------------------------------------------------------------
+## A service night: seven covers, one at a time, and the only resource is what
+## you carried up. Nothing to lose -- the worst night still pays -- but a night
+## run badly costs reputation, and reputation is the thing that compounds.
+func _open_kitchen() -> void:
+	if Game.kitchen_rep <= 0 and Game.kitchen_earned == 0:
+		Game.kitchen_rep = Kitchen.REP_START
+	var m := _menu("The Ashfall Kitchen")
+	m.list_width = 260
+	var closed := ""
+	if Kitchen.meat_total() == 0:
+		closed = "\"Come back with something,\" the cook says, \"and I'll cook it.\" (Meat comes off your own blade, underground.)"
+	elif Game.kitchen_nights >= Kitchen.NIGHTS_PER_VISIT:
+		closed = "The chairs are up. You cooked tonight; there isn't another one until you have been down again."
+	m.data = {"patrons": [] if closed != "" else Kitchen.roll_patrons(), "i": 0, "served": 0, "taken": 0, "closed": closed}
+	m.rebuild = func(mm: Menu):
+		mm.items = []
+		var d: Dictionary = mm.data
+		if d.closed != "" or d.i >= d.patrons.size():
+			mm.items.append({"label": "Leave", "id": "leave", "desc": d.closed})
+			return
+		for g in Kitchen.GRADES:
+			mm.items.append({"label": "Serve %s" % Kitchen.MEAT_NAMES[g], "right": "x%d" % int(Game.meat[g]), "g": g,
+				"enabled": int(Game.meat[g]) > 0, "why": "There is no %s left." % Kitchen.MEAT_NAMES[g],
+				"color": [Gfx.GREY, Gfx.WHITE, Gfx.CYAN, Gfx.GOLD][g],
+				"desc": "Pays about %s." % Gfx.comma(Kitchen.payout(d.patrons[d.i], g))})
+		mm.items.append({"label": "Turn them away", "g": -1, "color": Gfx.RED.lightened(0.2), "desc": "Costs the house a little standing."})
+	m.on_select = func(mm: Menu, it: Dictionary) -> bool:
+		var d: Dictionary = mm.data
+		if it.get("id", "") == "leave":
+			return true
+		var pat: Dictionary = d.patrons[d.i]
+		var g: int = it.g
+		Game.kitchen_rep = clampi(Game.kitchen_rep + Kitchen.rep_delta(pat, g), 0, Kitchen.REP_MAX)
+		if g < 0:
+			mm.say("%s is turned away, and says so on the way out." % pat.name)
+			Sfx.play("back")
+		else:
+			Game.meat[g] = int(Game.meat[g]) - 1
+			var paid := Game.gain_gold(Kitchen.payout(pat, g))
+			d.taken += paid
+			Game.kitchen_earned += paid
+			var happy := g >= int(pat.wants)
+			mm.say("%s %s. (+%s gold)" % [pat.name, "eats well" if happy else "pushes the plate back", Gfx.comma(paid)])
+			Sfx.play("coin" if happy else "buzz")
+		d.served += 1
+		d.i += 1
+		if d.i == 1:
+			Game.kitchen_nights += 1     # the night is spent only once you have cooked
+		if d.i < d.patrons.size() and Kitchen.meat_total() == 0:
+			d.i = d.patrons.size()
+			d.closed = "The larder is bare. The cook calls last orders. %s gold on the night." % Gfx.comma(d.taken)
+		elif d.i >= d.patrons.size():
+			d.closed = "Service is over. %s gold on the night, and the house is %s." % [Gfx.comma(d.taken), Kitchen.rep_title(Game.kitchen_rep)]
+		if d.closed != "":
+			Game.good(d.closed)
+			Game.save_run()
+		mm.cursor = 0
+		return false
+	m.detail = func(ci: CanvasItem, r: Rect2, mm: Menu, _it: Dictionary):
+		var d: Dictionary = mm.data
+		var p := r.position
+		Gfx.text(ci, p + Vector2(14, 12), "The pass", Gfx.GOLD, 2)
+		Gfx.text(ci, p + Vector2(14, 36), "The house: %s (%d)" % [Kitchen.rep_title(Game.kitchen_rep), Game.kitchen_rep], Gfx.GREY)
+		var y := p.y + 58
+		if d.closed == "" and d.i < d.patrons.size():
+			var pat: Dictionary = d.patrons[d.i]
+			Gfx.text(ci, Vector2(p.x + 14, y), "Cover %d of %d: %s" % [d.i + 1, d.patrons.size(), pat.name], Gfx.WHITE)
+			y += 16
+			for line in Gfx.wrap(pat.line, int(r.size.x - 28)):
+				Gfx.text(ci, Vector2(p.x + 14, y), line, Gfx.CYAN)
+				y += 14
+			Gfx.text(ci, Vector2(p.x + 14, y + 4), "Wants %s.  Purse %s." % [Kitchen.MEAT_NAMES[pat.wants], Gfx.comma(pat.purse)], Gfx.GREY)
+			y += 30
+		Gfx.text(ci, Vector2(p.x + 14, y), "The larder", Gfx.CYAN)
+		y += 16
+		for g in Kitchen.GRADES:
+			Gfx.text(ci, Vector2(p.x + 24, y), Kitchen.MEAT_NAMES[g], Gfx.WHITE)
+			Gfx.text_right(ci, Vector2(p.x + 150, y), "%d / %d" % [int(Game.meat[g]), Kitchen.larder_cap()], Gfx.WHITE)
+			y += 14
+		if d.taken > 0:
+			Gfx.text(ci, Vector2(p.x + 14, y + 8), "Tonight: %s gold" % Gfx.comma(d.taken), Gfx.GOLD)
+	m.footer = "Z/Enter: serve    X/Esc: leave"
+	m.refresh()
+
+
+# ---- the lizard track ----------------------------------------------------------------
+## Six runners and a bookmaker. The first three races of a visit are priced
+## generously; after that he shortens the book.
+func _open_races() -> void:
+	var m := _menu("The Lizard Track")
+	m.list_width = 220
+	m.data = {"stake": 50, "race": {}}
+	m.rebuild = func(mm: Menu):
+		var o := Kitchen.odds()
+		mm.items = []
+		for i in Kitchen.RUNNERS.size():
+			mm.items.append({"label": Kitchen.RUNNERS[i], "right": "%d-1" % o[i], "i": i,
+				"desc": "Stake %s on %s at %d-1: pays %s if it comes in." % [Gfx.comma(mm.data.stake), Kitchen.RUNNERS[i], o[i], Gfx.comma(mm.data.stake * (o[i] + 1))]})
+	m.on_select = func(mm: Menu, it: Dictionary) -> bool:
+		var d: Dictionary = mm.data
+		if not d.race.is_empty() and t - d.race.t0 < 3.4:
+			return false
+		if Game.gold < d.stake:
+			Sfx.play("buzz")
+			mm.say("\"Coin first,\" says the bookmaker, without looking up.")
+			return false
+		var o := Kitchen.odds()
+		Game.gold -= d.stake
+		var w := Kitchen.race_winner(o)
+		Game.races_this_visit += 1
+		var line := ""
+		if w == it.i:
+			# credited flat: the stake was already yours, and the bank's share
+			# on winnings would make the book a printing press
+			var paid: int = mini(d.stake * (o[it.i] + 1), 2000000000 - Game.gold)
+			Game.gold += paid
+			line = "%s comes in! The bookmaker counts out %s." % [Kitchen.RUNNERS[w], Gfx.comma(paid)]
+		else:
+			line = "%s takes it. Your %s stays on the table." % [Kitchen.RUNNERS[w], Gfx.comma(d.stake)]
+		if Game.races_this_visit == Kitchen.GENEROUS_RACES:
+			line += " The bookmaker shortens his prices."
+		d.race = {"winner": w, "pick": it.i, "t0": t, "line": line, "said": false,
+			"pace": range(6).map(func(_i): return randf_range(0.82, 0.97))}
+		Sfx.play("confirm")
+		Game.save_run()
+		return false
+	m.on_key = func(mm: Menu, key: int) -> bool:
+		var d: Dictionary = mm.data
+		match key:
+			KEY_LEFT, KEY_H: d.stake = d.stake - 50 if d.stake > 50 else 10
+			KEY_RIGHT, KEY_L: d.stake = mini(d.stake + 50, Kitchen.STAKE_MAX)
+			KEY_EQUAL, KEY_PLUS, KEY_KP_ADD: d.stake = mini(d.stake * 10, Kitchen.STAKE_MAX)
+			KEY_MINUS, KEY_KP_SUBTRACT: d.stake = maxi(d.stake / 10, 10)
+			_: return false
+		Sfx.play("cursor")
+		return true
+	m.detail = func(ci: CanvasItem, r: Rect2, mm: Menu, _it: Dictionary):
+		var d: Dictionary = mm.data
+		var p := r.position
+		Gfx.text(ci, p + Vector2(14, 12), "Stake  %s" % Gfx.comma(d.stake), Gfx.GOLD, 2)
+		Gfx.text(ci, p + Vector2(14, 36), "Left/Right: 50 at a time    +/-: ten times", Gfx.GREY)
+		var x0 := p.x + 108
+		var lane_w := r.size.x - 108 - 44
+		var race: Dictionary = d.race
+		var el := t - float(race.get("t0", -99.0))
+		var kind := ArtLayout.MON_KINDS.find("serpent")
+		for i in Kitchen.RUNNERS.size():
+			var y := p.y + 60 + i * 24
+			ci.draw_rect(Rect2(x0, y + 18, lane_w + 30, 1), Color8(90, 90, 150))
+			var k := 0.0
+			if not race.is_empty():
+				# the race is decided; this is the show, staged to end that way
+				var finish: float = 2.6 if i == race.winner else 2.6 / race.pace[i]
+				k = clampf(el / finish, 0.0, 1.0)
+				if i != race.winner:
+					k = minf(k, 0.97)
+			var x := x0 + k * lane_w
+			var frame := int(el * 8 + i) % 2 if k > 0.0 and k < 1.0 else 0
+			# the sheet faces left; a negative width turns them toward the post
+			ci.draw_texture_rect_region(Gfx.monsters, Rect2(x + 26, y - 8, -26, 26), Gfx.monster_src(0, kind, frame))
+			var col := Gfx.GOLD if not race.is_empty() and el > 2.7 and i == race.winner else (Gfx.CYAN if i == mm.cursor else Gfx.GREY)
+			Gfx.text(ci, Vector2(p.x + 14, y + 4), Kitchen.RUNNERS[i], col)
+		ci.draw_rect(Rect2(x0 + lane_w + 28, p.y + 56, 2, 6 * 24 + 4), Gfx.WHITE)
+		if not race.is_empty() and el > 2.8 and not race.said:
+			race.said = true
+			mm.say(race.line)
+			Sfx.play("coin" if race.winner == race.pick else "miss")
+	m.footer = "Z/Enter: bet on the runner    X/Esc: leave"
+	m.refresh()
+
+
+# ---- the Barter Bazaar -----------------------------------------------------------------
+## The Apothecary's bottles, at today's price -- which moves between trips.
+func _open_bazaar() -> void:
+	var m := _menu("Barter Bazaar")
+	m.rebuild = func(mm: Menu):
+		mm.items = []
+		for i in ItemsData.APOTHECARY.size():
+			var tpl: Dictionary = ItemsData.APOTHECARY[i]
+			var pct := Kitchen.bazaar_pct(i)
+			var price := Game.discounted(tpl.price * pct / 100)
+			mm.items.append({"label": tpl.name, "right": price, "tpl": tpl, "price": price,
+				"color": Gfx.GREEN if pct < 85 else (Gfx.RED.lightened(0.2) if pct > 120 else Gfx.WHITE),
+				"desc": "%d%% of the Apothecary's price today.  %s" % [pct, _consumable_desc(tpl)]})
+	m.on_select = func(mm: Menu, it: Dictionary) -> bool:
+		if not _buy(mm, it.price):
+			return false
+		Game.give(it.tpl.name)
+		mm.say("You buy a %s for %s." % [it.tpl.name, Gfx.comma(it.price)])
+		return false
+	m.detail = _detail_hero
+	m.refresh()
+	Game.msg("The same bottles as the Apothecary, at whatever the stalls say today.", Gfx.GREY)
+
+
+# ---- the Altar --------------------------------------------------------------------------
+## Trade one point of an attribute for one of another, for half what the
+## Gladiator School would charge to train the second one up.
+func _open_altar() -> void:
+	var h := Game.hero
+	var m := _menu("The Altar")
+	m.list_width = 260
+	m.rows = 11
+	m.data = {"give": -1}
+	m.rebuild = func(mm: Menu):
+		mm.items = []
+		var give: int = mm.data.give
+		for i in 30:
+			var it := {"label": "%s  %d" % [C.ATTR_NAMES[i], h.attrs[i]], "a": i}
+			if give < 0:
+				it.enabled = h.attrs[i] > Kitchen.ALTAR_MIN_ATTR
+				it.why = "\"There is nothing there to take.\""
+				it.desc = "Give up a point of %s." % C.ATTR_NAMES[i]
+			else:
+				var price := _altar_price(i)
+				it.right = Gfx.comma(price)
+				it.enabled = i != give
+				it.why = "\"That is not a trade.\""
+				it.desc = "%s for %s, %s gold." % [C.ATTR_NAMES[give], C.ATTR_NAMES[i], Gfx.comma(price)]
+				if i == give:
+					it.color = Gfx.RED.lightened(0.2)
+			mm.items.append(it)
+	m.on_select = func(mm: Menu, it: Dictionary) -> bool:
+		var give: int = mm.data.give
+		if give < 0:
+			mm.data.give = it.a
+			mm.title = "Give %s for..." % C.ATTR_NAMES[it.a]
+			Sfx.play("confirm")
+			return false
+		var price := _altar_price(it.a)
+		if not _buy(mm, price):
+			return false
+		h.shift_attribute(give, it.a)
+		Sfx.play("levelup")
+		mm.say("%s for %s. It is done, and it cost %s." % [C.ATTR_NAMES[give], C.ATTR_NAMES[it.a], Gfx.comma(price)])
+		mm.data.give = -1
+		mm.title = "The Altar"
+		Game.save_run()
+		return false
+	m.on_cancel = func(mm: Menu) -> bool:
+		if mm.data.give >= 0:
+			mm.data.give = -1
+			mm.title = "The Altar"
+			mm.refresh()
+			return false
+		return true
+	m.detail = _detail_hero
+	m.footer = "Z/Enter: choose    X/Esc: back"
+	m.refresh()
+
+
+func _altar_price(attr: int) -> int:
+	return Game.discounted(ItemsData.training_price(Game.hero.attrs[attr]) / 2)
 
 
 # ---- the bounty board ---------------------------------------------------------------

@@ -174,6 +174,37 @@ func _ready() -> void:
 	if Quests.active():
 		print("FAIL kill bounty did not pay"); failures += 1
 	print("bounties checked")
+	# the Kitchen, the track and the Bazaar
+	game.new_run(0, "Cook", C.Difficulty.NORMAL, C.WorldSize.SHAFT, 8)
+	game.enter_floor(3)
+	game.hero.maxhp = 99999
+	game.hero.hp = 99999
+	var cuts := 0
+	for i in 300:
+		var victim := Monster.for_floor(3, game.hero.x + 1, game.hero.y, game.rng)
+		victim.hp = 1
+		Rules.hero_attack(victim)
+	cuts = Kitchen.meat_total()
+	if cuts == 0 or cuts > 120:
+		print("FAIL %d cuts from 300 blade kills" % cuts); failures += 1
+	var before_cuts := Kitchen.meat_total()
+	for i in 200:
+		var shot_at := Monster.for_floor(3, game.hero.x + 1, game.hero.y, game.rng)
+		Rules.monster_take_damage(shot_at, 99999)      # a spell, a shot: no blade
+	if Kitchen.meat_total() != before_cuts:
+		print("FAIL meat came off a kill that was not a blade"); failures += 1
+	var pat := {"wants": 1, "purse": 1000}
+	if not (Kitchen.payout(pat, 2) > Kitchen.payout(pat, 1) and Kitchen.payout(pat, 1) > Kitchen.payout(pat, 0)):
+		print("FAIL kitchen payouts out of order"); failures += 1
+	game.races_this_visit = 0
+	var generous := Kitchen.odds().duplicate()
+	game.races_this_visit = 3
+	if Kitchen.odds()[5] >= generous[5]:
+		print("FAIL the book never soured"); failures += 1
+	var pct := Kitchen.bazaar_pct(2)
+	if pct != Kitchen.bazaar_pct(2) or pct < Kitchen.BAZAAR_MIN_PCT or pct > Kitchen.BAZAAR_MAX_PCT:
+		print("FAIL bazaar price unstable or out of range"); failures += 1
+	print("kitchen: %d cuts from 300 blade kills" % cuts)
 	# generation sweep: every floor is connected stairs-to-stairs
 	for f in [1, 7, 15, 22, 35, 48, 60, 77, 85, 99, 100]:
 		for ws in [C.WorldSize.SHAFT, C.WorldSize.HALLS]:

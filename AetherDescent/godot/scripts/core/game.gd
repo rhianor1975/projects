@@ -35,6 +35,12 @@ var rested := false            # has taken a room at the Inn: a place to wake
 var quest := {}
 var oracle_reading := ""       # "stairs" or "depth": spent on the next floor
 var writs := 0
+var meat: Array = [0, 0, 0, 0]  # the larder: cuts by grade, for the Kitchen
+var kitchen_rep := 0
+var kitchen_nights := 0        # service nights cooked since you last went down
+var kitchen_earned := 0
+var races_this_visit := 0      # the bookmaker's memory is short
+var bazaar_day := 0            # the Bazaar re-prices once a trip
 var tavern_seed := 1           # the Tavern's twenty, regenerated from this
 var tavern_reroll: Array = []  # per seat: how many times it has been let go
 var tavern_hired := 0          # bitmask of seats out with you
@@ -113,6 +119,12 @@ func new_run(class_id: int, name: String, diff: int, wsize: int, seed_ := 0) -> 
 	tavern_reroll.fill(0)
 	tavern_hired = 0
 	tavern_fallen = 0
+	meat = [0, 0, 0, 0]
+	kitchen_rep = 0
+	kitchen_nights = 0
+	kitchen_earned = 0
+	races_this_visit = 0
+	bazaar_day = 0
 	depth = 0
 	deepest_floor = 0
 	gold = C.NEW_GAME_GOLD
@@ -205,6 +217,12 @@ func enter_floor(n: int, arrive_down := true) -> void:
 	if n > deepest_floor:
 		deepest_floor = n
 	floor_entries += 1
+	bazaar_day += 1
+	if arrive_down:
+		# going down is what resets the town's per-visit counters: a second
+		# service night or three more generous races are earned, not clicked for
+		races_this_visit = 0
+		kitchen_nights = 0
 	update_escalation()
 	map = MapGen.generate(n, world_dims(), run_seed, difficulty)
 	var at := map.stairs_up if arrive_down or map.stairs_down.x < 0 else map.stairs_down
@@ -324,7 +342,9 @@ func snapshot() -> Dictionary:
 		"version": 2, "hero": hero.to_dict(),
 		"party": party.map(func(h): return h.to_dict()), "controlled": party.find(hero),
 		"tavern_seed": tavern_seed, "tavern_reroll": tavern_reroll,
-		"tavern_hired": tavern_hired, "tavern_fallen": tavern_fallen, "difficulty": difficulty, "world": world,
+		"tavern_hired": tavern_hired, "tavern_fallen": tavern_fallen,
+		"meat": meat, "kitchen_rep": kitchen_rep, "kitchen_nights": kitchen_nights,
+		"kitchen_earned": kitchen_earned, "races_this_visit": races_this_visit, "bazaar_day": bazaar_day, "difficulty": difficulty, "world": world,
 		"run_seed": run_seed, "depth": depth, "deepest_floor": deepest_floor, "gold": gold,
 		"gold_mult": gold_mult, "gold_boon_until": gold_boon_until, "inventory": inventory,
 		"keys": keys, "turns": turns, "floor_entries": floor_entries, "steps": steps,
@@ -348,6 +368,12 @@ func restore(d: Dictionary) -> void:
 	for i in tavern_reroll.size():
 		if tavern_reroll[i] == null:
 			tavern_reroll[i] = 0
+	meat = Array(d.get("meat", [0, 0, 0, 0])).map(func(v): return int(v))
+	kitchen_rep = int(d.get("kitchen_rep", 0))
+	kitchen_nights = int(d.get("kitchen_nights", 0))
+	kitchen_earned = int(d.get("kitchen_earned", 0))
+	races_this_visit = int(d.get("races_this_visit", 0))
+	bazaar_day = int(d.get("bazaar_day", 0))
 	tavern_hired = int(d.get("tavern_hired", 0))
 	tavern_fallen = int(d.get("tavern_fallen", 0))
 	difficulty = int(d.difficulty)

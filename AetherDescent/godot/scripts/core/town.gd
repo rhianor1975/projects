@@ -4,7 +4,7 @@ class_name Town
 ## is laid out for 32px tiles and a 3/4 view -- roofs, then a front wall with
 ## the door in it -- but holds the same buildings doing the same jobs.
 
-const W := 40
+const W := 53
 const H := 18
 const START := Vector2i(20, 10)
 const TEMPLE := Vector2i(20, 8)
@@ -23,6 +23,10 @@ const BUILDINGS := [
 	["junkyard", "Junkyard", 24, 12, 7, 4, "roof_slate"],
 	["blackmarket", "The Black Market", 32, 12, 6, 4, "roof_red"],
 	["tavern", "The Brass Lantern", 2, 7, 6, 4, "roof_slate"],
+	["kitchen", "The Ashfall Kitchen", 40, 2, 6, 4, "roof_red"],
+	["altar", "The Altar", 47, 1, 4, 5, "roof_teal"],
+	["races", "The Lizard Track", 40, 12, 6, 4, "roof_slate"],
+	["bazaar", "Barter Bazaar", 47, 12, 4, 4, "roof_red"],
 ]
 
 
@@ -62,9 +66,9 @@ static func generate() -> GameMap:
 	m.set_t(TEMPLE.x, TEMPLE.y, C.Tile.TEMPLE)
 	m.set_t(BOARD.x, BOARD.y, C.Tile.QUEST_BOARD)
 	m.stairs_down = TEMPLE
-	for p in [Vector2i(14, 8), Vector2i(26, 8)]:
+	for p in [Vector2i(14, 8), Vector2i(26, 8), Vector2i(44, 8)]:
 		m.set_t(p.x, p.y, C.Tile.FOUNTAIN)
-	for p in [Vector2i(9, 7), Vector2i(31, 7), Vector2i(9, 10), Vector2i(31, 10)]:
+	for p in [Vector2i(9, 7), Vector2i(31, 7), Vector2i(9, 10), Vector2i(31, 10), Vector2i(38, 7), Vector2i(38, 10)]:
 		m.set_t(p.x, p.y, C.Tile.PLANTER)
 	for p in [Vector2i(35, 8), Vector2i(35, 9), Vector2i(34, 9),
 			Vector2i(17, 10), Vector2i(23, 10), Vector2i(17, 6), Vector2i(23, 6)]:
