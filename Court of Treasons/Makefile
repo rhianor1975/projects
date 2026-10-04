@@ -5,6 +5,29 @@ OBJ    = $(SRC:.c=.o)
 BIN    = court
 
 all: $(BIN)
+
+# What a fresh checkout needs before the client will show anything.
+#
+# A clone has the engine, the rules and the fonts, and none of the
+# surfaces: a client started from one drew every card as a blank frame
+# labelled "card 225", because client/assets/cards.tsv -- the card list
+# the client reads -- is a copy made by mkassets.sh and is gitignored
+# along with everything else under client/assets.
+#
+# Both of these are offline.  mktextures.sh builds the table, the panel,
+# the bars and the vignette out of ImageMagick noise and copies the
+# Spectral faces out of assets/fonts, which ARE in the repository.
+# mkassets.sh copies CARDS.tsv into place and composes a face for every
+# card that has art.
+#
+# The card ART is the one thing this cannot make.  It came from an image
+# server a card at a time and gen-art.py asked for seed -1 every time,
+# so it is not reproducible -- see README.  Without it the cards draw as
+# named plates, which is the designed fallback and is playable.
+setup:
+	@sh tools/mktextures.sh
+	@sh tools/mkassets.sh
+	@echo "  ready: run  godot --path client"
 $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OBJ)
 
@@ -75,7 +98,7 @@ soak: $(BIN)
 
 clean:
 	rm -f $(OBJ) $(BIN)
-.PHONY: all clean san check soak test test-all
+.PHONY: setup all clean san check soak test test-all
 
 # Unit tests over the tables and the View: what can be checked without
 # playing a game.  `make check` plays 200 with the invariants armed.

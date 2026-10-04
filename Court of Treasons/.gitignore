@@ -1,11 +1,19 @@
 *.o
 TABLE.png
-art/
+# art/ is NOT ignored any more.  It is the one generated thing that
+# cannot be generated again: gen-art.py queues every face with seed -1
+# and logs/jobs.tsv records only the job id, so re-running the same
+# prompts yields 1455 different pictures.  The backs ARE reproducible
+# -- BACKS.tsv keeps model, seed and prompt for each.
+#
+# The faces composed from it and the small ones made from those stay
+# out: tools/mkassets.sh remakes both from art/ in a couple of minutes.
 card-*.png
 client/.godot/
 client/assets/backs/
 client/assets/cards.tsv
 client/assets/cards/
+client/assets/thumbs/
 client/assets/ui/
 court
 logs/
