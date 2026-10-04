@@ -75,11 +75,11 @@ CACHE = '/tmp/court-faces'
 
 def face(cid):
     """A composed card, not the raw art.  The first version composited
-    art/<id>.png straight onto the table, which is the painting without
+    art/<id>.webp straight onto the table, which is the painting without
     its frame, name, cost or rules text -- a hand of seven pictures."""
     os.makedirs(CACHE, exist_ok=True)
     out = '%s/%s.png' % (CACHE, cid)
-    if not os.path.exists(out) and os.path.exists('art/%s.png' % cid):
+    if not os.path.exists(out) and os.path.exists('art/%s.webp' % cid):
         subprocess.run(['tools/card.sh', cid, out],
                        stdout=subprocess.DEVNULL, check=False)
     return out
@@ -126,7 +126,7 @@ text(1062, 46, '1', 28, '#c98a72', True)
 
 text(1180, 22, 'THEIR HAND', 14, '#8a7a5c', True)
 for i in range(5):
-    card('art/backs/vipren.png', 1180 + i * 40, 42, 66)
+    card('art/backs/vipren.webp', 1180 + i * 40, 42, 66)
 
 # ---- their lords -----------------------------------------------------
 text(24, Y_THEIR_LORDS[0] - 22, 'THEIR LORDS', 16, '#8a7a5c', True)
@@ -172,9 +172,9 @@ def pile(x, y, label, n, back, tint):
                     '-composite'])
     text(x + 96, y + 52, str(n), 34, PALE, True)
 
-pile(840, Y_TABLE[0], 'YOUR WORD KEPT', 2, 'art/backs/ravenmark.png', '#e8dab8')
-pile(1010, Y_TABLE[0], 'THEIR WORD KEPT', 3, 'art/backs/vipren.png', '#e8dab8')
-pile(1190, Y_TABLE[0], 'THEIR BROKEN WORD', 1, 'art/backs/vipren.png', '#8f3c2c')
+pile(840, Y_TABLE[0], 'YOUR WORD KEPT', 2, 'art/backs/ravenmark.webp', '#e8dab8')
+pile(1010, Y_TABLE[0], 'THEIR WORD KEPT', 3, 'art/backs/vipren.webp', '#e8dab8')
+pile(1190, Y_TABLE[0], 'THEIR BROKEN WORD', 1, 'art/backs/vipren.webp', '#8f3c2c')
 text(840, Y_TABLE[0] + 146, 'the piles are public and permanent, and the only '
      'thing trust is made of', 16, '#6d5f48')
 

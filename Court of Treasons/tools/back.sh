@@ -1,7 +1,7 @@
 #!/bin/sh
 # tools/back.sh HOUSE [OUT]
 #
-# Compose a card back from art/backs/HOUSE.png.
+# Compose a card back from art/backs/HOUSE.webp.
 #
 #   tools/back.sh ravenmark
 #   tools/back.sh realm /tmp/shared-back.png
@@ -15,7 +15,7 @@ set -e
 cd "$(dirname "$0")/.."
 H=$1
 [ -n "$H" ] || { echo "usage: tools/back.sh HOUSE [OUT]"; exit 1; }
-SRC="art/backs/$H.png"
+SRC="art/backs/$H.webp"
 [ -f "$SRC" ] || { echo "no back art for $H"; exit 1; }
 OUT=${2:-back-$H.png}
 

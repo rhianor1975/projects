@@ -249,6 +249,20 @@ it on can. Pricing alone will not close that.
     python3 gen-art.py --deck Vipren                one deck
     python3 gen-art.py --all                        everything missing
 
+Art is stored as **WebP**, not PNG: a painting is a tenth the size at a
+quality nobody can tell from the original, and the repository was carrying
+a gigabyte and a half of PNG. Renders arrive from ImageLab as PNG and are
+written as WebP on the way in; card faces are composed as PNG and stored as
+WebP; the UI surfaces are generated noise and stored lossless. All of it
+goes through `tools/webp.py`, which uses Pillow if it is there and
+ImageMagick if it is not.
+
+| | PNG | WebP |
+|---|---|---|
+| `art/` (1,532 renders) | 901 MB | 96 MB |
+| `client/assets/cards` (1,455 faces) | 615 MB | 70 MB |
+| backs and UI surfaces | 37 MB | 4.6 MB |
+
 Resumable: a card already in `art/` is skipped, so the run can be stopped
 and restarted. The server renders one image at a time at about three
 minutes each, so the full 124 is roughly six hours; it is also shared, so

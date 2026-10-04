@@ -61,8 +61,17 @@ IM=$(command -v magick || command -v convert)
   -fill '#000000' -draw "roundrectangle 24,24 232,232 12,12" \
   -blur 0x16 -channel A -evaluate multiply 0.62 +channel "$OUT/shadow.png"
 
+# Stored lossless: these are generated noise, which lossy coding smooths
+# into mud, and lossless WebP is still eight times smaller than the PNG.
 for f in table panel bar vignette shadow; do
-  printf "  %-10s %s\n" "$f" "$("$IM" identify -format '%wx%h %b' "$OUT/$f.png")"
+  python3 tools/webp.py --lossless "$OUT/$f.png" 2>/dev/null
+done
+
+# `magick identify` on ImageMagick 7, plain `identify` on 6.
+IDENT="$(command -v identify || true)"
+command -v magick >/dev/null && IDENT="magick identify"
+for f in table panel bar vignette shadow; do
+  printf "  %-10s %s\n" "$f" "$($IDENT -format '%wx%h %b' "$OUT/$f.webp")"
 done
 
 # The faces.  Spectral, carried in the repo under the OFL, copied in

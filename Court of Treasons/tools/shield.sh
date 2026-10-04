@@ -24,12 +24,12 @@
 # shield is not something that needs a model anyway -- it is six points
 # and two curves, and masking is exact where asking is not.
 #
-# Writes art/backs/NAME.png, keeping the original as NAME-unshielded.png.
+# Writes art/backs/NAME.webp, keeping the original as NAME-unshielded.webp.
 set -e
 cd "$(dirname "$0")/.."
 N=$1
 [ -n "$N" ] || { echo "usage: tools/shield.sh NAME"; exit 1; }
-SRC="art/backs/$N.png"
+SRC="art/backs/$N.webp"
 [ -f "$SRC" ] || { echo "no back art for $N"; exit 1; }
 
 IM=$(command -v magick || command -v convert)
@@ -82,8 +82,9 @@ ZOOM=${ZOOM:-150}
 "$IM" "$TMP/ground.png" \
   "$TMP/rimgold.png" -gravity center -geometry +0+0 -composite \
   "$TMP/charge.png" -gravity center -geometry +0+0 -composite \
-  "art/backs/$N.png.new"
+  "$TMP/shielded.png"
+python3 tools/webp.py --quality 92 "$TMP/shielded.png"
 
-mv "$SRC" "art/backs/$N-unshielded.png"
-mv "art/backs/$N.png.new" "$SRC"
-echo "art/backs/$N.png  --  shielded"
+mv "$SRC" "art/backs/$N-unshielded.webp"
+mv "$TMP/shielded.webp" "$SRC"
+echo "art/backs/$N.webp  --  shielded"

@@ -31,7 +31,7 @@ n=0
 while IFS="$(printf '\t')" read -r deck id name rest; do
   [ "$id" = "id" ] && continue
   [ -n "$DECK" ] && [ "$deck" != "$DECK" ] && continue
-  [ -f "art/$id.png" ] || continue
+  [ -f "art/$id.webp" ] || continue
   ./tools/card.sh "$id" "$TMP/$(printf '%03d' $n)_$id.png" >/dev/null
   printf '%s\n' "$name" > "$TMP/$(printf '%03d' $n)_$id.txt"
   n=$((n + 1))

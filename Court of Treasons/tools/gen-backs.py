@@ -23,6 +23,9 @@ import time
 import urllib.error
 import urllib.request
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from webp import save_webp  # noqa: E402  renders are stored as WebP
+
 HOST = os.environ.get('IMAGELAB', 'http://192.168.0.50:8095')
 ART = 'art/backs'
 STYLE = ('steampunk, oil painting, thick impasto brushwork, dramatic '
@@ -174,10 +177,10 @@ def main():
                 if j is None:
                     del pending[jid]; continue
                 if j.get('status') == 'done' and j.get('output'):
-                    dst = '%s/%s.png' % (ART, pending[jid])
+                    dst = '%s/%s.webp' % (ART, pending[jid])
                     with urllib.request.urlopen(
                             HOST + '/out/' + j['output'], timeout=120) as r2:
-                        open(dst, 'wb').write(r2.read())
+                        save_webp(r2.read(), dst)
                     print('  %s' % dst, file=sys.stderr)
                     del pending[jid]
                 elif j.get('status') in ('failed', 'error'):
@@ -195,7 +198,7 @@ def main():
         return 0
 
     os.makedirs(ART, exist_ok=True)
-    todo = [k for k in want if not os.path.exists('%s/%s.png' % (ART, k))]
+    todo = [k for k in want if not os.path.exists('%s/%s.webp' % (ART, k))]
     print('%d backs, %d to render' % (len(want), len(todo)), file=sys.stderr)
 
     pending = {}
@@ -225,10 +228,10 @@ def main():
                 del pending[jid]
                 continue
             if j.get('status') == 'done' and j.get('output'):
-                dst = '%s/%s.png' % (ART, pending[jid])
+                dst = '%s/%s.webp' % (ART, pending[jid])
                 with urllib.request.urlopen(HOST + '/out/' + j['output'],
                                             timeout=120) as r:
-                    open(dst, 'wb').write(r.read())
+                    save_webp(r.read(), dst)
                 print('  %s' % dst, file=sys.stderr)
                 del pending[jid]
             elif j.get('status') in ('failed', 'error'):

@@ -831,7 +831,7 @@ func _process(dt: float) -> void:
 		# first version of this check ran out of memory and reported two
 		# perfectly good cards as broken.
 		for k in card_meta:
-			var t := _tex_file("res://assets/cards/%s.png" % card_meta[k].id)
+			var t := _tex_file("res://assets/cards/%s.webp" % card_meta[k].id)
 			if t == null:
 				miss.append(String(card_meta[k].id))
 			else:
@@ -992,12 +992,12 @@ func _load_skin() -> void:
 	# committed, so a missing one has to be survivable: every draw falls
 	# back to flat colour, which is what this looked like before and is
 	# ugly rather than broken.
-	tex_table = _tex("res://assets/ui/table.png")
+	tex_table = _tex("res://assets/ui/table.webp")
 	tex_panel = _tex_file(panel_tex_path) if panel_tex_path != "" \
-		else _tex("res://assets/ui/panel.png")
-	tex_bar = _tex("res://assets/ui/bar.png")
-	tex_vig = _tex("res://assets/ui/vignette.png")
-	tex_shadow = _tex("res://assets/ui/shadow.png")
+		else _tex("res://assets/ui/panel.webp")
+	tex_bar = _tex("res://assets/ui/bar.webp")
+	tex_vig = _tex("res://assets/ui/vignette.webp")
+	tex_shadow = _tex("res://assets/ui/shadow.webp")
 	f_serif = _fnt("res://assets/ui/serif.ttf")
 	f_bold = _fnt("res://assets/ui/serif-bold.ttf")
 	f_ital = _fnt("res://assets/ui/serif-italic.ttf")
@@ -1010,8 +1010,8 @@ func _load_skin() -> void:
 # what makes "drop a file in and it is there" true rather than "drop a
 # file in, reopen the editor, reimport, export again".
 #
-# jpg because the painted table is a 7.7MB png of a photograph, which
-# is the worst possible use of png.
+# jpg or webp because a painting stored as png is the worst possible
+# use of png -- the painted table was 7.7MB of it.
 func _scan_backgrounds() -> void:
 	bg_names = PackedStringArray([""])      # the painted table, always first
 	for d in BG_DIRS:
@@ -1151,7 +1151,7 @@ func _back_tex(i: int) -> Texture2D:
 		return backs[i]
 	if i < 0 or i >= BACK_FILE.size():
 		return null
-	backs[i] = _tex_file("res://assets/backs/%s.png" % BACK_FILE[i])
+	backs[i] = _tex_file("res://assets/backs/%s.webp" % BACK_FILE[i])
 	return backs[i]
 
 # The small face, for the hand and the lords, which are drawn at about
@@ -1171,9 +1171,9 @@ func _card_tex(idx: int) -> Texture2D:
 		dec_more = true
 		return null
 	dec_budget -= 1
-	var t := _tex_file("res://assets/thumbs/%s.png" % card_meta[idx].id)
+	var t := _tex_file("res://assets/thumbs/%s.webp" % card_meta[idx].id)
 	if t == null:
-		t = _tex_file("res://assets/cards/%s.png" % card_meta[idx].id)
+		t = _tex_file("res://assets/cards/%s.webp" % card_meta[idx].id)
 	cards[idx] = t
 	return t
 
@@ -1185,7 +1185,7 @@ func _card_full(idx: int) -> Texture2D:
 	if not card_meta.has(idx):
 		cards_full[idx] = null
 		return null
-	cards_full[idx] = _tex_file("res://assets/cards/%s.png"
+	cards_full[idx] = _tex_file("res://assets/cards/%s.webp"
 		% card_meta[idx].id)
 	return cards_full[idx]
 

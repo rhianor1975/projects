@@ -23,6 +23,9 @@ import time
 import urllib.error
 import urllib.request
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tools'))
+from webp import save_webp  # noqa: E402  renders are stored as WebP
+
 HOST  = os.environ.get('IMAGELAB', 'http://192.168.0.50:8095')
 # Every job this program has ever queued, as card id and job id.
 #
@@ -284,7 +287,7 @@ def main():
 
     os.makedirs(ART, exist_ok=True)
     todo = [r for r in rows
-            if not os.path.exists(os.path.join(ART, r['id'] + '.png'))]
+            if not os.path.exists(os.path.join(ART, r['id'] + '.webp'))]
     print('%d cards selected, %d already drawn, %d to do'
           % (len(rows), len(rows) - len(todo), len(todo)), file=sys.stderr)
 
@@ -382,10 +385,9 @@ def main():
                     break
                 continue
             misses = 0
-            dest = os.path.join(ART, pending[jid] + '.png')
+            dest = os.path.join(ART, pending[jid] + '.webp')
             try:
-                with open(dest, 'wb') as fh:
-                    fh.write(data)
+                save_webp(data, dest)
                 print('  %s  %d bytes' % (pending[jid], len(data)),
                       file=sys.stderr)
                 done += 1
