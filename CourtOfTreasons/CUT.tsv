@@ -1,0 +1,65 @@
+deck	id	name	why	effect
+Ravenmark	RAV002	Forced March	movement	Move 2 extra spaces
+Ravenmark	RAV005	Conquer	castles and sieges	Claim an abandoned castle
+Ravenmark	RAV011	Siege	castles and sieges	Attack a castle; defender loses 2 Production
+Ravenmark	RAV012	Breach the Walls	castles and sieges	Ignore castle defense bonus in combat
+Ravenmark	RAV023	The Old Way	movement	Force a combat with any player on your space
+Ravenmark	RAV038	Occupation	castles and sieges	Your army sits on target's castle; +2 Servitude
+Ravenmark	RAV040	Conquest	castles and sieges	Claim a castle you've defeated this round
+Ravenmark	RAV047	The Conqueror	castles and sieges	Win the game if you control 3 castles
+Ravenmark	RAV049	The Iron Throne	the gauntlet	Claim the throne by force without completing the gauntlet
+Ravenmark	RAV063	The Conqueror's Path	the gauntlet	Ignore one gauntlet goal
+Ravenmark	RAV064	The Final March	movement	Move 3 extra spaces
+Ravenmark	RAV065	The Last Gate	movement	Pay 3 Gold to skip one gauntlet step
+Ravenmark	RAV066	The Throne Awaits	the gauntlet	+3 Military in the inner ring
+Ravenmark	RAV067	The Crown	the gauntlet	+3 Political Capital in the inner ring
+Ravenmark	RAV080	The Final Conquest	castles and sieges	Claim an abandoned castle
+Ravenmark	RAV085	The Conqueror's Vote	castles and sieges	+3 votes if you control 2+ castles
+Vipren	VIP066	The Final Whisper	movement	Move 3 extra spaces
+Vipren	VIP067	The Last Gate	movement	Pay 3 Gold to skip one gauntlet step
+Vipren	VIP068	The Throne Awaits	the gauntlet	+3 Political Capital in the inner ring
+Vipren	VIP069	The Crown	the gauntlet	+3 votes in the inner ring
+Goldwyn	GOL013	Buy the Castle	castles and sieges	Spend 5 Gold -> claim an abandoned castle
+Goldwyn	GOL066	The Golden Path	the gauntlet	Ignore one gauntlet goal
+Goldwyn	GOL067	The Final March	movement	Move 3 extra spaces
+Goldwyn	GOL068	The Last Gate	movement	Pay 3 Gold to skip one gauntlet step
+Goldwyn	GOL069	The Throne Awaits	the gauntlet	+3 Gold in the inner ring
+Goldwyn	GOL070	The Crown	the gauntlet	+3 Political Capital in the inner ring
+Goldwyn	GOL080	The Final Conquest	castles and sieges	Claim an abandoned castle
+Aldemar	ALD004	Defend the Realm	castles and sieges	+2 Military when defending your castle
+Aldemar	ALD066	The Final March	movement	Move 3 extra spaces
+Aldemar	ALD067	The Last Gate	movement	Pay 3 Gold to skip one gauntlet step
+Aldemar	ALD068	The Throne Awaits	the gauntlet	+3 Political Capital in the inner ring
+Aldemar	ALD069	The Crown	the gauntlet	+3 votes in the inner ring
+Aldemar	ALD079	The Final Conquest	castles and sieges	Claim an abandoned castle
+Cataclysm	CAT005	The Drowned Capital	castles and sieges	All castles are abandoned; all players return to their starting castle
+Cataclysm	CAT029	The New World	castles and sieges	All players return to their castles; all trackers reset; game continues
+Combat	CMB016	The Castle Walls	castles and sieges	+3 Military when defending castle
+Combat	CMB017	The Moat	castles and sieges	Negate 1 attack against castle
+Combat	CMB024	The Fortress	castles and sieges	Castle cannot be taken this round
+Combat	CMB040	The Castle	castles and sieges	+2 if defending castle
+Intrigue	INT093	The Haunted Castle	castles and sieges	Target's castle produces -1 Gold
+Intrigue	INT099	The Grave Robber	castles and sieges	Claim a dead player's castle
+War	WAR001	Siege	castles and sieges	Attack a castle; defender loses 2 Production
+War	WAR004	Breach the Walls	castles and sieges	Ignore castle defense bonus
+War	WAR024	Forced March	movement	Move 2 extra spaces
+War	WAR038	The Siege Engine	castles and sieges	+3 Military against castles
+War	WAR041	Conquer	castles and sieges	Claim an abandoned castle
+War	WAR042	Occupation	castles and sieges	Your army sits on target's castle; +2 Servitude
+War	WAR043	Claim the Castle	castles and sieges	Take a castle you've defeated
+War	WAR045	The Conqueror	castles and sieges	Win if you control 3 castles
+War	WAR066	The Castle Walls	castles and sieges	+3 Military when defending castle
+War	WAR067	The Moat	castles and sieges	Negate one attack against castle
+War	WAR080	The Fortress	castles and sieges	Your castle cannot be taken this round
+War	WAR095	The Horseman	movement	+2 Military; move 1 extra space
+Ghost	GHO008	Path from Beyond	movement	Target moves 1 extra space
+Ghost	GHO012	Haunted Castle	castles and sieges	Target's castle produces -1 Gold
+Ghost	GHO024	The Haunted Castle	castles and sieges	Target's castle produces -1 Gold
+Ghost	GHO030	The Grave Robber	castles and sieges	Claim a dead player's castle
+Ghost	GHO039	The Fog	movement	Target cannot move next turn
+Resurrection	RES030	The New World	castles and sieges	Return with full stats. All players return to castles
+Instigator	INS029	The Haunted Castle	castles and sieges	Target's castle produces -1 Gold
+Ambition	GAU011	The Long Bridge	movement	Move 2 extra spaces
+Ambition	GAU012	The Narrow Path	movement	Move 1 space only
+Ambition	GAU014	The Hidden Door	movement	Skip one gauntlet step
+Throne	THR013	The New World	castles and sieges	All players return to castles

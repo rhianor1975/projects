@@ -1,0 +1,38 @@
+; Court of Treasons — the client.
+;
+; It holds no game state of its own.  Everything it draws came from a
+; View the authority sent, and everything it does is an Action it asks
+; the authority to apply.  A client that kept its own copy of the game
+; would be a client that could be asked what it thinks the other seat's
+; Revolution counts are, and the answer has to be "I was never told".
+
+config_version=5
+
+[application]
+config/name="Court of Treasons"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.4", "GL Compatibility")
+boot_splash/show_image=false
+
+[display]
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_items"
+; expand, not keep.
+;
+; keep letterboxes anything that is not 16:9, and a Mac display is
+; 16:10 -- so maximising put a black bar above and below the game, which
+; is wasted screen.  keep was right while the layout was authored at a
+; fixed 1920x1080 and could only be scaled whole; the layout is measured
+; from the viewport now and rearranges to fit, so the extra height is
+; usable space instead of something to be bordered away.
+;
+; Comments here must start with a semicolon.  A block of # lines is not
+; a comment to this parser, and it silently ate the setting underneath
+; it -- the file said expand and the window reported keep.
+window/stretch/aspect="expand"
+window/size/resizable=true
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.078, 0.067, 0.051, 1)

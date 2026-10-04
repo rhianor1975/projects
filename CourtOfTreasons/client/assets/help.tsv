@@ -1,0 +1,76 @@
+standing	Standing	What your House is: permanent, public, and slow to move. You have three -- Military, Capital and Gold. Standing is not spent by most cards; it is what your Levy is refilled from.
+levy	Levy	What you can spend this turn. It is refilled from your Standing at the start of every turn and it is gone at the end of it, so Levy you do not use is Levy you wasted. A card that says spend takes Levy; a card that says permanently takes or gives Standing.
+military	Military	Standing in arms. It is what a Throne challenge is decided on: you win the challenge by committing more Military than the other House.
+capital	Capital	Standing at court -- influence and position. Eight of it, with twelve Gold, buys the Throne outright.
+gold	Gold	Standing in money. The Lord Paramount's tax takes Levy from you and turns it into their Gold.
+unrest	Unrest	Trouble at home, one track for each resource, to 5. At 5 that resource revolts. It is three tracks and not one on purpose: the House causing the trouble chooses where it falls, not the House suffering it.
+grievance	Grievance	What you are owed by the Lord Paramount, to 10. You gain one every time they tax you. It is spent, not kept.
+kept	Word Kept	Promises you have kept. The Court is watching and it remembers.
+broken	Broken Words	Promises you have broken. It costs Favour with the Court, and it breaks ties against you -- for the Paramountcy and at the final reckoning.
+court	The Court	A third party that neither House controls, and at two players the whole game leans on it. It watches promises. Reach +8 Favour and you win outright, without a fight and without the Throne.
+paramount	Lord Paramount	Elected by the Council each round, not accrued. The title lets you take 1 Levy of your choosing from the other House and turn it into Gold -- and gives them a Grievance for it. It buys a good turn, not a permanent lead.
+lords	Minor Lords	The Council. You bind a lord with a hidden Bond of Servitude, to 5, and every revealed lord votes for the House that holds it. Meanwhile Revolution builds in it, to 5, hidden -- and a lord whose Revolution has passed its Servitude stops voting for you. At 5 it turns.
+servitude	Servitude	How firmly a lord is bound to a House, to 5. Hidden until the lord is revealed.
+revolution	Revolution	How close a lord is to turning on the House that holds it, to 5. Hidden -- and hidden from you as well, for a lord you do not hold. A question mark there is not the client keeping a secret; it is the honest answer, because the authority never told it.
+promise	Promises	A promise is an object, not a conversation. It is recorded, it comes due, and at the Reckoning it is kept or broken -- both Houses deciding before either is shown. Consideration is what you pay now to make it worth believing; breaking a promise that carried consideration costs more.
+ambition	Ambitions	Secret goals. Complete three and you become Throneworthy, which is what lets you challenge for the Throne at all.
+unbound	Unbound lords	Lords nobody holds yet. Bind one and it votes for you at the next Council -- and starts quietly resenting you.
+actions	Your turn	Everything you may legally do, right now -- and not everything you could ever do. An entry marked with a small bar down its right edge comes from a card in your hand: playing it, binding a lord with it, or making the promise it carries. Hovering the card lights the line, and hovering the line lifts the card.\nThe unmarked ones need no card: drawing from a deck, whispering to a lord or to the Court, declaring war, challenging for the Throne.\nA card you are holding that is not listed is one you cannot play this turn -- almost always because you have not the Levy for it. Click a card in your hand to play it; the list on the right is there for everything that is not a card, and for the few cards that can do more than one thing. Those cards go grey in your hand while you are being asked, and the ones you can play are lit at the edge. Nothing is hidden and nothing moves: the hand stays in the order you know it in.
+act.0	Draw a card	Take a card from that deck into your hand. Your own House deck is yours alone; the others are shared. Drawing is once a turn, so the deck you pick is the turn's first real decision.\nDrawing deep costs 3 of that deck's resource instead of 1, and draws two so you keep the cheaper of them -- more choice for three times the price. Choose a deck and pay its access. (once.)
+act.1	Play a card	Put this card into effect now, paying its cost in Levy. Play cards from hand, paying Levy. (unlimited, while you can pay.)
+act.2	Bind a lord	Spend this card to advance your hidden Servitude over a Minor Lord. A bound lord votes for you at the Council -- and begins, quietly, to resent you. Advance Servitude over one Minor Lord, if you hold a lever that reaches it. (once.)
+act.3	Work against them	Add hidden Revolution to a lord they hold, or Unrest to one of their resources. Neither is visible to them as it happens. Add hidden Revolution to a lord that is not yours, or 1 Unrest to a named resource of the other House. (once.)
+act.4	Offer a promise	Name a term and offer it. They may refuse; it costs neither of you anything if they do. If they accept it is recorded, and at the Reckoning you will keep it or break it in front of the Court. Offer a Promise. Costs nothing to offer and nothing to refuse. (unlimited.)
+act.5	Answer their promise	They have proposed something and it is your turn to say yes or no.
+act.9	Let a resource revolt	Unrest has reached its limit in one of your resources. It revolts: you lose 2 Standing in it and the track resets to nothing.
+act.12	Discard a card	Put a card out of your hand without playing it.
+act.6	Declare Open War	Say so openly. What follows is fought with committed Military Levy. Open War, a Throne challenge, or the revealing of a Bond. (once.)
+act.7	Challenge for the Throne	Only if you are Throneworthy -- three Ambitions completed. Both Houses commit Military Levy at once and the larger commitment takes the Throne and the game. Open War, a Throne challenge, or the revealing of a Bond. (once.)
+act.8	Reveal a Bond	Show a Servitude you had hidden. A revealed lord can vote for you; an unrevealed one cannot. Open War, a Throne challenge, or the revealing of a Bond. (once.)
+act.10	Spend Grievance	Cash in what the Lord Paramount owes you. Grievance is spent, not kept, and it is worth nothing at the end of the game.
+act.11	Buy Favour	Pay for the Court's good opinion. Favour is a road to winning on its own: reach +8 and the game is yours without a fight.
+act.13	Pass	Do nothing more this turn. Any Levy you have not spent is lost when the turn ends.
+ask.commit	Committing Military	Both Houses choose at the same time and neither sees the other's number first -- that is the whole reason this is a separate moment. The larger commitment wins. What you commit is spent whether you win or lose, so the question is not only how badly you want this, it is how much you can afford to lose.
+ask.break_promise	Keeping or breaking your word	A promise you made has come due. Keeping it costs you whatever you promised. Breaking it costs Favour with the Court -- more if they paid you consideration for it -- and hands them a Grievance either way. Both Houses decide before either decision is shown, so you cannot wait to see theirs.
+ask.accept_promise	Accepting a promise	They are offering their word, not asking for yours. Accepting costs you nothing and obliges you to nothing; refusing costs nothing either. What it changes is that a promise accepted is recorded, and the Court will see whether they keep it.
+ask.lord_turns	Turning a lord against them	You have been building Revolution in a lord the other House holds, and there is now enough of it. Say yes and the lord leaves them now. Say no and the Revolution stays where it is, to be spent later or lost if they shore the lord up.
+due.0	Vote	At the next Council
+due.1	Peace	End of the second round from now
+due.2	Tribute	End of next round
+due.3	Manumission	End of next round
+due.4	Abstention	At the next Council
+due.5	Forbearance	At the next Throne challenge
+due.6	Restraint	End of next round
+due.7	Disclosure	End of next round
+due.8	any term	when its own condition is met
+accent.Ravenmark	#7d3b2e	#241a16
+accent.Vipren	#2f5c46	#131d18
+accent.Goldwyn	#8a6a25	#241d10
+accent.Aldemar	#6a6350	#20201b
+accent.War	#8f3c2c	#28100c
+accent.Political	#3f5a74	#111920
+accent.Intrigue	#9a7b28	#2b220b
+accent.World	#8b7362	#26201b
+accent.Ambition	#6f4a68	#20151e
+accent.Throne	#4d2a2e	#150b0c
+accent.Court	#7c7468	#23211d
+accent.The Dead	#4a5560	#15181b
+parch	#d2bc8e	#fffaf0 #b8a074
+house	A House	Everything one House has and is owed, on one line: its name and its word, its three Standings with the Levy each will refill to, what it is owed by the Lord Paramount, how many promises it has kept and broken, and how much trouble is brewing at home. Yours is the lower bar; theirs is the upper one.
+log	The log	What has happened, most recent last. It is here so you can see what the other House did rather than infer it from a number that changed while you were looking elsewhere.
+decks	The decks	One shield for every deck you may draw from this turn, in that deck's own colours. Click one to draw. Only the decks you can afford appear, and drawing is once a turn -- so which shield you click is the turn's first real decision.
+houses	8	Ravenmark | Vipren | Goldwyn | Aldemar | Leoward | Stonegarth | Wulfren | Everhold
+phase.0	Accession	The Council sits and elects the Lord Paramount. Every revealed Minor Lord casts one vote for the House holding its Servitude; a lord whose Revolution has passed its Servitude abstains instead. The Court casts one. Ties go to the incumbent, then to the House with fewest Broken Words. Total Power no longer decides this: a title that accrues to whoever is ahead is a title that cannot be contested, and it was the worst-measured rule in the game.
+phase.1	Tax	The Lord Paramount takes 1 Levy of their choosing from the other House and gains 1 Gold Levy. The taxed House gains 1 Grievance. The tax takes Levy and not Standing: measured over three ranges of 300 seeds, a Standing tax gave a 14.6x win spread and handed whoever led first 54% of games, because the title fed the tax and the tax fed the title. Electing the title breaks half of that loop and taking Levy breaks the other half — the Paramountcy now buys a good turn rather than a permanent lead.
+phase.2	Turns	Each living House takes a turn in seat order.
+phase.3	Reckoning	Every Promise whose due condition was met this round is kept or broken now, both Houses deciding before either is shown. With two players this is the only phase in the game where neither House moves second, and that is the whole of why it is a phase.
+phase.4	Consequence	Instigators resolve. A Minor Lord at Revolution 5 turns. Any resource at Unrest 5 revolts. Ambitions are checked. Throne challenges are answered.
+phase.5	World	If the round number is even, the World deck turns one card face up on the table.
+step.0	Levy	Standing becomes Levy and Unrest bites. Nothing is chosen.\nautomatic
+step.1	Draw	Choose a deck and pay its access.\nonce
+step.2	First Court	Play, Propose, Build Bond, Send Instigator, spend Grievance, buy Favour.\nunlimited
+step.3	Declare	Open War, a Throne challenge, or the revealing of a Bond.\nonce
+step.4	Second Court	Play, Propose, spend Grievance, buy Favour.\nunlimited
+round	A round, in order	1. Accession -- The Council sits and elects the Lord Paramount.\n2. Tax -- The Lord Paramount takes 1 Levy of their choosing from the other House and gains 1 Gold Levy.\n3. Turns -- Each living House takes a turn in seat order.\n4. Reckoning -- Every Promise whose due condition was met this round is kept or broken now, both Houses deciding before either is shown.\n5. Consequence -- Instigators resolve.\n6. World -- If the round number is even, the World deck turns one card face up on the table.
+winning	The roads to winning	Claim by Force -- Complete 3 Ambitions and become Throneworthy. Declare a Throne challenge. Exceed the other House's committed Military.\nThe Purchased Throne -- Be Throneworthy and hold 7 Gold and 3 Capital Standing.\nThe Golden Throne -- Hold 12 Gold Standing, and play the card that claims it.\nFavour of the Court -- Reach +8 Court Favour.\nThe Last House -- The other House has fallen, and its claim has been extinguished: your Favour reached the crown while it was down.\nThe Final King -- The round cap is reached, or a Cataclysm ends the realm. Highest Total Power in Standing, ties broken by fewest Broken Words.
+terms	What you can promise	Vote, due at the next council\n"I will direct my lords as you say."\nPeace, due end of the second round from now\n"I will not attack you, nor instigate against you."\nForbearance, due at the next throne challenge\n"I will not commit against your challenge."\nRestraint, due end of next round\n"I will not buy Favour, nor instigate against your lords."\nDisclosure, due end of next round\n"I will reveal one of my Ambitions, truthfully."\nand 3 more, each shown in full when it is offered.

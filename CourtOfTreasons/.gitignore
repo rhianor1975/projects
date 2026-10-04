@@ -1,0 +1,14 @@
+*.o
+TABLE.png
+art/
+card-*.png
+client/.godot/
+client/assets/backs/
+client/assets/cards.tsv
+client/assets/cards/
+client/assets/ui/
+court
+logs/
+sheet*.png
+__pycache__/
+client/backgrounds/

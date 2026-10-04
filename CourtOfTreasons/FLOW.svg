@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1080" viewBox="0 0 1500 1080">
+<rect width="1500" height="1080" fill="#1a1610"/>
+<text x="40" y="56" font-family="Georgia,serif" font-size="30" fill="#e6d5ab" font-weight="bold" text-anchor="start">COURT OF TREASONS</text>
+<text x="40" y="88" font-family="Georgia,serif" font-size="20" fill="#b8a884" font-weight="normal" text-anchor="start">One round, as design.xml has it.  Struck through is what a two-player first rule kills.</text>
+<rect x="40" y="120" width="700" height="100" rx="10" fill="#d2bc8e" stroke="#8a6a25" stroke-width="3"/>
+<text x="62" y="152" font-family="Georgia,serif" font-size="22" fill="#241a12" font-weight="bold" text-anchor="start">1  ACCESSION</text>
+<text x="80" y="182" font-family="Georgia,serif" font-size="19" fill="#241a12" font-weight="normal" text-anchor="start">·  Recount Total Power; the higher is Lord Paramount</text>
+<text x="80" y="216" font-family="Georgia,serif" font-size="17" fill="#6b5a3e" font-weight="normal" text-anchor="start">At two Houses this is "whoever is ahead".</text>
+<line x1="390" y1="220" x2="390" y2="234" stroke="#8a6a25" stroke-width="4"/>
+<polygon points="390,246 382,232 398,232" fill="#8a6a25"/>
+<rect x="40" y="246" width="700" height="130" rx="10" fill="#d2bc8e" stroke="#8a6a25" stroke-width="3"/>
+<text x="62" y="278" font-family="Georgia,serif" font-size="22" fill="#241a12" font-weight="bold" text-anchor="start">2  TAX</text>
+<text x="80" y="308" font-family="Georgia,serif" font-size="19" fill="#241a12" font-weight="normal" text-anchor="start">·  Lord Paramount takes 1 Standing from the other House</text>
+<text x="80" y="338" font-family="Georgia,serif" font-size="19" fill="#241a12" font-weight="normal" text-anchor="start">·  That House gains 1 Grievance</text>
+<text x="80" y="372" font-family="Georgia,serif" font-size="17" fill="#6b5a3e" font-weight="normal" text-anchor="start">First Paramount already wins 66% of two-player games.</text>
+<line x1="390" y1="376" x2="390" y2="390" stroke="#8a6a25" stroke-width="4"/>
+<polygon points="390,402 382,388 398,388" fill="#8a6a25"/>
+<rect x="40" y="402" width="700" height="74" rx="10" fill="#d2bc8e" stroke="#8a6a25" stroke-width="3"/>
+<text x="62" y="434" font-family="Georgia,serif" font-size="22" fill="#241a12" font-weight="bold" text-anchor="start">3  TURNS</text>
+<text x="80" y="464" font-family="Georgia,serif" font-size="19" fill="#241a12" font-weight="normal" text-anchor="start">·  Each House in seat order -- see below</text>
+<line x1="390" y1="476" x2="390" y2="490" stroke="#8a6a25" stroke-width="4"/>
+<polygon points="390,502 382,488 398,488" fill="#8a6a25"/>
+<rect x="40" y="502" width="700" height="100" rx="10" fill="#d2bc8e" stroke="#8a6a25" stroke-width="3"/>
+<text x="62" y="534" font-family="Georgia,serif" font-size="22" fill="#241a12" font-weight="bold" text-anchor="start">4  RECKONING</text>
+<text x="80" y="564" font-family="Georgia,serif" font-size="19" fill="#241a12" font-weight="normal" text-anchor="start">·  Promises due are kept or broken, revealed together</text>
+<text x="80" y="598" font-family="Georgia,serif" font-size="17" fill="#6b5a3e" font-weight="normal" text-anchor="start">Five of seven terms die with votes and vassals.</text>
+<line x1="390" y1="602" x2="390" y2="616" stroke="#8a6a25" stroke-width="4"/>
+<polygon points="390,628 382,614 398,614" fill="#8a6a25"/>
+<rect x="40" y="628" width="700" height="194" rx="10" fill="#d2bc8e" stroke="#8a6a25" stroke-width="3"/>
+<text x="62" y="660" font-family="Georgia,serif" font-size="22" fill="#241a12" font-weight="bold" text-anchor="start">5  CONSEQUENCE</text>
+<text x="80" y="690" font-family="Georgia,serif" font-size="19" fill="#8f3c2c" font-weight="normal" text-anchor="start" text-decoration="line-through">×  Instigators resolve</text>
+<text x="80" y="720" font-family="Georgia,serif" font-size="19" fill="#8f3c2c" font-weight="normal" text-anchor="start" text-decoration="line-through">×  Revolts at Revolution 5</text>
+<text x="80" y="750" font-family="Georgia,serif" font-size="19" fill="#241a12" font-weight="normal" text-anchor="start">·  Unrest 5 resolves</text>
+<text x="80" y="780" font-family="Georgia,serif" font-size="19" fill="#241a12" font-weight="normal" text-anchor="start">·  Ambitions checked</text>
+<text x="80" y="810" font-family="Georgia,serif" font-size="19" fill="#241a12" font-weight="normal" text-anchor="start">·  Throne challenges answered</text>
+<line x1="390" y1="822" x2="390" y2="836" stroke="#8a6a25" stroke-width="4"/>
+<polygon points="390,848 382,834 398,834" fill="#8a6a25"/>
+<rect x="40" y="848" width="700" height="130" rx="10" fill="#d2bc8e" stroke="#8a6a25" stroke-width="3"/>
+<text x="62" y="880" font-family="Georgia,serif" font-size="22" fill="#241a12" font-weight="bold" text-anchor="start">6  WORLD</text>
+<text x="80" y="910" font-family="Georgia,serif" font-size="19" fill="#241a12" font-weight="normal" text-anchor="start">·  Even rounds: turn one World card</text>
+<text x="80" y="940" font-family="Georgia,serif" font-size="19" fill="#241a12" font-weight="normal" text-anchor="start">·  The Court turns one card</text>
+<text x="80" y="974" font-family="Georgia,serif" font-size="17" fill="#6b5a3e" font-weight="normal" text-anchor="start">The Court is no longer a two-player special case.</text>
+<rect x="790" y="120" width="670" height="470" rx="10" fill="#1f1a12" stroke="#8a6a25" stroke-width="3"/>
+<text x="814" y="158" font-family="Georgia,serif" font-size="24" fill="#e6d5ab" font-weight="bold" text-anchor="start">A TURN</text>
+<text x="814" y="186" font-family="Georgia,serif" font-size="18" fill="#b8a884" font-weight="normal" text-anchor="start">Phase 3, for one House</text>
+<text x="834" y="232" font-family="Georgia,serif" font-size="19" fill="#e8dab8">·  Levy set from Standing, less Unrest</text>
+<text x="1430" y="232" font-family="Georgia,serif" font-size="16" fill="#8a7a5c" font-weight="normal" text-anchor="end">automatic</text>
+<text x="834" y="270" font-family="Georgia,serif" font-size="19" fill="#e8dab8">·  Draw -- choose a deck and pay its access</text>
+<text x="1430" y="270" font-family="Georgia,serif" font-size="16" fill="#8a7a5c" font-weight="normal" text-anchor="end">once</text>
+<text x="834" y="308" font-family="Georgia,serif" font-size="19" fill="#e8dab8">·  Play cards, paying Levy</text>
+<text x="1430" y="308" font-family="Georgia,serif" font-size="16" fill="#8a7a5c" font-weight="normal" text-anchor="end">unlimited</text>
+<text x="834" y="346" font-family="Georgia,serif" font-size="19" fill="#8f3c2c" text-decoration="line-through">×  Build Bond -- advance Servitude with a Lever</text>
+<text x="1430" y="346" font-family="Georgia,serif" font-size="16" fill="#8f3c2c" font-weight="normal" text-anchor="end">once</text>
+<text x="834" y="384" font-family="Georgia,serif" font-size="19" fill="#8f3c2c" text-decoration="line-through">×  Send Instigator</text>
+<text x="1430" y="384" font-family="Georgia,serif" font-size="16" fill="#8f3c2c" font-weight="normal" text-anchor="end">once</text>
+<text x="834" y="422" font-family="Georgia,serif" font-size="19" fill="#e8dab8">·  Propose a Promise</text>
+<text x="1430" y="422" font-family="Georgia,serif" font-size="16" fill="#8a7a5c" font-weight="normal" text-anchor="end">unlimited, free</text>
+<text x="834" y="460" font-family="Georgia,serif" font-size="19" fill="#e8dab8">·  Declare -- Open War, or a Throne challenge</text>
+<text x="1430" y="460" font-family="Georgia,serif" font-size="16" fill="#8a7a5c" font-weight="normal" text-anchor="end">once</text>
+<text x="814" y="556" font-family="Georgia,serif" font-size="17" fill="#8a7a5c" font-weight="normal" text-anchor="start">Two of seven turn actions die with vassals.</text>
+<rect x="790" y="616" width="670" height="300" rx="10" fill="#1f1a12" stroke="#8a6a25" stroke-width="3"/>
+<text x="814" y="654" font-family="Georgia,serif" font-size="24" fill="#e6d5ab" font-weight="bold" text-anchor="start">HOW IT ENDS</text>
+<text x="834" y="692" font-family="Georgia,serif" font-size="19" fill="#e8dab8">·  Claim by Force -- 3 Ambitions, then beat the field</text>
+<text x="834" y="726" font-family="Georgia,serif" font-size="19" fill="#e8dab8">·  The Purchased Throne -- 12 Gold and 8 Capital Standing</text>
+<text x="834" y="760" font-family="Georgia,serif" font-size="19" fill="#e8dab8">·  Favour of the Court -- reach +5</text>
+<text x="834" y="794" font-family="Georgia,serif" font-size="19" fill="#8f3c2c" text-decoration="line-through">×  Acclamation -- be voted king</text>
+<text x="834" y="828" font-family="Georgia,serif" font-size="19" fill="#e8dab8">·  The Last House -- the other House is dead</text>
+<text x="834" y="862" font-family="Georgia,serif" font-size="19" fill="#e8dab8">·  The Final King -- round 30, highest Total Power</text>
+<text x="814" y="900" font-family="Georgia,serif" font-size="17" fill="#8a7a5c" font-weight="normal" text-anchor="start">Five roads become four, and the Court now carries two of them.</text>
+<rect x="790" y="942" width="670" height="108" rx="10" fill="#2a1c16" stroke="#8f3c2c" stroke-width="3"/>
+<text x="814" y="978" font-family="Georgia,serif" font-size="20" fill="#e8c4b0" font-weight="bold" text-anchor="start">WHAT IT COSTS</text>
+<text x="814" y="1008" font-family="Georgia,serif" font-size="19" fill="#e8c4b0" font-weight="normal" text-anchor="start">51 of 124 seed cards  ·  3 whole decks  ·  90 manifest cards</text>
+<text x="814" y="1034" font-family="Georgia,serif" font-size="17" fill="#c9a08c" font-weight="normal" text-anchor="start">Lever, Instigator and Council lose their purpose entirely.</text>
+</svg>
