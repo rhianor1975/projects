@@ -1,0 +1,1456 @@
+deck	id	name	type	category	cost	reads	effect
+Ravenmark	RAV001	Call the Banners	Play on turn	Core	2M		+3 Military Levy this turn
+Ravenmark	RAV002	Conscription	Play on turn	Growth	3G		+1 Military Standing permanently
+Ravenmark	RAV003	Rally the Troops	Play on turn	Bond	1M		Each of your revealed vassals gains +1 Military Levy this turn
+Ravenmark	RAV004	Iron Fist	Play on turn	Bond	2M 1Grv		Set one of your vassals' Revolution to 0
+Ravenmark	RAV005	Crush the Rebellion	Reaction	Bond	3M		Cancel a revolt against you; the vassal loses 2 Military Standing
+Ravenmark	RAV006	Martial Law	Play on turn	Core	2M		Clear 2 Unrest from one resource; the other House gains 1 Grievance
+Ravenmark	RAV007	Pillage	Play on turn	Core	3M		Take 2 Gold Levy from target House
+Ravenmark	RAV008	Terror	Play on turn	Core	2M		Target House gains 1 Unrest
+Ravenmark	RAV009	Warlord	Reaction	Combat	2M		After winning a combat, take a second Draw action this turn
+Ravenmark	RAV010	No Quarter	Play on turn	Combat	2M		Declare Open War at no Grievance cost and commit first
+Ravenmark	RAV011	The Iron Summons	Play on turn	Reputation	4M 2Grv	broken_words	Target House with 1 or more Broken Words loses 2 Capital Standing
+Ravenmark	RAV012	Oath of Steel	Promise	Promise	0		Propose Forbearance; consideration 2 Military Levy paid now
+Ravenmark	RAV014	Blood and Steel	Reaction	Combat	2M		+3 Military Levy in one combat, this combat only
+Ravenmark	RAV015	Veteran Company	Reaction	Combat	3M		Reduce an attacker's committed Military Levy by 2
+Ravenmark	RAV017	Flanking Maneuver	Reaction	Combat	2M		+2 Military Levy in one combat, this combat only
+Ravenmark	RAV018	Unbreakable	Reaction	Combat	3G		Reduce an attacker's committed Military Levy by 3
+Ravenmark	RAV020	Spy on Vassal	Play on turn	Core	1G		Reveal the Revolution count on any lord the other House holds
+Ravenmark	RAV021	Interrogate	Play on turn	Core	1G		Reveal the Revolution count on any lord the other House holds
+Ravenmark	RAV024	Intimidation	Play on turn	Core	3G		Target House must accept your next Promise or lose 2 Capital Standing
+Ravenmark	RAV025	Garrison	Reaction	Core	1M		+2 Military Levy when defending, not when attacking
+Ravenmark	RAV026	Brutal Efficiency	Play on turn	Core	3M		Target House loses 1 Military Standing
+Ravenmark	RAV027	War Taxes	Play on turn	Growth	2G	grievance	+2 Gold Levy this turn; gain 1 Grievance
+Ravenmark	RAV028	Spoils of War	Play on turn	Growth	4G		Take 3 Gold Levy from target House
+Ravenmark	RAV029	Mercenary Contract	Play on turn	Growth	2M		Any House may buy 2 Military Levy for 3 Gold Levy this round
+Ravenmark	RAV031	Confiscate	Play on turn	Growth	3G		Take 2 Gold Levy from target House
+Ravenmark	RAV032	War Chest	Play on turn	Growth	1G		Your Gold Levy is not lost at end of this turn
+Ravenmark	RAV033	Declare Open War	Play on turn	Council	2G	grievance	Declare Open War at no Grievance cost and commit first
+Ravenmark	RAV034	Demand Surrender	Play on turn	Council	1G		A revealed lord's Revolution cannot advance next round
+Ravenmark	RAV035	Threaten	Play on turn	Council	2G		Advance Servitude by 1
+Ravenmark	RAV036	Military Council	Reaction	Council	2C		gain 1 vote at the next Council
+Ravenmark	RAV037	The Sword Decides	Play on turn	Council	1C		Trigger a Council immediately
+Ravenmark	RAV039	Show of Force	Play on turn	Council	0	grievance	gain 1 Grievance
+Ravenmark	RAV041	Counter-Attack	Reaction	Core	2G		Declare Open War against target House
+Ravenmark	RAV042	Hold the Line	Reaction	Core	3G		Reduce an attacker's committed Military Levy by 2
+Ravenmark	RAV043	Rally	Reaction	Core	3M		+1 Military Standing permanently
+Ravenmark	RAV044	Vengeance	Reaction	Core	2M		+2 Military Levy in one combat, this combat only
+Ravenmark	RAV046	Blood Feud	Reaction	Core	3G	grievance	Target House gains 2 Unrest
+Ravenmark	RAV048	Total War	Instant	Core	3M		Every House including you loses 2 Military Levy
+Ravenmark	RAV050	Scourge of the Realm	Instant	Core	4M		Every Bond gains 2 hidden Revolution; +3 Military Levy this turn
+Ravenmark	RAV051	Royal Decree	Play on turn	Core	3G		Take 2 Gold Levy from target House
+Ravenmark	RAV052	Executive Order	Play on turn	Core	3G		Target House loses 1 Capital Standing
+Ravenmark	RAV053	Realm Control	Play on turn	Core	2G		Advance Servitude by 1
+Ravenmark	RAV054	The King's Army	Play on turn	Core	2M		+3 Military Levy this turn
+Ravenmark	RAV055	Tax Collector	Play on turn	Core	2G		+2 Gold Levy this turn
+Ravenmark	RAV056	Martial Decree	Play on turn	Core	3G		In a Throne challenge, one House of your choosing may not commit
+Ravenmark	RAV057	Warlord's Court	Play on turn	Bond	1M		Each of your revealed lords gains +1 Military Levy this turn
+Ravenmark	RAV058	The Iron Fist	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Ravenmark	RAV059	The Chain of Command	Play on turn	Bond	1G		A revealed lord's Revolution cannot advance next round
+Ravenmark	RAV060	Mass Conscription	Play on turn	Bond	0		+1 Military Levy this turn
+Ravenmark	RAV061	The War Machine	Play on turn	Bond	4G		+2 Military Standing permanently
+Ravenmark	RAV062	Total Control	Play on turn	Bond	3C		Direct one of the other House's lords at the next Council
+Ravenmark	RAV068	The Final Battle	Play on turn	Core	5M		+4 Military Levy in a Throne challenge only
+Ravenmark	RAV069	Iron Grip	Play on turn	Bond	1M		Clear all your Unrest
+Ravenmark	RAV070	The Fear	Play on turn	Bond	0	unrest	Every House gains 1 Unrest
+Ravenmark	RAV071	The Suppressor	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Ravenmark	RAV072	The Punisher	Play on turn	Bond	2M		Cancel a revolt against you; the lord loses 1 Military Standing
+Ravenmark	RAV073	The Example	Play on turn	Bond	2G		Advance Servitude by 1
+Ravenmark	RAV074	The Iron Will	Play on turn	Bond	1G		A revealed lord's Revolution cannot advance next round
+Ravenmark	RAV075	Scourge	Play on turn	Combat	0	grievance	gain 1 Grievance
+Ravenmark	RAV076	The Conqueror's Due	Play on turn	Combat	2G		+3 Gold Levy this turn
+Ravenmark	RAV077	The Terror	Play on turn	Combat	2M		Every House loses 1 Capital Standing
+Ravenmark	RAV078	The Blood Price	Play on turn	Combat	3M		Target House loses 1 Military Standing
+Ravenmark	RAV079	The Iron Crown	Play on turn	Combat	2C		+2 Capital Levy this turn
+Ravenmark	RAV081	The Sword Decides	Reaction	Council	1C		Trigger a Council immediately
+Ravenmark	RAV082	The Military Vote	Reaction	Council	3M		gain 2 vote at the next Council
+Ravenmark	RAV083	The Iron Vote	Reaction	Council	2C		gain 1 vote at the next Council
+Ravenmark	RAV084	The War Vote	Reaction	Council	3C		gain 2 vote at the next Council
+Ravenmark	RAV086	The People's Champion	Play on turn	Chaos	1M		Every House gains 2 Military Levy this round
+Ravenmark	RAV087	The Underdog's Rise	Play on turn	Chaos	1M		Every House gains 2 Capital Levy this round
+Ravenmark	RAV088	The Merchant's Gift	Play on turn	Chaos	2G		Every House gains 3 Gold Levy this round
+Ravenmark	RAV090	The Broken Wheel	Play on turn	Chaos	1G		Every House including you loses 1 Gold Levy
+Ravenmark	RAV091	The Lucky Draw	Play on turn	Chaos	2G		After winning a combat, take a second Draw action this turn
+Ravenmark	RAV092	The Miser's Curse	Play on turn	Chaos	1G		Every House including you loses 1 Gold Levy
+Ravenmark	RAV093	The Generous Lord	Play on turn	Chaos	1M		Take 1 Gold Levy from the Lord Paramount
+Ravenmark	RAV094	The Tax Collector	Play on turn	Chaos	2G		Take 1 Gold Levy from target House
+Ravenmark	RAV095	The Hidden Blade	Play on turn	Chaos	3C		Target House loses 1 Capital Standing
+Ravenmark	RAV096	The Open Hand	Play on turn	Chaos	0		Every House gains 1 Gold Levy this round
+Ravenmark	RAV097	The Closed Fist	Play on turn	Chaos	1G		Every House including you loses 1 Gold Levy
+Ravenmark	RAV098	The Long Memory	Play on turn	Chaos	0		gain 2 Grievance
+Ravenmark	RAV099	The Short Memory	Play on turn	Chaos	2G		Clear 2 of your Unrest
+Ravenmark	RAV100	The Iron King	Instant	Chaos	1M		Trigger a Council immediately
+Ravenmark	RAV022	War Council	Play on turn	Core	3G		Draw 2 combat cards
+Ravenmark	RAV016	Scorched Earth	Play on turn	Combat	4G	grievance	Target player loses 2 Production; you gain 1 Grievance
+Ravenmark	RAV030	Forced Labor	Play on turn	Growth	1M	unrest	+1 Production; +1 Unrest
+Ravenmark	RAV013	Duel	Play on turn	Combat	2G		Challenge a player to single combat; winner takes a card
+Ravenmark	RAV045	Last Stand	Reaction	Core	3M		If you would be eliminated survive with 1 Military
+Ravenmark	RAV089	The Forgotten Heir	Play on turn	Chaos	4M		A random dead player may return as a ghost
+Vipren	VIP001	Whisper Network	Play on turn	Core	0		Look at target House's hand
+Vipren	VIP002	Poison	Play on turn	Core	4G		Target House loses 2 Standing of your choosing
+Vipren	VIP003	Blackmail	Lever	Bond	3C		Advance Servitude by 2 over a lord that is Afraid
+Vipren	VIP004	Expose	Instant	Bond	1C		Reveal the Revolution count on any lord the other House holds
+Vipren	VIP005	Double Agent	Play on turn	Bond	0		Redirect an Instigator sent this round to a House of your choosing
+Vipren	VIP006	The Long Knife	Play on turn	Core	3G 3Grv		Attempt an assassination against the Lord Paramount
+Vipren	VIP007	Seed the Court	Play on turn	Core	1C		Send 1 extra Instigator this turn
+Vipren	VIP008	Forged Letters	Play on turn	Reputation	1C	broken_words	Transfer one Broken Word from your pile to target House's pile
+Vipren	VIP008-1	Whispers in the Dark	Instant	Core	2C		Every lord the other House holds gains 1 hidden Revolution
+Vipren	VIP009	Patient Web	Play on turn	Growth	3C		+1 Capital Standing permanently
+Vipren	VIP009-1	Secret Meeting	Play on turn	Core	2C		Every lord the other House holds gains 1 hidden Revolution
+Vipren	VIP010	Two Tongues	Promise	Promise	1C		Propose Vote and Abstention at once; only one can be kept
+Vipren	VIP011	Nothing Was Agreed	Reaction	Promise	1C		Break a Promise without adding it to your Broken Word pile; once per game
+Vipren	VIP012	The Quiet Room	Play on turn	Bond	1C		Spy on any Bond in play, including one the other House holds
+Vipren	VIP013	Silent Blade	Play on turn	Combat	2G		Free any revealed lord; the House that held it gains 1 Military Unrest
+Vipren	VIP019	False Flag	Play on turn	Core	0		Redirect an Instigator sent this round to a House of your choosing
+Vipren	VIP021	Puppet Strings	Reaction	Core	3C		Direct one of the other House's lords at the next Council
+Vipren	VIP025	Instigator	Play on turn	Core	2C		Every lord the other House holds gains 1 hidden Revolution
+Vipren	VIP029	Foreign Gold	Play on turn	Growth	3G		Every lord the other House holds gains 2 hidden Revolution
+Vipren	VIP030	Bribe the Guard	Reaction	Growth	3G		Reduce an attacker's committed Military Levy by 2
+Vipren	VIP031	Black Market	Play on turn	Growth	2G		+2 Gold Levy this turn
+Vipren	VIP032	Debt Collector	Play on turn	Growth	3G		Take 2 Gold Levy from target House
+Vipren	VIP033	Silk Trader	Play on turn	Growth	0		+1 Gold Levy this turn
+Vipren	VIP034	Smuggler	Play on turn	Growth	2G		Take 1 Gold Levy from target House
+Vipren	VIP035	Shadow Vote	Instant	Council	1C		Trigger a Council; no votes may be bought or commanded
+Vipren	VIP036	Puppet Council	Instant	Council	2C		At the next Council, lords vote as they wish, not as their House holds
+Vipren	VIP037	The Pretender	Instant	Council	3G		Advance Servitude by 2
+Vipren	VIP038	Whisper to the King	Reaction	Council	3C		gain 2 vote at the next Council
+Vipren	VIP039	Divide and Conquer	Play on turn	Council	3G	grievance	Target House gains 2 Unrest
+Vipren	VIP040	The Long Con	Play on turn	Council	3G		Advance Servitude by 2 against target House
+Vipren	VIP041	Secret Pact	Promise	Council	0		Propose Peace; consideration 1 Capital Levy paid now
+Vipren	VIP042	The Kingmaker	Reaction	Council	3C		gain 2 vote at the next Council
+Vipren	VIP043	Counter-Spy	Reaction	Core	1G		A revealed lord's Revolution cannot advance next round
+Vipren	VIP044	Misdirection	Reaction	Core	0		Redirect an Instigator sent this round to a House of your choosing
+Vipren	VIP045	Escape Artist	Reaction	Core	3G		Reduce an attacker's committed Military Levy by 3
+Vipren	VIP046	Dead Man's Switch	Reaction	Core	4C		Target House loses 2 Capital Standing
+Vipren	VIP047	The Poisoner	Reaction	Core	3M		Reduce an attacker's committed Military Levy by 2
+Vipren	VIP048	Whispers	Reaction	Core	3G		Target House loses 1 Capital Standing
+Vipren	VIP049	The Puppet Master	Instant	Core	4G		+2 Military Levy in a Throne challenge only
+Vipren	VIP050	The Long Night	Instant	Core	3C		Every House loses 1 Capital Standing; +2 Capital Levy this turn
+Vipren	VIP051	The Shadow Throne	Instant	Core	4G		+2 Military Levy in a Throne challenge only
+Vipren	VIP052	The Whisper King	Instant	Core	3C		Direct one of the other House's lords at the next Council
+Vipren	VIP053	Master of Whispers	Play on turn	Core	1C		Spy on any Bond in play, including one the other House holds
+Vipren	VIP054	The Spider's Web	Play on turn	Core	3C		Direct one of the other House's lords at the next Council
+Vipren	VIP055	The Shadow Decree	Play on turn	Core	3G		Target House loses 1 Capital Standing
+Vipren	VIP056	The Whisper Network	Play on turn	Core	2C		Every lord the other House holds gains 1 hidden Revolution
+Vipren	VIP057	The Silent Blade	Play on turn	Core	2G		Free any revealed lord; the House that held it gains 1 Capital Unrest
+Vipren	VIP058	The Long Game	Play on turn	Core	2G		After winning a combat, take a second Draw action this turn
+Vipren	VIP059	Spider's Web	Play on turn	Bond	3C		Direct one of the other House's lords at the next Council
+Vipren	VIP060	The Puppet Court	Play on turn	Bond	2G		Advance Servitude by 1
+Vipren	VIP061	The Silent Coup	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Vipren	VIP062	The Shadow Army	Play on turn	Bond	0		+1 Military Levy this turn
+Vipren	VIP063	The Whisper Machine	Play on turn	Bond	1C		Send 1 extra Instigator this turn
+Vipren	VIP064	Total Control	Play on turn	Bond	3C		Direct one of the other House's lords at the next Council
+Vipren	VIP065	The Shadow Throne	Play on turn	Core	4G		+2 Military Levy in a Throne challenge only
+Vipren	VIP070	The Final Whisper	Play on turn	Core	3C		+4 Capital Levy this turn
+Vipren	VIP071	The Veil	Play on turn	Bond	1G		A revealed lord's Revolution cannot advance next round
+Vipren	VIP072	The Long Night	Play on turn	Bond	2C		Every House loses 1 Capital Standing
+Vipren	VIP073	The Suppressor	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Vipren	VIP074	The Punisher	Play on turn	Bond	2M		Cancel a revolt against you; the lord loses 1 Military Standing
+Vipren	VIP075	The Example	Play on turn	Bond	2G		Advance Servitude by 1
+Vipren	VIP076	The Iron Will	Play on turn	Bond	1G		A revealed lord's Revolution cannot advance next round
+Vipren	VIP077	The Long Night	Play on turn	Combat	2C		Every House loses 1 Capital Standing
+Vipren	VIP078	The Shadow King	Play on turn	Combat	2C		+2 Capital Levy this turn
+Vipren	VIP079	The Whisper King	Play on turn	Combat	3C		Direct one of the other House's lords at the next Council
+Vipren	VIP080	The Final Whisper	Play on turn	Combat	2G		Free any revealed lord; the House that held it gains 1 Capital Unrest
+Vipren	VIP081	The Shadow Vote	Reaction	Council	1C		Trigger a Council; no votes may be bought or commanded
+Vipren	VIP082	The Puppet Council	Reaction	Council	2C		At the next Council, lords vote as they wish, not as their House holds
+Vipren	VIP083	The Silent Vote	Reaction	Council	3C		gain 2 vote at the next Council
+Vipren	VIP084	The Whisper Vote	Reaction	Council	2C		gain 1 vote at the next Council
+Vipren	VIP085	The Kingmaker	Reaction	Council	3C		gain 2 vote at the next Council
+Vipren	VIP086	The People's Champion	Play on turn	Chaos	1C		Every House gains 2 Military Levy this round
+Vipren	VIP087	The Underdog's Rise	Play on turn	Chaos	1C		Every House gains 2 Capital Levy this round
+Vipren	VIP088	The Merchant's Gift	Play on turn	Chaos	2G		Every House gains 3 Gold Levy this round
+Vipren	VIP090	The Broken Wheel	Play on turn	Chaos	1G		Every House including you loses 1 Gold Levy
+Vipren	VIP091	The Lucky Draw	Play on turn	Chaos	2G		After winning a combat, take a second Draw action this turn
+Vipren	VIP092	The Miser's Curse	Play on turn	Chaos	1G		Every House including you loses 1 Gold Levy
+Vipren	VIP093	The Generous Lord	Play on turn	Chaos	1C		Take 1 Gold Levy from the Lord Paramount
+Vipren	VIP094	The Tax Collector	Play on turn	Chaos	2G		Take 1 Gold Levy from target House
+Vipren	VIP095	The Hidden Blade	Play on turn	Chaos	3C		Target House loses 1 Capital Standing
+Vipren	VIP096	The Open Hand	Play on turn	Chaos	0		Every House gains 1 Gold Levy this round
+Vipren	VIP097	The Closed Fist	Play on turn	Chaos	1G		Every House including you loses 1 Gold Levy
+Vipren	VIP098	The Long Memory	Play on turn	Chaos	0		gain 2 Grievance
+Vipren	VIP099	The Short Memory	Play on turn	Chaos	2G		Clear 2 of your Unrest
+Vipren	VIP100	The Shadow King	Instant	Chaos	1G		Trigger a Council immediately
+Vipren	VIP010-1	Master of Whispers	Play on turn	Core	0		Look at any player's hand
+Vipren	VIP012-1	Assassin	Play on turn	Combat	4C		Target player loses 2 Political Capital
+Vipren	VIP016	Poisoned Wine	Play on turn	Combat	3M		Target loses 1 Military permanently
+Vipren	VIP027	Whisper Campaign	Play on turn	Core	2G	unrest	+1 Unrest on any player
+Vipren	VIP006-1	Spy Network	Play on turn	Core	1C		Look at any hidden tracker of your choice
+Vipren	VIP007-1	The Long Game	Play on turn	Core	3G		Draw 2 Vipren cards
+Vipren	VIP026	Agitator	Play on turn	Core	3G		+2 Revolution; may be detected
+Vipren	VIP015	Backstab	Reaction	Combat	2M		+3 Military Levy if target trusts you
+Vipren	VIP020	Disinformation	Reaction	Core	2C		Cancel target's next House Action
+Vipren	VIP023	The Spider's Web	Play on turn	Core	1C		All hidden trackers revealed to you only
+Vipren	VIP028	The Veil	Play on turn	Core	0		Your trackers cannot be spied on this round
+Vipren	VIP014	The Knife	Play on turn	Combat	3C		Assassinate a player; they are eliminated if undefended
+Vipren	VIP024	Betrayal	Instant	Core	3C		Break alliance; +2 Capital Levy -2 Honor
+Vipren	VIP022	Shadow Alliance	Promise	Core	0		Term Peace; consideration up to 2 Levy
+Vipren	VIP089	The Forgotten Heir	Play on turn	Chaos	4C		A random dead player may return as a ghost
+Vipren	VIP011-1	Turncoat	Reaction	Combat	2C		Steal an enemy's combat card mid-combat
+Vipren	VIP017	Ambush	Reaction	Combat	0		Attack first in any combat
+Vipren	VIP018	Escape	Reaction	Combat	1C		Flee any combat without penalty
+Goldwyn	GOL001	Bribe	Instant	Core	3G		Target House must accept your next Promise or lose 2 Capital Standing
+Goldwyn	GOL002	Mercenaries	Reaction	Combat	3G		+4 Military Levy in one combat, this combat only
+Goldwyn	GOL003	Buy the Vote	Instant	Council	2G		Buy 1 additional vote at this Council
+Goldwyn	GOL004	Debt Trap	Lever	Bond	3G		Advance Servitude by 2 over a lord that is In Debt
+Goldwyn	GOL005	Golden Shackles	Play on turn	Bond	1G		A revealed vassal's Revolution cannot advance next round
+Goldwyn	GOL006	The Counting House	Play on turn	Growth	3G		+1 Gold Standing permanently
+Goldwyn	GOL007	Call the Debt	Play on turn	Core	1G	broken_words	Take 1 Levy of each resource if the other House has broken a Promise to you
+Goldwyn	GOL008	Grain Shipment	Play on turn	Core	2G		Clear 2 of your Unrest
+Goldwyn	GOL009	Price of Peace	Promise	Promise	1G		Propose Peace; consideration 3 Gold Levy paid now
+Goldwyn	GOL010	Treasury Raid	Play on turn	Core	3M		Take 3 Gold Levy from the Lord Paramount; gain 1 Grievance
+Goldwyn	GOL011	Underwrite the Throne	Play on turn	Core	2G		Count 2 toward the Purchased Throne's Gold requirement permanently
+Goldwyn	GOL012	Everyone Has a Price	Play on turn	Council	3G		Direct one of the other House's lords at the next Council
+Goldwyn	GOL021	The Price of Loyalty	Play on turn	Core	2G		Advance Servitude by 1
+Goldwyn	GOL029	King's Ransom	Play on turn	Growth	3G		Advance Servitude by 3 against target House
+Goldwyn	GOL030	Golden Age	Play on turn	Growth	2G		+3 Gold Levy this turn
+Goldwyn	GOL032	Trade Empire	Play on turn	Growth	0		+1 Gold Levy this turn
+Goldwyn	GOL043	The Golden King	Play on turn	Council	3C		gain 2 vote at the next Council
+Goldwyn	GOL046	Buy Out	Reaction	Core	3G		Advance Servitude by 2 against target House
+Goldwyn	GOL056	Realm Control	Play on turn	Core	2G		Advance Servitude by 1
+Goldwyn	GOL057	The King's Army	Play on turn	Core	2M		+3 Military Levy this turn
+Goldwyn	GOL058	Tax Collector	Play on turn	Core	2G		+2 Gold Levy this turn
+Goldwyn	GOL060	The Merchant Guild	Play on turn	Bond	0		+1 Gold Levy this turn
+Goldwyn	GOL061	The Golden Chain	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Goldwyn	GOL062	The Chain of Gold	Play on turn	Bond	1G		A revealed lord's Revolution cannot advance next round
+Goldwyn	GOL063	Mass Conscription	Play on turn	Bond	0		+1 Military Levy this turn
+Goldwyn	GOL065	Total Control	Play on turn	Bond	3C		Direct one of the other House's lords at the next Council
+Goldwyn	GOL074	The Suppressor	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Goldwyn	GOL075	The Punisher	Play on turn	Bond	2M		Cancel a revolt against you; the lord loses 1 Military Standing
+Goldwyn	GOL076	The Example	Play on turn	Bond	2G		Advance Servitude by 1
+Goldwyn	GOL077	The Iron Will	Play on turn	Bond	1G		A revealed lord's Revolution cannot advance next round
+Goldwyn	GOL084	The Bought Vote	Reaction	Council	2C		gain 1 vote at the next Council
+Goldwyn	GOL092	The Miser's Curse	Play on turn	Chaos	1G		Every House including you loses 1 Gold Levy
+Goldwyn	GOL041	The Price of Peace	Play on turn	Council	2G		Spend 5 Gold -> no combat this round
+Goldwyn	GOL059	Martial Decree	Play on turn	Core	2G		No combat this round unless you allow it
+Goldwyn	GOL086	The People's Champion	Play on turn	Chaos	1M		Player with lowest Military gains +2 Military Levy
+Goldwyn	GOL087	The Underdog's Rise	Play on turn	Chaos	1C		Player with lowest Political Capital gains +2
+Goldwyn	GOL088	The Merchant's Gift	Play on turn	Chaos	2G		Player with lowest Gold gains +3 Gold Levy
+Goldwyn	GOL008-1	Market Crash	Play on turn	Core	4G		Target player loses 3 Gold
+Goldwyn	GOL020	Blackmail	Play on turn	Core	3G		Spend 4 Gold -> +2 Servitude
+Goldwyn	GOL023	Informant	Play on turn	Core	1G		Spend 2 Gold -> learn one hidden tracker
+Goldwyn	GOL027	Silk and Gold	Play on turn	Growth	2C		+2 Capital Levy
+Goldwyn	GOL034	Buy the Throne	Play on turn	Growth	3C		Spend 10 Gold -> +3 votes
+Goldwyn	GOL037	Buy the Council	Play on turn	Council	3C		Spend 6 Gold -> +3 votes
+Goldwyn	GOL038	The Golden Vote	Play on turn	Council	3C		Spend 4 Gold -> target votes as you command
+Goldwyn	GOL039	Bought Loyalty	Play on turn	Council	2G		Spend 3 Gold -> +1 Servitude
+Goldwyn	GOL064	The War Machine	Play on turn	Bond	3G		Draw 2 War cards
+Goldwyn	GOL073	The Fear	Play on turn	Bond	0	unrest	All players gain +1 Unrest
+Goldwyn	GOL078	The Great Depression	Play on turn	Combat	3G		All players lose 3 Gold
+Goldwyn	GOL079	The Golden Crown	Play on turn	Combat	2C		+2 Capital Levy
+Goldwyn	GOL083	The Merchant's Vote	Reaction	Council	3C		+2 votes if you have the most Gold
+Goldwyn	GOL007-1	Buy Information	Play on turn	Core	1G		Spend 2 Gold -> look at any hidden tracker
+Goldwyn	GOL011-1	Hire Assassin	Play on turn	Combat	4C		Spend 4 Gold -> target loses 2 Political Capital
+Goldwyn	GOL012-1	Mercenary Company	Play on turn	Combat	3M		Spend 6 Gold -> +4 Military Levy
+Goldwyn	GOL014	Economic Sanctions	Play on turn	Combat	4G		Target loses 2 Production
+Goldwyn	GOL016	Bounty Hunter	Play on turn	Combat	3M		Spend 3 Gold -> target loses 1 Military
+Goldwyn	GOL055	Executive Order	Play on turn	Core	1G		Force one player to discard a card
+Goldwyn	GOL098	The Long Memory	Play on turn	Chaos	1G		All Grievances are doubled
+Goldwyn	GOL099	The Short Memory	Play on turn	Chaos	0		All Grievances are halved
+Goldwyn	GOL019	Buy the Spy	Play on turn	Core	0		Spend 3 Gold -> look at any hand
+Goldwyn	GOL022	Bought Silence	Play on turn	Core	2G		Spend 3 Gold -> cancel a Revolt
+Goldwyn	GOL026	The Banker	Play on turn	Core	2G		All players owe you 1 Gold
+Goldwyn	GOL028	Merchant Guild	Play on turn	Growth	3G		Draw 2 Goldwyn cards
+Goldwyn	GOL031	Tax Haven	Play on turn	Growth	0		Ignore Lord Paramount tax this round
+Goldwyn	GOL033	The Vault	Play on turn	Growth	1G		Save 5 Gold for next round
+Goldwyn	GOL044	Buy the Rebellion	Play on turn	Council	2G		Spend 5 Gold -> cancel a Revolution
+Goldwyn	GOL048	The Ledger Balances	Reaction	Core	3G		Target loses 2 Gold; you gain 2
+Goldwyn	GOL054	The Golden Tax	Play on turn	Core	3G		All players pay you 2 Gold
+Goldwyn	GOL071	The Final Battle	Reaction	Core	3M		+4 Military Levy in the final combat
+Goldwyn	GOL015	Golden Parachute	Reaction	Combat	0		Spend 3 Gold -> negate one assassination
+Goldwyn	GOL047	Golden Shield	Reaction	Core	2G		Spend 3 Gold -> negate one attack
+Goldwyn	GOL090	The Broken Wheel	Play on turn	Chaos	0		All players lose 1 random resource
+Goldwyn	GOL093	The Generous Lord	Play on turn	Chaos	1G		Lord Paramount gives 1 Gold to each player
+Goldwyn	GOL094	The Tax Collector	Play on turn	Chaos	1G		All players pay 1 Gold to Lord Paramount
+Goldwyn	GOL095	The Hidden Blade	Play on turn	Chaos	0		A random player loses 1 Political Capital
+Goldwyn	GOL006-1	Trade Route	Play on turn	Core	2G		+2 Gold Levy per turn for 3 rounds
+Goldwyn	GOL009-1	Loan Shark	Play on turn	Core	2G		Target player owes you 3 Gold; if unpaid +1 Servitude
+Goldwyn	GOL010-1	The Ledger	Play on turn	Core	1G		All debts owed to you are doubled
+Goldwyn	GOL018	Inflation	Play on turn	Combat	2G		All players lose 1 Gold; you gain 2 Gold
+Goldwyn	GOL025	Debt Collector	Play on turn	Core	2G		Target owes 2 Gold; if unpaid +1 Servitude
+Goldwyn	GOL035	Economic Warfare	Play on turn	Growth	3G		Target's Production is halved next round
+Goldwyn	GOL049	Insurance	Reaction	Core	3M		Spend 2 Gold -> recover 1 Military after loss
+Goldwyn	GOL051	The Great Depression	Instant	Core	3G		All players lose 3 Gold; you lose 1
+Goldwyn	GOL053	The Debt of Kings	Instant	Core	2G		All players owe you 5 Gold; unpaid -> vassals
+Goldwyn	GOL100	The Golden King	Instant	Chaos	3G		Player with most Gold becomes Lord Paramount
+Goldwyn	GOL040	The Merchant's Pact	Play on turn	Council	2G		Force alliance for 3 rounds
+Goldwyn	GOL042	The Banker's Choice	Play on turn	Council	2G		Choose who wins a tied vote
+Goldwyn	GOL089	The Forgotten Heir	Play on turn	Chaos	4G		A random dead player may return as a ghost
+Goldwyn	GOL091	The Lucky Draw	Play on turn	Chaos	0		All players draw 1 extra House Action
+Goldwyn	GOL050	The Golden Throne	Instant	Core	4G		Win if you have 20+ Gold
+Goldwyn	GOL052	The Merchant King	Instant	Core	3G		Buy the throne for 15 Gold
+Goldwyn	GOL045	Counter-Bribe	Reaction	Core	2G		Spend 3 Gold -> negate a bribe against you
+Goldwyn	GOL081	Buy the Council	Reaction	Council	3C		Spend 6 Gold -> +3 votes
+Goldwyn	GOL082	The Golden Vote	Reaction	Council	3C		Spend 4 Gold -> target votes as you command
+Goldwyn	GOL085	The Banker's Choice	Reaction	Council	2G		Choose who wins a tied vote
+Goldwyn	GOL096	The Open Hand	Play on turn	Chaos	0		All players may give 1 Gold to another player
+Goldwyn	GOL097	The Closed Fist	Play on turn	Chaos	2G		All players may take 1 Gold from another player
+Goldwyn	GOL201	The Deep Mine	Play on turn	Growth	3G		Spend 4 Gold Levy: +1 Gold Standing
+Goldwyn	GOL202	The Second Shaft	Play on turn	Growth	3G		Spend 4 Gold Levy: +1 Gold Standing
+Goldwyn	GOL203	The Counting House	Play on turn	Growth	3G		Spend 4 Gold Levy: +1 Gold Standing
+Goldwyn	GOL204	The Mint	Play on turn	Core	1G		Double your Gold Levy this turn
+Goldwyn	GOL205	The Bourse	Play on turn	Core	1G		Double your Gold Levy this turn
+Goldwyn	GOL206	The Long Investment	Play on turn	Growth	3C		Spend 4 Capital Levy: +1 Capital Standing
+Aldemar	ALD001	Call the Council	Play on turn	Council	1C		Trigger a Council immediately
+Aldemar	ALD002	Pardon	Reaction	Bond	3C		End a revolt against you and advance Servitude by 2 against the rebel
+Aldemar	ALD003	Oath Sworn	Promise	Promise	2C		Propose any term; if kept, gain 2 Capital Standing permanently
+Aldemar	ALD004	Defend the Realm	Reaction	Combat	2M		+3 Military Levy when defending, not when attacking
+Aldemar	ALD005	The People's Choice	Play on turn	Council	3C		Clear all your Unrest and gain 1 vote at the next Council
+Aldemar	ALD006	The Realm Remembers	Play on turn	Reputation	1C	broken_words	Each House loses 1 Capital Standing per Broken Word it holds
+Aldemar	ALD006-1	Honor Bound	Play on turn	Core	2C		+2 Capital Levy this turn
+Aldemar	ALD007	Lawful Claim	Play on turn	Core	4C 2Grv		Complete one revealed Ambition that requires Capital
+Aldemar	ALD008	Arbitration	Instant	Promise	1C		Cancel a Promise before it comes due; it is discarded, not broken
+Aldemar	ALD009	The Old Rites	Play on turn	Council	2C		At the next Council, lords vote as they wish, not as their House holds
+Aldemar	ALD010	Held in Trust	Play on turn	Reputation	1C	word_kept	+1 Capital Levy per Promise in your Word Kept pile this turn
+Aldemar	ALD010-1	Loyalty Beyond Death	Reaction	Core	1G		A revealed lord's Revolution cannot advance next round
+Aldemar	ALD011	Regency	Play on turn	Core	1C		Take the Lord Paramount's tax income this round instead of them
+Aldemar	ALD012	No Crown Unearned	Reaction	Council	1G 3Grv		Object to a crowning without paying Military Levy
+Aldemar	ALD017	Inspiring Speech	Play on turn	Combat	2G		Advance Servitude by 1
+Aldemar	ALD018	The Rightful King	Reaction	Combat	4C		gain 3 vote at the next Council
+Aldemar	ALD028	The King's Bounty	Play on turn	Growth	2G		+2 Gold Levy this turn
+Aldemar	ALD029	Honorable Trade	Play on turn	Growth	0		+1 Gold Levy this turn
+Aldemar	ALD036	The Puppet Council	Instant	Council	2C		At the next Council, lords vote as they wish, not as their House holds
+Aldemar	ALD041	The Rightful Heir	Reaction	Council	3C		gain 2 vote at the next Council
+Aldemar	ALD042	The King's Voice	Reaction	Council	2C		gain 1 vote at the next Council
+Aldemar	ALD055	Realm Control	Play on turn	Core	2G		Advance Servitude by 1
+Aldemar	ALD056	The King's Army	Play on turn	Core	2M		+3 Military Levy this turn
+Aldemar	ALD057	Tax Collector	Play on turn	Core	2G		+2 Gold Levy this turn
+Aldemar	ALD059	The People's Will	Play on turn	Bond	2C		gain 1 vote at the next Council
+Aldemar	ALD060	The Loyal Court	Play on turn	Bond	2G		Advance Servitude by 1
+Aldemar	ALD061	The Chain of Honor	Play on turn	Bond	1G		A revealed lord's Revolution cannot advance next round
+Aldemar	ALD062	Mass Conscription	Play on turn	Bond	0		+1 Military Levy this turn
+Aldemar	ALD064	Total Control	Play on turn	Bond	3C		Direct one of the other House's lords at the next Council
+Aldemar	ALD073	The Suppressor	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Aldemar	ALD074	The Punisher	Play on turn	Bond	2M		Cancel a revolt against you; the lord loses 1 Military Standing
+Aldemar	ALD075	The Example	Play on turn	Bond	2G		Advance Servitude by 1
+Aldemar	ALD076	The Iron Will	Play on turn	Bond	1G		A revealed lord's Revolution cannot advance next round
+Aldemar	ALD082	The People's Vote	Reaction	Council	3C		gain 2 vote at the next Council
+Aldemar	ALD083	The Loyal Vote	Reaction	Council	2C		gain 1 vote at the next Council
+Aldemar	ALD092	The Miser's Curse	Play on turn	Chaos	1G		Every House including you loses 1 Gold Levy
+Aldemar	ALD026	The People's Shield	Reaction	Core	1M		+2 Military Levy when defending
+Aldemar	ALD053	The King's Peace	Play on turn	Core	2C		No combat this round
+Aldemar	ALD058	Martial Decree	Play on turn	Core	2C		No combat this round unless you allow it
+Aldemar	ALD080	The People's Champion	Play on turn	Combat	1M		Player with lowest Military gains +2 Military Levy
+Aldemar	ALD087	The Underdog's Rise	Play on turn	Chaos	1C		Player with lowest Political Capital gains +2
+Aldemar	ALD088	The Merchant's Gift	Play on turn	Chaos	2G		Player with lowest Gold gains +3 Gold Levy
+Aldemar	ALD021	Truth	Play on turn	Core	1G		Reveal one hidden tracker publicly
+Aldemar	ALD022	Justice	Play on turn	Core	3C		Target loses 1 Political Capital
+Aldemar	ALD024	The Silent Watch	Play on turn	Core	1C		Look at one hidden tracker
+Aldemar	ALD025	The Noble's Duty	Play on turn	Core	2G		+1 Servitude on target (hidden)
+Aldemar	ALD063	The War Machine	Play on turn	Bond	3G		Draw 2 War cards
+Aldemar	ALD072	The Fear	Play on turn	Bond	0	unrest	All players gain +1 Unrest
+Aldemar	ALD078	The King's Crown	Play on turn	Combat	2C		+2 Capital Levy
+Aldemar	ALD084	The Rightful Vote	Reaction	Council	4C		+3 votes if you have the most Honor
+Aldemar	ALD033	The Council Convenes	Instant	Council	1C		Trigger a Council vote
+Aldemar	ALD034	The King is Dead	Instant	Council	1C		Immediate vote after assassination
+Aldemar	ALD054	Executive Order	Play on turn	Core	1C		Force one player to discard a card
+Aldemar	ALD098	The Long Memory	Play on turn	Chaos	1G		All Grievances are doubled
+Aldemar	ALD099	The Short Memory	Play on turn	Chaos	0		All Grievances are halved
+Aldemar	ALD009-1	Righteous Cause	Play on turn	Core	0	grievance	+1 Grievance against the Lord Paramount
+Aldemar	ALD014	The Realm United	Play on turn	Combat	0	grievance	All players gain +1 Grievance against Lord Paramount
+Aldemar	ALD016	The Long Watch	Play on turn	Combat	3G		Draw 2 Aldemar cards
+Aldemar	ALD027	Fair Taxes	Play on turn	Growth	0	grievance	+1 Gold Levy; no Grievance
+Aldemar	ALD031	Tithe	Play on turn	Growth	2G		All players give you 1 Gold
+Aldemar	ALD032	The Royal Treasury	Play on turn	Growth	1G		Save 3 Gold
+Aldemar	ALD077	The Realm United	Play on turn	Combat	0	grievance	All players +1 Grievance against Lord Paramount
+Aldemar	ALD007-1	Shield Wall	Reaction	Core	2C		Negate one attack against you
+Aldemar	ALD011-1	The King's Peace	Instant	Combat	2C		No combat can occur this round
+Aldemar	ALD015	Guardian	Reaction	Combat	0		Target player cannot be assassinated this round
+Aldemar	ALD044	The Shield of Honor	Reaction	Core	0		Negate one assassination
+Aldemar	ALD047	The King's Mercy	Reaction	Core	2G		Target rebel gains +1 Loyalty
+Aldemar	ALD071	The King's Mercy	Play on turn	Bond	2G		Rebels gain +1 Loyalty instead of punishment
+Aldemar	ALD090	The Broken Wheel	Play on turn	Chaos	0		All players lose 1 random resource
+Aldemar	ALD093	The Generous Lord	Play on turn	Chaos	1C		Lord Paramount gives 1 Gold to each player
+Aldemar	ALD094	The Tax Collector	Play on turn	Chaos	1C		All players pay 1 Gold to Lord Paramount
+Aldemar	ALD095	The Hidden Blade	Play on turn	Chaos	0		A random player loses 1 Political Capital
+Aldemar	ALD012-1	Voice of the People	Reaction	Combat	3C		Gain +2 votes at a Council
+Aldemar	ALD013	Noble Sacrifice	Play on turn	Combat	3M		Lose 1 Military -> gain 2 Political Capital
+Aldemar	ALD019	Mercy	Play on turn	Core	4G	grievance	Target gains +1 Grievance against you; you gain +2 Honor
+Aldemar	ALD030	The People's Fund	Play on turn	Growth	3G		+2 Gold Levy; +1 Loyalty
+Aldemar	ALD052	The Peace of Kings	Instant	Core	3G		End all wars; all players gain +1 Loyalty
+Aldemar	ALD100	The People's King	Instant	Chaos	3C		Player with lowest Military becomes Lord Paramount
+Aldemar	ALD046	Honor Bound	Reaction	Core	0		Cannot be forced to betray
+Aldemar	ALD008-1	The Old Alliance	Play on turn	Core	2C		Force an alliance with a player for 3 rounds
+Aldemar	ALD020	Coronation	Instant	Core	1C		If you have the most votes you may declare yourself king
+Aldemar	ALD035	The Shadow Vote	Instant	Council	1C		Hidden votes
+Aldemar	ALD038	The Council is Divided	Instant	Council	2C		No majority -> coin flip
+Aldemar	ALD040	The Council is Bought	Instant	Council	2C		Gold can buy votes
+Aldemar	ALD048	The Last Word	Reaction	Core	2C		Force a tied vote to your favor
+Aldemar	ALD051	The Coronation	Instant	Core	1C		Declare yourself king if you have the most votes
+Aldemar	ALD065	The Coronation	Play on turn	Core	1C		Declare yourself king if most votes
+Aldemar	ALD070	The Final Vote	Play on turn	Core	4C		+4 votes in the final vote
+Aldemar	ALD085	The King's Choice	Reaction	Council	2C		Lord Paramount breaks tie
+Aldemar	ALD089	The Forgotten Heir	Play on turn	Chaos	4C		A random dead player may return as a ghost
+Aldemar	ALD023	The People's Will	Reaction	Core	2C		+1 vote per free player
+Aldemar	ALD091	The Lucky Draw	Play on turn	Chaos	0		All players draw 1 extra House Action
+Aldemar	ALD039	Veto	Reaction	Council	2C		Cancel a Council Event
+Aldemar	ALD043	Counter-Argument	Reaction	Core	2C		Negate one Political attack
+Aldemar	ALD045	The People's Shield	Reaction	Core	1M		+2 Military Levy when defending
+Aldemar	ALD050	The Realm United	Instant	Core	0	grievance	All players gain +1 Grievance against Lord Paramount
+Aldemar	ALD081	The Council Convenes	Reaction	Council	1C		Trigger a Council vote
+Aldemar	ALD086	The People's Champion	Play on turn	Chaos	1M		Player with lowest Military gains +2 Military Levy
+Aldemar	ALD096	The Open Hand	Play on turn	Chaos	0		All players may give 1 Gold to another player
+Aldemar	ALD097	The Closed Fist	Play on turn	Chaos	2G		All players may take 1 Gold from another player
+Combat	CMB032	The Sleeper	Reaction	Combat	2G		Advance Servitude by 1 against target House
+Combat	CMB044	The Long Con	Reaction	Bond	3G		Advance Servitude by 2 against target House
+Combat	CMB046	The Broken Chain	Reaction	Bond	2G		Free any revealed lord; the House that held it gains 1 Military Unrest
+Combat	CMB014	Hold the Line	Reaction	Combat	1M		+2 Military Levy when defending
+Combat	CMB019	The Arrow Slits	Reaction	Combat	1M		+2 Military Levy when defending
+Combat	CMB020	The Boiling Oil	Reaction	Combat	2M		Attacker loses 1 Military
+Combat	CMB022	The Ramparts	Reaction	Combat	1M		+2 Military Levy when defending
+Combat	CMB001	Flanking Maneuver	Reaction	Combat	2M		+2 Military Levy
+Combat	CMB002	Blood and Steel	Reaction	Combat	2M		+3 Military Levy -1 after combat
+Combat	CMB004	The Last Charge	Reaction	Combat	3M		+4 Military Levy -2 after combat
+Combat	CMB006	The Night Attack	Reaction	Combat	2M		+2 Military Levy if attacking at night
+Combat	CMB007	The Dawn Attack	Reaction	Combat	2M		+2 Military Levy if attacking at dawn
+Combat	CMB010	The Archer's Volley	Reaction	Combat	1M		+2 Military Levy if defending
+Combat	CMB011	The Infantry Square	Reaction	Combat	1M		+2 Military Levy if outnumbered
+Combat	CMB027	Poisoned Blade	Reaction	Combat	3M		Target loses 1 Military permanently
+Combat	CMB035	High Ground	Reaction	Combat	0		+1 if defending
+Combat	CMB036	The Forest	Reaction	Combat	0		+1 if defending in woods
+Combat	CMB037	The River	Reaction	Combat	0		+1 if defending at river
+Combat	CMB038	The Mountains	Reaction	Combat	0		+1 if defending in mountains
+Combat	CMB039	The Open Field	Reaction	Combat	0		+1 if attacking in open field
+Combat	CMB041	The Village	Reaction	Combat	0		+1 if defending village
+Combat	CMB042	The Ruins	Reaction	Combat	0		+1 if defending ruins
+Combat	CMB030	The Whisper	Reaction	Combat	1M		Force target to discard a card
+Combat	CMB005	The Breakthrough	Reaction	Combat	2M		+3 Military Levy if you outnumber target
+Combat	CMB009	The Knight's Charge	Reaction	Combat	2M		+3 Military Levy if you have 3+ Military
+Combat	CMB012	The Cavalry Flank	Reaction	Combat	2M		+3 Military Levy if you have more cards
+Combat	CMB015	Last Stand	Reaction	Combat	3M		Survive elimination with 1 Military
+Combat	CMB023	The Relief Force	Reaction	Combat	2M		+2 Military Levy if ally sends aid
+Combat	CMB031	The False Flag	Reaction	Combat	1M		Make it look like an ally betrayed you
+Combat	CMB033	The Broken Oath	Reaction	Combat	2G		Target cannot form alliances for 3 rounds
+Combat	CMB047	The New Alliance	Promise	Bond	0		Term Peace; consideration up to 2 Levy
+Combat	CMB013	Shield Wall	Reaction	Combat	2M		Negate 1 Attack card
+Combat	CMB021	The Portcullis	Reaction	Combat	2M		Negate 1 attack
+Combat	CMB029	The Double Cross	Reaction	Combat	1M		Target's ally becomes yours
+Combat	CMB043	Counter-Attack	Reaction	Bond	2G		After being attacked attack back
+Combat	CMB045	The Double Agent	Reaction	Bond	1M		Appear allied to one; actually allied to another
+Combat	CMB048	The Grand Alliance	Reaction	Bond	0		All players allied against Lord Paramount
+Combat	CMB049	The Coalition	Reaction	Bond	0		All players allied against the leader
+Combat	CMB003	Ambush	Reaction	Combat	2M		+1 Military Levy; attack first
+Combat	CMB018	The Drawbridge	Reaction	Combat	1M		Retreat without penalty
+Combat	CMB025	Feigned Retreat	Reaction	Combat	2M		Cancel enemy's next card
+Combat	CMB026	Turncoat	Reaction	Combat	2M		Steal an enemy's combat card
+Combat	CMB034	The Poisoned Gift	Reaction	Combat	0		Give target a card; it costs them 1 resource
+War	WAR001	Levy the Fields	Play on turn	Core	2M		+2 Military Levy this turn
+War	WAR002	Standing Army	Play on turn	Growth	3G		+1 Military Standing permanently
+War	WAR003	Open War	Play on turn	Combat	2G 2Grv		Declare Open War against target House
+War	WAR004	Coalition	Instant	Combat	2G 3Grv		Clear 2 Unrest from one of your resources
+War	WAR005	Scorched Earth	Play on turn	Core	4M		Target House loses 2 Gold Standing; you gain 2 Unrest
+War	WAR006	Winter Camp	Play on turn	Core	1M		Your Military Levy is not lost at end of this turn
+War	WAR007	The Broken Truce	Play on turn	Reputation	1M	broken_words	Attack a House you hold an unresolved Peace with; break that Promise now
+War	WAR008	Rebellion	Play on turn	Core	2G 4Grv		The Lord Paramount loses 2 Standing of their choosing
+War	WAR009	Hostages	Lever	Bond	2M		Advance Servitude by 1 over a lord of a House you defeated in combat this round
+War	WAR010	Attrition	Play on turn	Core	1M		Every House including you loses 1 Military Levy
+War	WAR012	Raid	Play on turn	Combat	2G		Take 1 Gold Levy from target House
+War	WAR021	Call the Banners	Play on turn	Combat	2M		+2 Military Levy this turn
+War	WAR025	Rally the Troops	Play on turn	Combat	1M		Each of your revealed lords gains +1 Military Levy this turn
+War	WAR029	The Old Guard	Play on turn	Combat	0		+1 Military Levy this turn
+War	WAR031	The Standing Army	Play on turn	Combat	3M		+1 Military Standing permanently 
+War	WAR048	The Iron Fist	Play on turn	Combat	2G		Set one of your lords' Revolution to 0
+War	WAR049	Crush the Rebellion	Play on turn	Combat	2G		Set one of your lords' Revolution to 0
+War	WAR055	The Purge	Play on turn	Combat	3C		Target House loses 1 Capital Standing
+War	WAR056	The Exile	Play on turn	Combat	2G		Free any revealed lord; the House that held it gains 1 Military Unrest
+War	WAR060	The Blood Tax	Play on turn	Combat	1M		Every House including you loses 1 Military Levy
+War	WAR085	The Veteran	Play on turn	Core	3M		+1 Military Standing permanently 
+War	WAR028	Garrison	Reaction	Combat	1M		+2 Military Levy when defending
+War	WAR052	The Garrison	Reaction	Combat	1M		+2 Military Levy when defending
+War	WAR062	Hold the Line	Reaction	Combat	1M		+2 Military Levy when defending
+War	WAR064	The King's Peace	Play on turn	Combat	2M		No combat this round
+War	WAR069	The Arrow Slits	Reaction	Combat	1M		+2 Military Levy when defending
+War	WAR070	The Boiling Oil	Reaction	Combat	2M		Attacker loses 1 Military
+War	WAR071	The Murder Holes	Reaction	Combat	2M		Attacker loses 1 Military
+War	WAR073	The Ramparts	Reaction	Combat	1M		+2 Military Levy when defending
+War	WAR078	The Guerrilla War	Reaction	Combat	2M		Attacker loses 1 Military per round
+War	WAR079	The Winter	Reaction	Combat	2M		Attacker loses 1 Military
+War	WAR003-1	Border Skirmish	Reaction	Combat	0		+1 Military Levy this combat
+War	WAR006-1	Blood and Steel	Reaction	Combat	2M		+3 Military Levy this combat -1 after
+War	WAR014	The Night Attack	Reaction	Combat	2M		+2 Military Levy if attacking at night
+War	WAR015	The Dawn Attack	Reaction	Combat	2M		+2 Military Levy if attacking at dawn
+War	WAR019	The Last Charge	Reaction	Combat	3M		+4 Military Levy but lose 2 Military after
+War	WAR027	War Council	Play on turn	Combat	3G		Draw 2 combat cards
+War	WAR035	The Archer's Volley	Reaction	Combat	1M		+2 Military Levy if defending
+War	WAR036	The Infantry Square	Reaction	Combat	1M		+2 Military Levy if outnumbered
+War	WAR051	The Occupation	Play on turn	Combat	3G		+2 Servitude on target
+War	WAR057	The Execution	Play on turn	Combat	3M		Target loses 1 Military permanently
+War	WAR059	The Gallows	Play on turn	Combat	4C		Target loses 2 Political Capital
+War	WAR065	The Defensive Line	Reaction	Combat	1M		+2 Military Levy when outnumbered
+War	WAR086	The Recruit	Reaction	Core	0		+1 Military Levy this combat
+War	WAR087	The Knight	Play on turn	Core	3M		+2 Military Levy; +1 Capital Levy
+War	WAR089	The Archer	Reaction	Core	1M		+2 Military Levy if defending
+War	WAR091	The Pikeman	Reaction	Core	1M		+2 Military Levy if outnumbered
+War	WAR092	The Swordsman	Play on turn	Core	2M		+2 Military Levy
+War	WAR100	The King	Play on turn	Core	3M		+3 Military Levy; +2 Capital Levy
+War	WAR013	The Long Siege	Play on turn	Combat	3G		Target loses 1 Production per round
+War	WAR022	Mercenaries	Play on turn	Combat	2M		Spend 5 Gold -> +3 Military Levy
+War	WAR023	Conscription	Play on turn	Combat	3M		Spend 2 Gold -> +1 Military Standing permanently
+War	WAR011	Pillage	Play on turn	Combat	3G		Steal 2 Gold from target
+War	WAR032	The Levy	Play on turn	Combat	3M	unrest	+2 Military Levy this turn; -1 Unrest
+War	WAR033	The Militia	Play on turn	Combat	0		+1 Military Levy; no cost
+War	WAR039	The War Elephant	Play on turn	Combat	3M		+4 Military Levy; -1 Gold Levy per turn
+War	WAR040	The Dragon	Play on turn	Combat	4M		+5 Military Levy; -2 Gold Levy per turn
+War	WAR053	The Pacification	Play on turn	Combat	3G	unrest	-2 Unrest on target
+War	WAR083	The Strategist	Play on turn	Core	3G		Draw 3 combat cards
+War	WAR084	The Warlord	Play on turn	Core	2G		Extra turn after winning combat
+War	WAR088	The Squire	Play on turn	Core	2M		+1 Military Levy; -1 Gold Levy
+War	WAR090	The Crossbowman	Reaction	Core	2M		+2 Military Levy; ignore armor
+War	WAR093	The Axeman	Reaction	Core	2M		+3 Military Levy; -1 Defense
+War	WAR094	The Spearman	Reaction	Core	2M		+2 Military Levy; +1 Defense
+War	WAR096	The Scout	Play on turn	Core	0		Look at enemy's hand
+War	WAR007-1	Flanking Maneuver	Reaction	Combat	2M		+2 Military Levy if you have more cards
+War	WAR018	The Breakthrough	Reaction	Combat	2M		+3 Military Levy if you outnumber target
+War	WAR034	The Knight's Charge	Reaction	Combat	2M		+3 Military Levy if you have 3+ Military
+War	WAR037	The Cavalry Flank	Reaction	Combat	2M		+3 Military Levy if you have more cards
+War	WAR058	The Dungeon	Play on turn	Combat	2M		Target cannot act next turn
+War	WAR061	Shield Wall	Play on turn	Combat	2M		Negate one attack
+War	WAR063	Last Stand	Play on turn	Combat	3M		Survive elimination with 1 Military
+War	WAR072	The Portcullis	Play on turn	Combat	2M		Negate one attack
+War	WAR099	The Bodyguard	Play on turn	Core	0		Negate one assassination
+War	WAR046	Total War	Play on turn	Combat	3M		All players lose 2 Military; you lose 1
+War	WAR047	The Scourge	Play on turn	Combat	1M	grievance	All players gain +1 Grievance against you
+War	WAR050	Martial Law	Play on turn	Combat	2G	grievance	Cancel a Revolt; +1 Grievance
+War	WAR054	The Crackdown	Play on turn	Combat	3G	grievance unrest	-3 Unrest; +1 Grievance
+War	WAR044	The Iron Throne	Play on turn	Combat	3M		Claim the throne by force
+War	WAR081	The General	Play on turn	Core	4M		+2 Military Levy; draw 2 combat cards
+War	WAR098	The Assassin	Play on turn	Core	3M		+2 Military Levy; target loses 1 card
+War	WAR005-1	Duel	Play on turn	Combat	2G		Challenge to single combat; winner takes a card
+War	WAR075	The Beacon	Reaction	Combat	0		Call for aid; ally may send 1 Military
+War	WAR076	The Relief Force	Reaction	Combat	2M		+2 Military Levy if ally sends aid
+War	WAR009-1	Counter-Attack	Play on turn	Combat	2G		After being attacked attack back
+War	WAR030	The New Blood	Play on turn	Combat	0		+1 Military Levy per free player
+War	WAR008-1	Ambush	Reaction	Combat	2G		Attack first +1 if enemy surprised
+War	WAR016	The Feigned Retreat	Play on turn	Combat	2M		Cancel enemy's next card
+War	WAR026	Veteran Company	Play on turn	Combat	1M		Military cannot be reduced this round
+War	WAR068	The Drawbridge	Play on turn	Combat	1M		Retreat without penalty
+War	WAR077	The Scorched Earth	Play on turn	Combat	1M		Attacker gains nothing
+War	WAR082	The Tactician	Play on turn	Core	2M		Cancel enemy's next combat card
+War	WAR097	The Spy	Play on turn	Core	2M		Steal one combat card
+War	WAR201	The Muster Grounds	Play on turn	Growth	3M		Spend 4 Military Levy: +1 Military Standing
+War	WAR202	The Great Levy	Play on turn	Core	1M		Double your Military Levy this turn
+Political	CNC001	The Great Council	Resolve on draw	Council	1C		Trigger a Council immediately
+Political	POL059	The Peace of Kings	Play on turn	Bond	2C		No combat this round
+Political	POL072	The King's Peace	Play on turn	Council	2C		No combat this round
+Political	POL001-1	Trade Boom	Play on turn	Growth	2G		+2 Gold Levy
+Political	POL003-1	Bribe	Play on turn	Growth	2G		Spend 3 Gold -> +1 Servitude
+Political	POL010-1	Market Crash	Play on turn	Growth	4G		Target loses 3 Gold
+Political	POL013	Silk and Gold	Play on turn	Growth	2C		+2 Capital Levy
+Political	POL020	Buy the Throne	Play on turn	Growth	3C		Spend 10 Gold -> +3 votes
+Political	POL037	The Double Vote	Play on turn	Council	2C		Your vote counts twice
+Political	POL063	Honor Bound	Play on turn	Council	2C		+2 Capital Levy
+Political	POL075	The Royal Wedding	Play on turn	Council	0		+1 Capital Levy
+Political	POL076	The Festival of Fools	Play on turn	Council	0	unrest	All players gain +1 Unrest
+Political	POL078	The Open Court	Play on turn	Council	0		All players gain +1 Capital Levy
+Political	POL004-1	Mercenaries	Play on turn	Growth	2M		Spend 5 Gold -> +3 Military Levy
+Political	POL021	The Council Convenes	Play on turn	Council	1C		Trigger a Council vote
+Political	POL022	The King is Dead	Play on turn	Council	1C		Immediate vote after assassination
+Political	POL029	The Council is Bought	Play on turn	Council	2C		Gold buys votes
+Political	POL081	The Council Convenes	Play on turn	Council	1C		Trigger a vote
+Political	POL082	The Motion	Play on turn	Council	1C		Propose a motion; vote on it
+Political	POL097	The Bought Council	Play on turn	Council	2C		Gold buys votes
+Political	POL014	Merchant Guild	Play on turn	Growth	3G		Draw 2 Political cards
+Political	POL017	Tax Haven	Play on turn	Growth	0		Ignore Lord Paramount tax
+Political	POL019	The Vault	Play on turn	Growth	1G		Save 5 Gold for next round
+Political	POL061	Righteous Cause	Play on turn	Council	0	grievance	+1 Grievance against Lord Paramount
+Political	POL062	The Realm United	Play on turn	Council	0	grievance	All +1 Grievance against Lord Paramount
+Political	POL070	The King's Mercy	Play on turn	Council	2G		Target rebel gains +1 Loyalty
+Political	POL077	The Silent Night	Play on turn	Council	0		No assassinations this round
+Political	POL006-1	Debt Trap	Play on turn	Growth	3G		Lend Gold; unpaid -> +2 Servitude
+Political	POL008-1	Trade Route	Play on turn	Growth	2G		+2 Gold Levy for 3 rounds
+Political	POL011	Loan Shark	Play on turn	Growth	2G		Target owes 3 Gold; unpaid -> +1 Servitude
+Political	POL012	The Ledger	Play on turn	Growth	1C		All debts owed to you doubled
+Political	POL007-1	Golden Shackles	Play on turn	Growth	2G		Target cannot revolt
+Political	POL009-1	Buy Information	Play on turn	Growth	1C		Spend 2 Gold -> look at hidden tracker
+Political	POL068	Mercy	Play on turn	Council	4G	grievance	Target +1 Grievance; you +2 Honor
+Political	POL069	Pardon	Play on turn	Council	4G		Rebel becomes loyal; +2 Loyalty -2 Revolution
+Political	POL074	The King's Tournament	Play on turn	Council	1C		Compete for +2 Capital Levy
+Political	POL041	Oath Sworn	Play on turn	Bond	0		Target cannot betray for 3 rounds
+Political	POL042	Secret Pact	Play on turn	Bond	2C		Force alliance; neither can betray for 3 rounds
+Political	POL044	The Old Alliance	Play on turn	Bond	2C		Force alliance for 3 rounds
+Political	POL045	The Broken Vow	Play on turn	Bond	1C		Cancel an alliance
+Political	POL046	Betrayal	Play on turn	Bond	3C		Break alliance; +2 Capital Levy -2 Honor
+Political	POL053	The False Flag	Play on turn	Bond	1C		Make it look like an ally betrayed you
+Political	POL060	The End of Alliances	Play on turn	Bond	1C		All alliances are void
+Political	POL079	The Broken Treaty	Play on turn	Council	1C		All alliances are void
+Political	POL043	Shadow Alliance	Promise	Bond	0		Term Peace; consideration up to 2 Levy
+Political	POL047	The Marriage Pact	Promise	Bond	1C		Term Restraint; consideration up to 3 Levy
+Political	POL048	The Blood Oath	Promise	Bond	1C		Term Restraint; consideration up to 3 Levy
+Political	POL050	The Written Word	Promise	Bond	2G		Term Restraint; consideration up to 4 Levy
+Political	POL051	The Secret Handshake	Promise	Bond	0		Term Peace; no consideration
+Political	POL056	The New Alliance	Promise	Bond	0		Term Peace; consideration up to 2 Levy
+Political	POL005-1	Buy the Vote	Play on turn	Growth	2C		Spend 2 Gold per vote
+Political	POL023	The Pretender	Play on turn	Council	3M		Military leader gets +2 votes
+Political	POL024	The Shadow Vote	Play on turn	Council	1C		Hidden votes
+Political	POL027	The Council is Divided	Play on turn	Council	2C		No majority -> coin flip
+Political	POL034	The Common Vote	Play on turn	Council	2C	unrest	+1 vote per Unrest you've caused
+Political	POL035	The Silent Vote	Play on turn	Council	1C		Votes are hidden until revealed
+Political	POL038	The Broken Vote	Play on turn	Council	2C		Target's vote is nullified
+Political	POL039	The Kingmaker	Play on turn	Council	2C		Choose who wins a tied vote
+Political	POL040	The Coronation	Play on turn	Council	1C		Declare yourself king if most votes
+Political	POL085	The Filibuster	Play on turn	Council	1C		Delay a vote by 1 round
+Political	POL087	The Minority	Play on turn	Council	2C		Minority vote counts if majority is split
+Political	POL088	The Majority	Play on turn	Council	2C		Majority vote counts double
+Political	POL090	The Coin Flip	Play on turn	Council	2C		Tied vote -> coin flip
+Political	POL091	The Dice Roll	Play on turn	Council	2C		Tied vote -> dice roll
+Political	POL092	The King's Choice	Play on turn	Council	2C		Lord Paramount breaks tie
+Political	POL093	The People's Choice	Play on turn	Council	2C		Free players break tie
+Political	POL095	The Secret Council	Play on turn	Council	1C		Votes are hidden
+Political	POL098	The Broken Council	Play on turn	Council	1C		No vote this round
+Political	POL099	The Great Council	Play on turn	Council	1C		All players vote for a new king
+Political	POL100	The Final Council	Play on turn	Council	1C		The player with the most votes becomes king
+Political	POL032	The People's Will	Play on turn	Council	2C		+1 vote per free player
+Political	POL052	The Double Agent	Play on turn	Bond	1C		Appear allied to one; actually allied to another
+Political	POL057	The Grand Alliance	Play on turn	Bond	0		All players allied against Lord Paramount
+Political	POL058	The Coalition	Play on turn	Bond	0		All players allied against the leader
+Political	POL064	The People's Champion	Play on turn	Council	0		+1 Capital Levy per free player
+Political	POL094	The Shadow Council	Play on turn	Council	1C		All players vote on a random issue
+Political	POL028	Veto	Play on turn	Council	2C		Cancel a Council Event
+Political	POL067	The Coronation	Play on turn	Council	1C		Declare yourself king if most votes
+Political	POL071	The King's Justice	Play on turn	Council	2G		Lord Paramount may punish one player
+Political	POL080	The New Alliance	Promise	Council	0		Term Peace; consideration up to 2 Levy
+Political	POL084	The Veto	Play on turn	Council	2C		Cancel a Council Event
+Political	POL201	The Charter	Play on turn	Growth	3C		Spend 4 Capital Levy: +1 Capital Standing
+Political	POL202	The Great Assembly	Play on turn	Core	1C		Double your Capital Levy this turn
+Council	CNC002	The Question of Succession	Resolve on draw	Council	1C		Trigger a Council; the Lord Paramount may not be voted for
+Council	COU017	The Double Vote	Resolve on draw	Core	2C		Your vote counts twice
+Council	COU001	The Council Convenes	Resolve on draw	Core	1C		Trigger a vote
+Council	COU002	The King is Dead	Resolve on draw	Core	1C		Immediate vote after assassination
+Council	COU009	The Council is Bought	Resolve on draw	Core	2C		Gold buys votes
+Council	COU021	The Motion	Resolve on draw	Core	1C		Propose a motion; vote on it
+Council	COU003	The Pretender	Resolve on draw	Core	3M		Military leader gets +2 votes
+Council	COU004	The Shadow Vote	Resolve on draw	Core	1C		Hidden votes
+Council	COU007	The Council is Divided	Resolve on draw	Core	2C		No majority -> coin flip
+Council	COU014	The Common Vote	Resolve on draw	Core	2C	unrest	+1 vote per Unrest caused
+Council	COU019	The Kingmaker	Resolve on draw	Core	2C		Choose who wins a tied vote
+Council	COU023	The Filibuster	Resolve on draw	Core	1C		Delay a vote by 1 round
+Council	COU026	The Majority	Resolve on draw	Core	2C		Majority vote counts double
+Council	COU028	The King's Choice	Resolve on draw	Core	2C		Lord Paramount breaks tie
+Council	COU012	The People's Will	Resolve on draw	Core	2C		+1 vote per free player
+Council	COU015	The Silent Vote	Resolve on draw	Core	1C		Votes hidden until revealed
+Council	COU018	The Broken Vote	Resolve on draw	Core	2C		Target's vote nullified
+Council	COU020	The Coronation	Resolve on draw	Core	1C		Declare king if most votes
+Council	COU025	The Minority	Resolve on draw	Core	2C		Minority vote counts if majority split
+Council	COU030	The Final Council	Resolve on draw	Core	1C		Player with most votes becomes king
+Council	COU008	Veto	Resolve on draw	Core	2C		Cancel a Council Event
+Political	CNC003	A Voice for the Commons	Resolve on draw	Council	1C		Trigger a Council; the House with most total Unrest gives each of its lords 2 votes
+Political	CNC004	Sealed Ballots	Resolve on draw	Council	1C		Trigger a Council; no votes may be bought or commanded
+Political	CNC005	The Oath Read Aloud	Resolve on draw	Council	1C	broken_words	Trigger a Council; a House with a Broken Word loses 1 vote
+Council	COU005	The Puppet Council	Resolve on draw	Core	2C		At the next Council, lords vote as they wish, not as their House holds
+Council	COU006	The People's Choice	Resolve on draw	Core	2C		At the next Council, lords vote as they wish, not as their House holds
+Council	COU010	The Rightful Heir	Resolve on draw	Core	3C		gain 2 vote at the next Council
+Council	COU011	The King's Voice	Resolve on draw	Core	2C		gain 1 vote at the next Council
+Council	COU013	The Noble's Vote	Resolve on draw	Core	3C		gain 2 vote at the next Council
+Political	POL001	Court Favour	Play on turn	Core	2C		+2 Capital Levy this turn
+Political	POL002	Build a Faction	Play on turn	Growth	3G		+1 Capital Standing permanently
+Political	POL002-1	Tax Collector	Play on turn	Growth	0		+1 Gold Levy this turn
+Political	POL003	Force the Council	Play on turn	Council	1G 6Grv		Trigger a Council immediately
+Political	POL004	Public Oath	Promise	Promise	2C		Propose any term; breaking it gives 2 Grievance to every House instead of 1
+Political	POL005	The Quiet Word	Instant	Council	1C		Change your vote after the reveal; once per Council
+Political	POL006	Petition	Play on turn	Core	1C		Clear 1 Unrest and gain 1 Grievance
+Political	POL007	Legitimacy	Play on turn	Reputation	2C	word_kept	+1 vote at the next Council per 2 Promises in your Word Kept pile
+Political	POL008	Denounce	Play on turn	Reputation	3C	broken_words	The other House, with 2 or more Broken Words, gains 2 Unrest in a resource you name
+Political	POL009	Manumission	Play on turn	Bond	2C		Free any revealed lord; the House that held it gains 1 Capital Unrest
+Political	POL010	Succession Crisis	Play on turn	Council	1C		No House may be crowned by vote next round
+Political	POL015	King's Ransom	Play on turn	Growth	3G		Advance Servitude by 3 against target House
+Political	POL016	Golden Age	Play on turn	Growth	2G		+3 Gold Levy this turn
+Political	POL018	Trade Empire	Play on turn	Growth	0		+1 Gold Levy this turn
+Political	POL025	The Puppet Council	Play on turn	Council	2C		At the next Council, lords vote as they wish, not as their House holds
+Political	POL026	The People's Choice	Play on turn	Council	2C		At the next Council, lords vote as they wish, not as their House holds
+Political	POL030	The Rightful Heir	Play on turn	Council	3C		gain 2 vote at the next Council
+Political	POL031	The King's Voice	Play on turn	Council	2C		gain 1 vote at the next Council
+Political	POL033	The Noble's Vote	Play on turn	Council	3C		gain 2 vote at the next Council
+Political	POL054	The Long Con	Play on turn	Bond	3G		Advance Servitude by 2 against target House
+Political	POL055	The Broken Chain	Play on turn	Bond	2G		Free any revealed lord; the House that held it gains 1 Military Unrest
+Political	POL065	The Rightful King	Play on turn	Council	4C		gain 3 vote at the next Council
+Political	POL073	The King's Bounty	Play on turn	Council	2G		+2 Gold Levy this turn
+Political	PRM001	A Vote Bought	Promise	Promise	2C		Term Vote; consideration up to 4 Levy of any one resource
+Political	PRM002	A Vote Given	Promise	Promise	0		Term Vote; no consideration
+Political	PRM003	Two Rounds of Quiet	Promise	Promise	1C		Term Peace; consideration up to 3 Levy
+Political	PRM004	The Field Left Empty	Promise	Promise	0		Term Forbearance
+Political	PRM005	Tribute	Promise	Promise	0		Term Tribute, a named Levy due at end of next round
+Political	PRM006	Set Them Free	Promise	Promise	0		Term Manumission, due at end of next round
+Political	PRM007	I Will Not Speak	Promise	Promise	2C		Term Abstention; consideration up to 4 Levy
+Political	PRM008	The Sworn Alliance	Promise	Promise	1C		Term Restraint; consideration up to 3 Levy
+Political	PRM009	The Purse Before the Word	Promise	Promise	2C		Term Peace; consideration up to 4 Levy
+Political	PRM010	Coin for Silence	Promise	Promise	1C		Term Abstention; consideration up to 3 Levy
+Political	PRM011	The Retainer	Promise	Promise	0		Term Tribute; consideration up to 2 Levy
+Political	PRM012	Paid in Advance	Promise	Promise	2C		Term Forbearance; consideration up to 4 Levy
+Political	PRM013	The Bought Absence	Promise	Promise	1C		Term Restraint; consideration up to 3 Levy
+Political	PRM014	What the Ledger Shows	Promise	Promise	0		Term Disclosure; consideration up to 2 Levy
+Political	PRM015	The Freeing Fee	Promise	Promise	1C		Term Manumission; consideration up to 3 Levy
+Political	PRM016	A Vote and a Purse	Promise	Promise	2C		Term Vote; consideration up to 5 Levy
+Political	PRM017	The Standing Arrangement	Promise	Promise	2C		Term Tribute; consideration up to 4 Levy
+Political	PRM018	Danegeld	Promise	Promise	2C		Term Peace; consideration up to 5 Levy
+Political	PRM019	A Word Only	Promise	Promise	0		Term Peace; no consideration
+Political	PRM020	Nothing Asked	Promise	Promise	0		Term Forbearance; no consideration
+Political	PRM021	The Quiet Undertaking	Promise	Promise	0		Term Restraint; no consideration
+Political	PRM022	Told Freely	Promise	Promise	0		Term Disclosure; no consideration
+Political	PRM023	The Open Hand	Promise	Promise	0		Term Manumission; no consideration
+Political	PRM024	Said in Passing	Promise	Promise	0		Term Abstention; no consideration
+Political	PRM025	On My Honour	Promise	Promise	0		Term Tribute; no consideration
+Political	PRM026	The Empty Field	Promise	Promise	0		Term Forbearance; no consideration
+Political	PRM027	Sworn on the Realm	Promise	Promise	2C		Propose any term; breaking it gives 2 Grievance to every House instead of 1
+Political	PRM028	The Rewarded Word	Promise	Promise	2C		Propose any term; if kept, gain 2 Capital Standing permanently
+Political	PRM029	The Long Peace	Promise	Promise	1C		Term Peace; consideration up to 3 Levy
+Political	PRM030	A Seat Kept Empty	Promise	Promise	2C		Term Abstention; consideration up to 4 Levy
+Political	PRM031	The Unread Letter	Promise	Promise	1C		Term Disclosure; consideration up to 3 Levy
+Political	PRM032	Two Hands, One Seal	Promise	Promise	2C		Term Restraint; consideration up to 5 Levy
+Instigator	INS005	Exposed!	Play on turn	Core	1G		Reveal the Revolution count on any lord the other House holds
+Instigator	INS007	False Flag	Play on turn	Core	0		Redirect an Instigator sent this round to a House of your choosing
+Instigator	INS008	The Long Con	Play on turn	Core	3G		Advance Servitude by 2 against target House
+Instigator	INS009	The Sleeper	Play on turn	Core	2G		Advance Servitude by 1 against target House
+Instigator	INS010	The Sleeper Awakens	Play on turn	Core	3G		Every lord the other House holds gains 2 hidden Revolution
+Instigator	INS015	The Shadow King	Play on turn	Core	4G		+2 Military Levy in a Throne challenge only
+Instigator	INS014	The Long Night	Play on turn	Core	2G		All players lose 1 Political Capital
+Instigator	INS023	The Haunting	Play on turn	Core	2G	unrest	Target gains +1 Unrest
+Instigator	INS024	The Grave Chill	Play on turn	Core	3M		Target loses 1 Military
+Instigator	INS028	The Unfinished Business	Play on turn	Core	1G		Target reveals one hidden tracker
+Instigator	INS025	The Spectral Army	Play on turn	Core	0		Target gains +1 Military Levy
+Instigator	INS027	The Ancestral Guidance	Play on turn	Core	0		Target gains +1 Capital Levy
+Instigator	INS004	Whisper Network	Play on turn	Core	2G		Target two players with Instigators
+Instigator	INS026	The Wraith's Ward	Play on turn	Core	0		Target immune to assassination
+Instigator	INS001	Emissary	Play on turn	Core	2G		+1 Revolution on a vassal or -1 Production on free player
+Instigator	INS002	Agitator	Play on turn	Core	3G		+2 Revolution or -2 Production; may be detected
+Instigator	INS003	Foreign Gold	Play on turn	Core	3G		Spend 2 Gold -> +2 Revolution or -2 Production
+Instigator	INS030	The Veil Rips	Play on turn	Core	1G		Draw from Cataclysm deck
+Instigator	INS011	The Broken Oath	Play on turn	Core	2G		Target cannot form alliances for 3 rounds
+Instigator	INS016	The Whisper King	Play on turn	Core	3C		All players vote as you command at next Council
+Instigator	INS017	The Veil Thins	Play on turn	Core	4G		All dead players draw a Ghost card
+Instigator	INS019	The Light Calls	Play on turn	Core	4G		A dead player may return
+Instigator	INS020	The Dark Pact	Play on turn	Core	4G		Make a deal with a dead player
+Instigator	INS021	The Ghost's Whisper	Play on turn	Core	4G		A dead player haunts a target
+Instigator	INS022	The Seance	Play on turn	Core	1G		Speak with a dead player
+Instigator	INS013	The False Friend	Play on turn	Core	1G		Target believes you're allied; you're not
+Instigator	INS018	The Raven Arrives	Play on turn	Core	1G		Draw from Resurrection deck
+Instigator	INS006	Counter-Intelligence	Play on turn	Core	2G		Cancel an Instigator targeting you
+Instigator	INS012	The Poisoned Gift	Play on turn	Core	0		Give target a card; it costs them 1 resource
+Intrigue	INT001	Purse of Whispers	Play on turn	Core	2G		+2 Gold Levy this turn
+Intrigue	INT002	Buy an Ear	Play on turn	Growth	3G		+1 Gold Standing permanently
+Intrigue	INT003	Send an Instigator	Play on turn	Bond	1G		Send 1 extra Instigator this turn
+Intrigue	INT003-1	Silent Blade	Play on turn	Core	2G		Free any revealed lord; the House that held it gains 1 Military Unrest
+Intrigue	INT004	Spy	Play on turn	Bond	1G		Learn the Revolution count on one Bond you are party to
+Intrigue	INT005	Counterfeit Seal	Instant	Promise	1G		Treat a Promise made to another House as if made to you
+Intrigue	INT006	The Favour Owed	Lever	Bond	2G	word_kept	Advance Servitude by 1 over a lord that is Owed
+Intrigue	INT007	Poisoned Cup	Play on turn	Core	4G 2Grv		Target House loses 3 Standing of your choosing; you gain 2 Unrest
+Intrigue	INT008	Rumour	Play on turn	Reputation	1G		The Court believes the other House broke a Promise this round; it loses 1 Favour
+Intrigue	INT009	Turn the Guard	Reaction	Combat	3G		Reduce an attacker's committed Military Levy by 3
+Intrigue	INT009-1	Nightshade	Play on turn	Core	2G		Take 1 Gold Levy from target House
+Intrigue	INT010	Sell the Secret	Play on turn	Bond	3G		Reveal a Bond the other House holds; gain 3 Gold Levy
+Intrigue	INT011	Blood on the Floor	Play on turn	Core	3C		Target House loses 1 Capital Standing
+Intrigue	INT013	Two Blades	Play on turn	Core	3G		Free any revealed lord; the House that held it gains 2 Military Unrest
+Intrigue	INT018	The Creeper	Play on turn	Core	2G		Free any revealed lord; the House that held it gains 1 Military Unrest
+Intrigue	INT023	Expose	Play on turn	Core	1G		Reveal a Bond the other House holds; gain 1 Gold Levy
+Intrigue	INT034	Double Agent	Play on turn	Core	0		the lord's Revolution advances at double rate
+Intrigue	INT041	Whispers in the Dark	Play on turn	Bond	2G		Every lord the other House holds gains 1 hidden Revolution
+Intrigue	INT042	Secret Meeting	Play on turn	Bond	2G		Every lord the other House holds gains 1 hidden Revolution
+Intrigue	INT043	Instigator	Play on turn	Bond	2G		Every lord the other House holds gains 1 hidden Revolution
+Intrigue	INT045	Whisper Network	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Intrigue	INT046	The People's Voice	Play on turn	Bond	2G		Every lord the other House holds gains 1 hidden Revolution
+Intrigue	INT047	The Spark	Play on turn	Bond	2G		Every lord the other House holds gains 1 hidden Revolution
+Intrigue	INT048	The Firebrand	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Intrigue	INT049	The Rebel's Call	Play on turn	Bond	2G		Every lord the other House holds gains 1 hidden Revolution
+Intrigue	INT050	The Broken Chain	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Intrigue	INT051	The Free Man	Play on turn	Bond	3G		Every Bond gains 1 hidden Revolution; Advance Servitude by 1
+Intrigue	INT052	The Uprising	Play on turn	Bond	2G		Every lord the other House holds gains 1 hidden Revolution
+Intrigue	INT054	The People's Champion	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Intrigue	INT057	The Call to Arms	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Intrigue	INT058	The Great Revolt	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Intrigue	INT059	The Chain Breaker	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Intrigue	INT060	The Free Kingdom	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Intrigue	INT061	Puppet Strings	Play on turn	Core	3C		Direct one of the other House's lords at the next Council
+Intrigue	INT064	False Flag	Play on turn	Core	0		Redirect an Instigator sent this round to a House of your choosing
+Intrigue	INT066	The Long Con	Play on turn	Core	3G		Advance Servitude by 2 against target House
+Intrigue	INT070	The Double Cross	Play on turn	Core	3G		Advance Servitude by 2 against target House
+Intrigue	INT073	The Sleeper	Play on turn	Core	2G		Advance Servitude by 1 against target House
+Intrigue	INT074	The Sleeper Awakens	Play on turn	Core	3G		Every lord the other House holds gains 2 hidden Revolution
+Intrigue	INT079	The Shadow King	Play on turn	Core	4G		+2 Military Levy in a Throne challenge only
+Intrigue	LEV001	A Marriage	Lever	Bond	3C		Advance Servitude by 2 over a lord that is Proud; it may not Betray
+Intrigue	LEV002	A Hostage	Lever	Bond	3M		Advance Servitude by 1 over any lord; its Revolution advances at double rate
+Intrigue	LEV003	A Debt	Lever	Bond	2G		Advance Servitude by 1 over a lord that is In Debt; +1 more if you hold 6 or more Gold Levy
+Intrigue	LEV004	A Secret Kept	Lever	Bond	2C	broken_words	Advance Servitude by 1 over a lord that is Owed
+Intrigue	LEV005	Occupation	Lever	Bond	3M		Advance Servitude by 2 over a lord of a House you defeated this round
+Intrigue	LEV006	Fear	Lever	Bond	2M		Advance Servitude by 1 over a lord that is Afraid
+Intrigue	LEV007	A Favour	Lever	Bond	2G	word_kept	Advance Servitude by 1 over a lord that is Owed, if you kept a Promise this round
+Intrigue	LRD001	The Indebted Baron	Minor Lord	Bond	1G		Trait In Debt
+Intrigue	LRD002	The Mortgaged Marches	Minor Lord	Bond	1G		Trait In Debt
+Intrigue	LRD003	The Frightened Castellan	Minor Lord	Bond	1G		Trait Afraid
+Intrigue	LRD004	The Widow of Ashfen	Minor Lord	Bond	1G		Trait Afraid
+Intrigue	LRD005	The Younger Son	Minor Lord	Bond	1G		Trait Ambitious
+Intrigue	LRD006	The Harbour Master	Minor Lord	Bond	1G		Trait Ambitious
+Intrigue	LRD007	The Old Marshal	Minor Lord	Bond	1G		Trait Proud
+Intrigue	LRD008	The Last of a Line	Minor Lord	Bond	1G		Trait Proud
+Intrigue	LRD009	The Pardoned Rebel	Minor Lord	Bond	1G		Trait Owed
+Intrigue	LRD010	The Physician	Minor Lord	Bond	1G		Trait Owed
+Intrigue	INT002-1	Poison	Play on turn	Core	4C		Target loses 2 Political Capital
+Intrigue	INT004-1	Garrote	Play on turn	Core	3M		Target loses 1 Military permanently
+Intrigue	INT007-1	Poisoned Wine	Play on turn	Core	3M		Target loses 1 Military
+Intrigue	INT021	Whisper	Play on turn	Core	1G		Look at one hidden tracker
+Intrigue	INT022	Blackmail	Play on turn	Core	3G		+2 Servitude on target (hidden)
+Intrigue	INT024	Spy Network	Play on turn	Core	1G		Look at any hidden tracker
+Intrigue	INT025	Informant	Play on turn	Core	1G		Spend 2 Gold -> learn one hidden tracker
+Intrigue	INT027	Master of Whispers	Play on turn	Core	0		Look at any player's hand
+Intrigue	INT029	Truth	Play on turn	Core	1G		Reveal one hidden tracker publicly
+Intrigue	INT031	The Rumor Mill	Play on turn	Core	2G	unrest	+1 Unrest on any player
+Intrigue	INT036	The Interrogation	Play on turn	Core	1G		Target reveals one hidden tracker
+Intrigue	INT078	The Long Night	Play on turn	Core	2G		All players lose 1 Political Capital
+Intrigue	INT087	The Haunting	Play on turn	Core	2G	unrest	Target gains +1 Unrest
+Intrigue	INT088	The Grave Chill	Play on turn	Core	3M		Target loses 1 Military
+Intrigue	INT071	The Whisper	Play on turn	Core	1G		Force target to discard a card
+Intrigue	INT005-1	The Long Goodbye	Play on turn	Core	1G		Target loses 1 card at random
+Intrigue	INT006-1	Hired Blade	Play on turn	Core	3G		Spend 3 Gold -> assassinate a player
+Intrigue	INT010-1	The Quiet Death	Play on turn	Core	3G		Assassinate a player; no one knows who did it
+Intrigue	INT012	The Assassin's Guild	Play on turn	Core	3G		Hire an assassin for 2 Gold
+Intrigue	INT017	The Borrowed Face	Play on turn	Core	3G		Assassinate a player; you cannot be detected
+Intrigue	INT028	The Long Game	Play on turn	Core	3G		Draw 2 Intrigue cards
+Intrigue	INT035	The Confession	Play on turn	Core	1G		Target reveals one secret
+Intrigue	INT037	The Bribe	Play on turn	Core	0		Spend 2 Gold -> look at any hand
+Intrigue	INT044	Agitator	Play on turn	Bond	3G		+2 Revolution; may be detected
+Intrigue	INT053	The Silent Revolt	Play on turn	Bond	3G		+2 Revolution; Lord cannot detect
+Intrigue	INT008-1	The Strangler	Play on turn	Core	2G		Target cannot act next turn
+Intrigue	INT019	The Silencer	Play on turn	Core	0		Cancel one assassination against you
+Intrigue	INT020	The Last Breath	Play on turn	Core	3G		If you would be assassinated survive with 1 Political Capital
+Intrigue	INT039	The Hidden Blade	Play on turn	Core	0		A random player loses 1 Political Capital
+Intrigue	INT065	Disinformation	Play on turn	Core	2G		Cancel target's next House Action
+Intrigue	INT089	The Spectral Army	Play on turn	Core	0		Target gains +1 Military Levy for one combat
+Intrigue	INT090	The Wraith's Ward	Play on turn	Core	0		Target is immune to assassination
+Intrigue	INT091	The Ancestral Guidance	Play on turn	Core	0		Target gains +1 Capital Levy
+Intrigue	INT026	The Spider's Web	Play on turn	Core	1G		All hidden trackers revealed to you only
+Intrigue	INT038	The Ledger	Play on turn	Core	1G		All debts owed to you are doubled
+Intrigue	INT014	The Final Cut	Play on turn	Core	4M		Target loses 2 Military if undefended
+Intrigue	INT030	Lies	Play on turn	Core	1G		Plant a false tracker; target believes it
+Intrigue	INT032	Whisper Campaign	Play on turn	Core	0	unrest	+1 Unrest on two players
+Intrigue	INT033	The Veil	Play on turn	Core	0		Your trackers cannot be spied on
+Intrigue	INT072	The Misdirection	Play on turn	Core	0		Redirect an Instigator to another target
+Intrigue	INT092	The Unfinished Business	Play on turn	Core	1G		Target must reveal one hidden tracker
+Intrigue	INT015	Death by Inches	Play on turn	Core	3G		Target loses 1 resource per turn for 3 turns
+Intrigue	INT016	The Adder	Reaction	Core	2M		+2 Military Levy in assassination attempts
+Intrigue	INT094	The Veil Rips	Play on turn	Core	1G		Draw from Cataclysm deck
+Intrigue	INT100	The End of Days	Play on turn	Core	1G		Draw from Cataclysm deck
+Intrigue	INT001-1	The Knife	Play on turn	Core	3G		Assassinate a player; eliminated if undefended
+Intrigue	INT055	The Martyr	Play on turn	Bond	2G		If a vassal is eliminated all vassals gain +1 Revolution
+Intrigue	INT063	Betrayal	Play on turn	Core	3C		Break alliance; +2 Capital Levy -2 Honor
+Intrigue	INT067	Secret Pact	Play on turn	Core	2G		Force alliance; neither can betray for 3 rounds
+Intrigue	INT075	The Broken Oath	Play on turn	Core	2G		Target cannot form alliances for 3 rounds
+Intrigue	INT062	Shadow Alliance	Promise	Core	0		Term Peace; consideration up to 2 Levy
+Intrigue	INT068	The Kingmaker	Play on turn	Core	2G		Choose who wins a tied vote
+Intrigue	INT080	The Whisper King	Play on turn	Core	3C		All players vote as you command at next Council
+Intrigue	INT081	The Veil Thins	Play on turn	Core	4G		All dead players draw a Ghost card
+Intrigue	INT083	The Light Calls	Play on turn	Core	4G		A dead player may return
+Intrigue	INT084	The Dark Pact	Play on turn	Core	4G		Make a deal with a dead player; they return as your vassal
+Intrigue	INT085	The Ghost's Whisper	Play on turn	Core	4G		A dead player haunts a target
+Intrigue	INT086	The Seance	Play on turn	Core	1G		Speak with a dead player; they reveal one secret
+Intrigue	INT095	The Dead Rise	Play on turn	Core	4G		All dead players return as ghosts
+Intrigue	INT096	The Final Death	Play on turn	Core	3G		Cancel a resurrection
+Intrigue	INT097	The Necromancer	Play on turn	Core	5G		Resurrect a dead player as your vassal
+Intrigue	INT098	The People's Choice	Play on turn	Core	5G		Resurrect a dead player with full stats
+Intrigue	INT077	The False Friend	Play on turn	Core	1G		Target believes you're allied; you're not
+Intrigue	INT082	The Raven Arrives	Play on turn	Core	1G		Draw from Resurrection deck
+Intrigue	INT069	The Turncoat	Play on turn	Core	2G		Steal an enemy's combat card mid-combat
+Intrigue	INT076	The Poisoned Gift	Play on turn	Core	0		Give target a card; it costs them 1 resource
+Intrigue	INT201	The Quiet Purchase	Play on turn	Growth	3G		Spend 4 Gold Levy: +1 Gold Standing
+Intrigue	INT202	The Reinvestment	Play on turn	Growth	3C		Spend 4 Capital Levy: +1 Capital Standing
+Ambition	AMB001	The Standing Host	Ambition	Core	0		Hold 8 Military Standing
+Ambition	AMB002	The Full Treasury	Ambition	Core	0		Hold 10 Gold Standing
+Ambition	AMB003	The Loud Court	Ambition	Core	0		Hold 8 Capital Standing
+Ambition	AMB004	Two Knees Bent	Ambition	Bond	0		Hold 2 revealed vassals at once
+Ambition	AMB005	Unbroken	Ambition	Reputation	0	broken_words	Reach round 6 with 0 Broken Words
+Ambition	AMB006	The Kingmaker	Ambition	Reputation	0	word_kept	Hold 3 Promises in your Word Kept pile
+Ambition	AMB007	Blood Drawn	Ambition	Combat	0		Win 2 combats
+Ambition	AMB008	The Hated Crown	Ambition	Core	0		Be Lord Paramount at the start of 3 rounds
+Ambition	AMB009	The Realm Aflame	Ambition	Chaos	0		Have a rival at 5 Unrest at any Consequence
+Ambition	AMB010	The Broken Oathbreaker	Ambition	Reputation	0	broken_words	Defeat in combat a House holding 2 or more Broken Words
+World	WE008	The Old Gods Stir	Resolve on draw	Core	2G		Every Bond gains 1 hidden Revolution
+World	WE033	The Miser's Curse	Resolve on draw	Core	1G		Every House including you loses 1 Gold Levy
+World	WE046	The Great Revolt	Resolve on draw	Core	3G		Every Bond gains 2 hidden Revolution
+World	WE051	The People's Choice	Resolve on draw	Core	2C		At the next Council, lords vote as they wish, not as their House holds
+World	WE052	The Puppet Council	Resolve on draw	Core	2C		At the next Council, lords vote as they wish, not as their House holds
+World	WE054	The Rightful Heir	Resolve on draw	Core	3C		gain 2 vote at the next Council
+World	WLD001	Bad Harvest	Resolve on draw	Chaos	0		Every House gains 1 Unrest
+World	WLD002	A Good Year	Resolve on draw	Chaos	1C		Every House gains 2 Gold Levy this round
+World	WLD003	Plague in the Cities	Resolve on draw	Chaos	2C		Every House loses 1 Capital Standing
+World	WLD004	The Tax Revolt	Resolve on draw	Chaos	2C		No tax is levied this round; the Lord Paramount gains 2 Unrest
+World	WLD005	Mercenary Companies Adrift	Resolve on draw	Chaos	2C		Any House may buy 2 Military Levy for 3 Gold Levy this round
+World	WLD006	The Reckoning Comes Early	Resolve on draw	Promise	1C		Every Promise in play comes due at once
+World	WLD007	Whispers of Rebellion	Resolve on draw	Bond	2C		Every Bond gains 1 hidden Revolution
+World	WE014	The Peace of Kings	Resolve on draw	Core	2C		No combat this round
+World	WE027	The People's Champion	Resolve on draw	Core	1M		Player with lowest Military gains +2 Military Levy
+World	WE028	The Underdog's Rise	Resolve on draw	Core	1C		Player with lowest Political Capital gains +2
+World	WE029	The Merchant's Gift	Resolve on draw	Core	2G		Player with lowest Gold gains +3 Gold Levy
+World	WE001	The Harvest Fails	Resolve on draw	Core	2C		All players lose 1 Gold
+World	WE003	Border Skirmishes	Resolve on draw	Core	2C		All players lose 1 Military
+World	WE006	The People's Revolt	Resolve on draw	Core	0	unrest	All players gain +1 Unrest
+World	WE009	The Trade Boom	Resolve on draw	Core	1C		All players gain +2 Gold Levy
+World	WE010	The War Drums	Resolve on draw	Core	0		All players gain +1 Military Levy
+World	WE015	The Bountiful Harvest	Resolve on draw	Core	0		All players gain +1 Gold Levy
+World	WE016	The Royal Wedding	Resolve on draw	Core	0		All players gain +1 Capital Levy
+World	WE017	The Bandit Raids	Resolve on draw	Core	2C		All players lose 1 Gold
+World	WE018	The Festival of Fools	Resolve on draw	Core	0	unrest	All players gain +1 Unrest
+World	WE022	The Open Court	Resolve on draw	Core	0		All players gain +1 Capital Levy
+World	WE005	Plague	Resolve on draw	Core	2C		All players lose 1 Production
+World	WE039	The Long Memory	Resolve on draw	Core	1G		All Grievances are doubled
+World	WE040	The Short Memory	Resolve on draw	Core	0		All Grievances are halved
+World	WE041	The Council Convenes	Resolve on draw	Core	1C		Trigger a Council vote
+World	WE021	The Silent Night	Resolve on draw	Core	0		No assassinations this round
+World	WE031	The Broken Wheel	Resolve on draw	Core	0		All players lose 1 random resource
+World	WE034	The Generous Lord	Resolve on draw	Core	1C		Lord Paramount gives 1 Gold to each player
+World	WE035	The Tax Collector	Resolve on draw	Core	1C		All players pay 1 Gold to Lord Paramount
+World	WE036	The Hidden Blade	Resolve on draw	Core	0		A random player loses 1 Political Capital
+World	WE004	Whispers in the Court	Resolve on draw	Core	2C		All hidden trackers shift by 1
+World	WE011	The King's Tournament	Resolve on draw	Core	1C		All players may compete for +2 Capital Levy
+World	WE012	The Assassin's Guild	Resolve on draw	Core	3C		All players may hire an assassin for 2 Gold
+World	WE019	The Spy Network	Resolve on draw	Core	1C		All players may look at one hidden tracker
+World	WE020	The Mercenary Market	Resolve on draw	Core	0		All players may buy +1 Military Levy for 2 Gold
+World	WE056	The Broken Crown	Resolve on draw	Core	2C		Lord Paramount loses 2 Political Capital
+World	WE057	The Iron Throne	Resolve on draw	Core	1M		Lord Paramount gains +2 Military Levy
+World	WE058	The Golden Throne	Resolve on draw	Core	3G		Lord Paramount gains +5 Gold Levy
+World	WE059	The Shadow Throne	Resolve on draw	Core	1C		Lord Paramount gains +2 Capital Levy
+World	WE063	The Forgiven Debt	Resolve on draw	Core	2C		All Servitude trackers are reduced by 1
+World	WE064	The Called Debt	Resolve on draw	Core	2C		All Servitude trackers are increased by 1
+World	WE007	The Long Winter	Resolve on draw	Core	3G		All players lose 1 Gold and 1 Production
+World	WE025	The Dungeon Opens	Resolve on draw	Core	2C		All players may release one prisoner for +1 Servitude
+World	WE045	Foreign Invasion	Resolve on draw	Core	2C		All players lose 1 Military; Lord Paramount loses 2
+World	WE060	The Empty Throne	Resolve on draw	Core	1C		No Lord Paramount this round
+World	WE065	The Silent Revolution	Resolve on draw	Core	0		All Revolution trackers are hidden this round
+World	WE002	The King's Health Fails	Resolve on draw	Core	1C	grievance	Lord Paramount gains +1 Grievance
+World	WE066	The Sky Darkens	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE067	The Earth Shakes	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE068	The Sea Rises	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE069	The Red Comet	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE070	The Long Night	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE071	The Drowned Capital	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE072	The Wyrm Wakes	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE073	The Great Winter	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE074	The Plague of Kings	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE075	The Madness of Crowds	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE076	The Broken Sky	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE077	The Silent Gods	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE078	The Blood Moon	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE079	The Last Dawn	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE080	The End of Days	Resolve on draw	Chaos	1C		Draw from Cataclysm Deck
+World	WE023	The Broken Treaty	Resolve on draw	Core	1C		All alliances are void
+World	WE024	The New Alliance	Promise	Core	0		Term Peace; consideration up to 2 Levy
+World	WE053	The Divided Council	Resolve on draw	Core	2C		No majority -> coin flip
+World	WE030	The Forgotten Heir	Resolve on draw	Core	4C		A random dead player may return as a ghost
+World	WE043	The Veil Thins	Resolve on draw	Core	4C		All dead players draw a Ghost card
+World	WE013	The Shadow Council	Resolve on draw	Core	1C		All players vote on a random issue
+World	WE032	The Lucky Draw	Resolve on draw	Core	0		All players draw 1 extra House Action
+World	WE042	The Raven Arrives	Resolve on draw	Core	1C		Draw from Resurrection deck
+World	WE047	The King is Dead	Resolve on draw	Core	3C		Lord Paramount is assassinated; new vote triggered
+World	WE048	The Shadow Vote	Resolve on draw	Core	1C		All votes this round are hidden
+World	WE050	The Bought Council	Resolve on draw	Core	2C		Gold can buy votes this round
+World	WE055	The Pretender	Resolve on draw	Core	4C		A dead player returns as a vassal of the Lord Paramount
+World	WE026	The King's Justice	Resolve on draw	Core	2G		Lord Paramount may punish one player
+World	WE044	The Mad King	Resolve on draw	Core	2G		All players must attack the nearest player
+World	WE061	The Double Tax	Resolve on draw	Core	1C		Lord Paramount taxes twice this round
+World	WE037	The Open Hand	Resolve on draw	Core	0		All players may give 1 Gold to another player
+World	WE038	The Closed Fist	Resolve on draw	Core	2G		All players may take 1 Gold from another player
+Court	CRT001	The Court Observes	Resolve on draw	Council	1C	broken_words	The House with more Broken Words loses 1 Favour
+Court	CRT002	An Audience Granted	Resolve on draw	Council	1C		The House with higher Capital Standing gains 1 Favour
+Court	CRT003	The Court Is Not For Sale	Resolve on draw	Council	1C		No Favour may be bought next round
+Court	CRT004	A Judgement	Resolve on draw	Council	1C		Trigger a Council; the Court votes first and aloud
+Court	CRT005	The Court Withdraws	Resolve on draw	Council	1C		The Court does not vote at the next Council
+Throne	THR001	The Last Charge	Reaction	Combat	5M		+5 Military Levy in a Throne challenge only
+Throne	THR002	The Crown Bought	Play on turn	Core	3M		Reduce the Purchased Throne's Gold requirement by 3 permanently
+Throne	THR003	Acclaim	Instant	Council	3C		In a Throne challenge, one House of your choosing may not commit
+Throne	THR004	The Oath of the Realm	Reaction	Reputation	2C	broken_words	In a Throne challenge, each House with a Broken Word commits 2 less
+Throne	THR007	The Rightful Heir	Play on turn	Core	3C		gain 2 vote at the next Council
+Throne	THR002-1	The Crown	Play on turn	Core	2C		+3 Capital Levy
+Throne	THR012	The Broken Wheel	Play on turn	Core	4G		All trackers reset to 0
+Throne	THR001-1	The Throne	Play on turn	Core	3M		Claim the throne by force
+Throne	THR006	The Usurper	Play on turn	Core	3M		Claim the throne by force
+Throne	THR004-1	The Last Gate	Play on turn	Core	2M		Pay 5 Gold or lose 1 turn
+Throne	THR015	The End of Days	Play on turn	Core	1M		Draw from Cataclysm deck
+Throne	THR005	The Coronation	Play on turn	Core	1C		Declare yourself king if most votes
+Throne	THR010	The End	Play on turn	Core	3M		Player with most total power becomes king
+Throne	THR014	The Final King	Play on turn	Core	3M		Player with most total power becomes king
+Throne	THR008	The Pretender	Play on turn	Core	4M		A dead player returns as your rival
+Throne	THR011	The Last Dawn	Play on turn	Core	1M		All players gain +2 in all stats
+Ghost	GHO005	Ghostly Whisper	Play on turn	Core	2G		Every Bond gains 1 hidden Revolution
+Ghost	GHO001	Whispers in the Night	Play on turn	Core	2G	unrest	Target gains +1 Unrest
+Ghost	GHO002	Ancestral Guidance	Play on turn	Core	0		Target gains +1 Capital Levy
+Ghost	GHO003	Grave Chill	Play on turn	Core	3M		Target loses 1 Military
+Ghost	GHO004	Spectral Vision	Play on turn	Core	1C		Look at one hidden tracker
+Ghost	GHO006	Wraith's Ward	Play on turn	Core	0		Target immune to assassination
+Ghost	GHO011	Unfinished Business	Play on turn	Core	1G		Target reveals one hidden tracker
+Ghost	GHO013	Spectral Army	Play on turn	Core	0		Target gains +1 Military Levy for one combat
+Ghost	GHO014	The Veil Thins	Play on turn	Core	4C		All dead players draw a Ghost card
+Ghost	GHO016	The Dark Pact	Play on turn	Core	4C		Make a deal with a dead player
+Ghost	GHO017	The Ghost's Whisper	Play on turn	Core	4C		A dead player haunts a target
+Ghost	GHO018	The Seance	Play on turn	Core	1G		Speak with a dead player; they reveal one secret
+Ghost	GHO019	The Grave Chill	Play on turn	Core	3M		Target loses 1 Military
+Ghost	GHO020	The Spectral Army	Play on turn	Core	0		Target gains +1 Military Levy
+Ghost	GHO021	The Wraith's Ward	Play on turn	Core	0		Target immune to assassination
+Ghost	GHO022	The Ancestral Guidance	Play on turn	Core	0		Target gains +1 Capital Levy
+Ghost	GHO023	The Unfinished Business	Play on turn	Core	1G		Target reveals one hidden tracker
+Ghost	GHO025	The Veil Rips	Play on turn	Core	1C		Draw from Cataclysm deck
+Ghost	GHO026	The Dead Rise	Play on turn	Core	4C		All dead players return as ghosts
+Ghost	GHO027	The Final Death	Play on turn	Core	3C		Cancel a resurrection
+Ghost	GHO028	The Necromancer	Play on turn	Core	5G		Resurrect a dead player as your vassal
+Ghost	GHO029	The People's Choice	Play on turn	Core	5G		Resurrect a dead player with full stats
+Ghost	GHO031	The End of Days	Play on turn	Core	1C		Draw from Cataclysm deck
+Ghost	GHO032	The Silent Watcher	Play on turn	Core	0		Look at any player's hand
+Ghost	GHO033	The Cold Hand	Play on turn	Core	3G		Target loses 1 Gold
+Ghost	GHO034	The Empty Chair	Play on turn	Core	3C		Target loses 1 Political Capital
+Ghost	GHO036	The Shadow	Play on turn	Core	2C		Target cannot act next turn
+Ghost	GHO037	The Whisper	Play on turn	Core	1C		Force target to discard a card
+Ghost	GHO038	The Chill	Play on turn	Core	3G		Target loses 1 Production
+Ghost	GHO007	The Haunting	Play on turn	Core	1C		Target discards a card
+Ghost	GHO009	I Remember	Play on turn	Core	0	grievance	+2 Grievance against your killer
+Ghost	GHO010	The Light Calls	Play on turn	Core	1C		Draw from Resurrection deck
+Ghost	GHO015	The Raven Arrives	Play on turn	Core	1C		Draw from Resurrection deck
+Ghost	GHO035	The Broken Mirror	Play on turn	Core	3G		Target loses 1 random resource
+Ghost	GHO040	The Return	Play on turn	Core	1C		Draw from Resurrection deck
+Resurrection	RES002	Broken but Alive	Play on turn	Core	4G		Return with half stats. No memory
+Resurrection	RES003	The Puppet King	Play on turn	Core	4G		Return as vassal of the drawer. Servitude 3
+Resurrection	RES005	The Forgotten	Play on turn	Core	4G		Return with 1 in all stats. May build Servitude secretly
+Resurrection	RES006	Vengeance	Play on turn	Core	5G		Return with full stats. May send an Instigator for free
+Resurrection	RES007	The Returned King	Play on turn	Core	5G		Return with full stats. All former vassals return
+Resurrection	RES008	Final Death	Play on turn	Core	4G		Permanently eliminated. No resurrection possible
+Resurrection	RES009	The Pretender	Play on turn	Core	5G		Return with full stats. Claim throne is yours
+Resurrection	RES011	The Broken Crown	Play on turn	Core	5C		Return with half stats. Lord Paramount loses 2 Political Capital
+Resurrection	RES013	The Shadow King	Play on turn	Core	4G		Return with half stats. May build Servitude secretly
+Resurrection	RES014	The Iron King	Play on turn	Core	5M		Return with full stats. +2 Military Levy
+Resurrection	RES015	The Golden King	Play on turn	Core	5G		Return with full stats. +5 Gold Levy
+Resurrection	RES016	The Dead King	Play on turn	Core	5G		Return as Lord Paramount
+Resurrection	RES018	The Kingless Realm	Play on turn	Core	5G		Return with full stats. No Lord Paramount for 3 rounds
+Resurrection	RES019	The Blood Tax	Play on turn	Core	5M		Return with full stats. All lose 1 Military per vassal
+Resurrection	RES020	The Gold Tax	Play on turn	Core	5G		Return with full stats. All lose 1 Gold per vassal
+Resurrection	RES021	The Soul Tax	Play on turn	Core	5C		Return with full stats. All lose 1 Political Capital per vassal
+Resurrection	RES023	The Silent Coup	Play on turn	Core	5G		Return with full stats. Replace Lord Paramount
+Resurrection	RES024	The Open Coup	Play on turn	Core	5G		Return with full stats. Replace Lord Paramount by force
+Resurrection	RES025	The Golden Coup	Play on turn	Core	5G		Return with full stats. Replace Lord Paramount by gold
+Resurrection	RES026	The People's Coup	Play on turn	Core	5C		Return with full stats. Replace Lord Paramount by vote
+Resurrection	RES027	The End of Days	Play on turn	Core	5G		Return with full stats. Draw from Cataclysm deck
+Resurrection	RES028	The Last Dawn	Play on turn	Core	5G		Return with full stats. All players gain +2 in all stats
+Resurrection	RES029	The Broken Wheel	Play on turn	Core	5G		Return with full stats. All trackers reset to 0
+Resurrection	RES004	Rebellion in Your Name	Play on turn	Core	4G	unrest	Return with an army. All with Unrest >= 3 may join
+Resurrection	RES012	The People's King	Play on turn	Core	5C		Return with full stats. +2 votes at next Council
+Resurrection	RES017	The Twin Kings	Play on turn	Core	4C		Return with another dead player; share power
+Resurrection	RES022	The Great Betrayal	Play on turn	Core	5G		Return with full stats. All alliances broken
+Resurrection	RES001	The Heir Returns	Play on turn	Core	5G	grievance	Return with full stats. Remember killer. +2 Grievance
+Cataclysm	CAT001	The Great Revolt	Resolve on draw	Core	3G		Every Bond gains 2 hidden Revolution
+Cataclysm	CAT002	The Long Night	Resolve on draw	Core	3G		All players lose half their resources
+Cataclysm	CAT004	The Wyrm Wakes	Resolve on draw	Core	3M		All players lose 3 Military; Lord Paramount loses 5
+Cataclysm	CAT006	The Plague	Resolve on draw	Core	4G		All players lose 2 Production; all vassals gain +2 Revolution
+Cataclysm	CAT007	The Great Winter	Resolve on draw	Core	3G		All players lose 3 Gold; no Production this round
+Cataclysm	CAT011	The Shadow King	Resolve on draw	Core	1G		Trigger a Council immediately
+Cataclysm	CAT012	The People's King	Resolve on draw	Core	3C		Player with lowest Military becomes Lord Paramount
+Cataclysm	CAT013	The Golden King	Resolve on draw	Core	3C		Player with most Gold becomes Lord Paramount
+Cataclysm	CAT018	The Blood Tax	Resolve on draw	Core	1M		Every House including you loses 1 Military Levy
+Cataclysm	CAT019	The Gold Tax	Resolve on draw	Core	1G		Every House including you loses 1 Gold Levy
+Cataclysm	CAT020	The Soul Tax	Resolve on draw	Core	2C		Every House loses 1 Capital Standing
+Cataclysm	CAT022	The Silent Coup	Resolve on draw	Core	1G		Trigger a Council immediately
+Cataclysm	CAT021	The Great Betrayal	Resolve on draw	Core	1C		All alliances are broken; all vassals revolt
+Cataclysm	CAT010	The Empty Throne	Resolve on draw	Core	1C		No Lord Paramount for 3 rounds
+Cataclysm	CAT015	The Dead King	Resolve on draw	Core	4C		A random dead player returns as Lord Paramount
+Cataclysm	CAT009	The Broken Crown	Resolve on draw	Core	3C		Lord Paramount is deposed; new vote triggered
+Cataclysm	CAT014	The Iron King	Resolve on draw	Core	4M		Player with most Military becomes Lord Paramount
+Cataclysm	CAT023	The Open Coup	Resolve on draw	Core	4M		Lord Paramount is replaced by the player with most Military
+Cataclysm	CAT024	The Golden Coup	Resolve on draw	Core	3C		Lord Paramount is replaced by the player with most Gold
+Cataclysm	CAT025	The People's Coup	Resolve on draw	Core	4C		Lord Paramount is replaced by the player with most Political Capital
+Cataclysm	CAT027	The Last Dawn	Resolve on draw	Core	1C		All players gain +2 in all stats; game continues
+Cataclysm	CAT028	The Broken Wheel	Resolve on draw	Core	4G	grievance unrest	All trackers (Servitude Revolution Unrest Grievance) reset to 0
+Cataclysm	CAT030	The Final King	Resolve on draw	Core	4G		The player with the most total power becomes king immediately
+Cataclysm	CAT017	The Kingless Realm	Resolve on draw	Core	3G	unrest	No Lord Paramount; all players gain +1 Unrest
+Cataclysm	CAT008	The Mad King	Resolve on draw	Core	2G		All players must attack the nearest player this round
+Everhold	BOA001	The Blood Watch	Play on turn	Core	0		+1 Military Levy this turn
+Everhold	BOA002	The Mud Summons	Reaction	Combat	0		+1 Military Levy in one combat, this combat only
+Everhold	BOA003	The Stubborn Season	Play on turn	Chaos	4M		Target House gains 3 Unrest
+Everhold	BOA004	The Bracken Silence	Play on turn	Growth	4M		+2 Capital Standing permanently
+Everhold	BOA005	The Bristle Gate	Play on turn	Core	1M		Clear 1 of your Unrest
+Everhold	BOA006	The Thicket Claim	Reaction	Combat	0		+1 Military Levy when defending, not when attacking
+Everhold	BOA007	The Stubborn Answer	Play on turn	Core	2M		Clear 2 of your Unrest
+Everhold	BOA008	The Mud Standard	Play on turn	Core	0		+1 Gold Levy this turn
+Everhold	BOA009	The Stubborn Tally	Play on turn	Core	2M		+2 Military Levy this turn
+Everhold	BOA010	The Thicket Cause	Play on turn	Core	2M		+3 Military Levy this turn
+Everhold	BOA011	The Thicket Season	Play on turn	Growth	4M		+2 Military Standing permanently
+Everhold	BOA012	The Mire Tithe	Play on turn	Chaos	3M		Target House gains 2 Unrest
+Everhold	BOA013	The Wild Hall	Play on turn	Core	2M		+3 Gold Levy this turn
+Everhold	BOA014	The Tusk March	Reaction	Combat	2M		+3 Military Levy in one combat, this combat only
+Everhold	BOA015	The Bracken Bargain	Play on turn	Chaos	2M		Every House gains 3 Unrest
+Everhold	BOA016	The Bristle Tithe	Reaction	Combat	2M		Attacker loses 1 Military
+Everhold	BOA017	The Stubborn Silence	Play on turn	Chaos	0		Every House gains 1 Unrest
+Everhold	BOA018	The Gore Bargain	Reaction	Combat	0		+1 Military Levy when defending, not when attacking
+Everhold	BOA019	The Furious Standard	Play on turn	Chaos	2M		Every House gains 3 Unrest
+Everhold	BOA020	The Gore Claim	Reaction	Combat	3M		Attacker loses 3 Military
+Everhold	BOA021	The Thicket Host	Play on turn	Chaos	3M		Target House gains 2 Unrest
+Everhold	BOA022	The Stubborn Tithe	Play on turn	Reputation	3M		gain 1 Favour with the Court
+Everhold	BOA023	The Furious Answer	Play on turn	Reputation	4M		gain 3 Favour with the Court
+Everhold	BOA024	The Blood Road	Play on turn	Core	2M		Clear 2 of your Unrest
+Everhold	BOA025	The Tusk Reckoning	Play on turn	Core	4M		Target House loses 2 Gold Standing
+Everhold	BOA026	The Furious Silence	Play on turn	Chaos	4M		Target House gains 3 Unrest
+Everhold	BOA027	The Bristle Road	Play on turn	Reputation	4M		gain 3 Favour with the Court
+Everhold	BOA028	The Low Host	Play on turn	Chaos	4M		Target House gains 3 Unrest
+Everhold	BOA029	The Furious Court	Play on turn	Growth	3M		+1 Military Standing permanently
+Everhold	BOA030	The Stubborn Host	Play on turn	Core	0		+1 Military Levy this turn
+Everhold	BOA031	The Tusk Feast	Play on turn	Chaos	2M		Every House gains 3 Unrest
+Everhold	BOA032	The Bracken Cause	Play on turn	Core	2M		Clear 2 of your Unrest
+Everhold	BOA033	The Blood Silence	Reaction	Combat	0		+1 Military Levy in one combat, this combat only
+Everhold	BOA034	The Tusk Summons	Reaction	Combat	2M		+3 Military Levy when defending, not when attacking
+Everhold	BOA035	The Gore Reckoning	Reaction	Combat	1M		+2 Military Levy when defending, not when attacking
+Everhold	BOA036	The Tusk Tithe	Reaction	Combat	2M		Attacker loses 1 Military
+Everhold	BOA037	The Gore Standard	Play on turn	Core	3M		Target House loses 1 Capital Standing
+Everhold	BOA038	The Gore Keeping	Play on turn	Core	0		+1 Military Levy this turn
+Everhold	BOA039	The Gore Silence	Play on turn	Core	2M		Clear 2 of your Unrest
+Everhold	BOA040	The Furious Keeping	Play on turn	Core	0		+1 Gold Levy this turn
+Everhold	BOA041	The Thicket Silence	Play on turn	Chaos	3M		Target House gains 2 Unrest
+Everhold	BOA042	The Furious Summons	Play on turn	Chaos	3M		Every House including you loses 2 Capital Levy
+Everhold	BOA043	The Wild Tally	Play on turn	Reputation	3M		gain 1 Favour with the Court
+Everhold	BOA044	The Blood Tally	Reaction	Combat	0		+1 Military Levy in one combat, this combat only
+Everhold	BOA045	The Mire Claim	Play on turn	Core	2M		+2 Gold Levy this turn
+Everhold	BOA046	The Tusk Claim	Reaction	Combat	0		+1 Military Levy when defending, not when attacking
+Everhold	BOA047	The Mire Answer	Play on turn	Core	2M		+2 Gold Levy this turn
+Everhold	BOA048	The Gore Answer	Play on turn	Chaos	2M		Target House gains 1 Unrest
+Everhold	BOA049	The Thicket Vigil	Play on turn	Growth	4M		+2 Capital Standing permanently
+Everhold	BOA050	The Furious Claim	Play on turn	Core	0		+1 Military Levy this turn
+Everhold	BOA051	The Bristle Silence	Play on turn	Core	2M		+3 Gold Levy this turn
+Everhold	BOA052	The Unbroken Season	Play on turn	Chaos	2M		Target House gains 1 Unrest
+Everhold	BOA053	The Mire Court	Play on turn	Core	2M		+2 Capital Levy this turn
+Everhold	BOA054	The Gore Debt	Reaction	Combat	2M		+2 Military Levy in one combat, this combat only
+Everhold	BOA055	The Rooting Keeping	Play on turn	Reputation	3M		gain 1 Favour with the Court
+Everhold	BOA056	The Stubborn Watch	Play on turn	Core	2M		Clear 2 of your Unrest
+Everhold	BOA057	The Furious Cause	Reaction	Combat	3M		Attacker loses 2 Military
+Everhold	BOA058	The Bracken Court	Play on turn	Chaos	2M		Target House gains 1 Unrest
+Everhold	BOA059	The Bristle Reckoning	Play on turn	Reputation	4M		gain 3 Favour with the Court
+Everhold	BOA060	The Charge Reckoning	Play on turn	Core	4M		Target House loses 3 Gold Standing
+Everhold	BOA061	The Bracken Feast	Play on turn	Reputation	3M		gain 1 Favour with the Court
+Everhold	BOA062	The Rooting Summons	Play on turn	Chaos	4M		Target House gains 3 Unrest
+Everhold	BOA063	The Bristle March	Play on turn	Chaos	4M		Target House gains 3 Unrest
+Everhold	BOA064	The Bristle Standard	Reaction	Combat	0		+1 Military Levy in one combat, this combat only
+Everhold	BOA065	The Thicket Debt	Play on turn	Core	2M		Clear 2 of your Unrest
+Everhold	BOA066	The Tusk Standard	Reaction	Combat	1M		+2 Military Levy when defending, not when attacking
+Everhold	BOA067	The Stubborn Court	Play on turn	Reputation	3M		gain 1 Favour with the Court
+Everhold	BOA068	The Tusk Court	Play on turn	Growth	4M		+2 Military Standing permanently
+Everhold	BOA069	The Tusk Gate	Play on turn	Reputation	3M		gain 1 Favour with the Court
+Everhold	BOA070	The Mud Road	Reaction	Combat	2M		+2 Military Levy in one combat, this combat only
+Everhold	BOA071	The Low Tithe	Play on turn	Chaos	0		Every House gains 1 Unrest
+Everhold	BOA072	The Low Feast	Play on turn	Core	4M		Target House loses 2 Capital Standing
+Everhold	BOA073	The Unbroken Tally	Reaction	Combat	2M		Attacker loses 1 Military
+Everhold	BOA074	The Bracken Standard	Play on turn	Core	0		+1 Military Levy this turn
+Everhold	BOA075	The Bracken Hall	Reaction	Combat	3M		Attacker loses 2 Military
+Everhold	BOA076	The Stubborn Debt	Play on turn	Core	3M		Target House loses 1 Capital Standing
+Everhold	BOA077	The Low Bargain	Play on turn	Growth	4M		+2 Military Standing permanently
+Everhold	BOA078	The Low Claim	Play on turn	Core	3M		Target House loses 1 Military Standing
+Everhold	BOA079	The Charge Keeping	Play on turn	Chaos	3M		Every House including you loses 2 Capital Levy
+Everhold	BOA080	The Unbroken Feast	Play on turn	Growth	4M		+2 Military Standing permanently
+Everhold	BOA081	The Mire Vigil	Play on turn	Reputation	4M		gain 2 Favour with the Court
+Everhold	BOA082	The Mud Cause	Play on turn	Core	2M		Clear 2 of your Unrest
+Everhold	BOA083	The Rooting Gate	Play on turn	Growth	3M		+1 Gold Standing permanently
+Everhold	BOA084	The Tusk Road	Play on turn	Chaos	2M		Every House gains 2 Unrest
+Everhold	BOA085	The Gore Tithe	Play on turn	Chaos	0		Every House gains 1 Unrest
+Everhold	BOA086	The Charge Answer	Reaction	Combat	3M		Attacker loses 2 Military
+Everhold	BOA087	The Thicket March	Play on turn	Growth	4M		+3 Military Standing permanently
+Everhold	BOA088	The Charge Hall	Reaction	Combat	3M		Attacker loses 3 Military
+Everhold	BOA089	The Gore Feast	Play on turn	Core	4M		Target House loses 3 Military Standing
+Everhold	BOA090	The Blood Host	Play on turn	Chaos	4M		Target House gains 3 Unrest
+Everhold	BOA091	The Low Road	Reaction	Combat	2M		Attacker loses 1 Military
+Everhold	BOA092	The Furious Debt	Play on turn	Chaos	3M		Target House gains 2 Unrest
+Everhold	BOA093	The Rooting Standard	Play on turn	Chaos	0		Every House gains 1 Unrest
+Everhold	BOA094	The Thicket Road	Play on turn	Reputation	4M		gain 2 Favour with the Court
+Everhold	BOA095	The Thicket Court	Play on turn	Chaos	0		Every House gains 1 Unrest
+Everhold	BOA096	The Unbroken Keeping	Play on turn	Core	4M		Target House loses 2 Gold Standing
+Everhold	BOA097	The Wild Court	Reaction	Combat	2M		+3 Military Levy when defending, not when attacking
+Everhold	BOA098	The Blood Summons	Play on turn	Core	0		+1 Capital Levy this turn
+Everhold	BOA099	The Low Standard	Play on turn	Growth	4M		+2 Military Standing permanently
+Everhold	BOA100	The Mud Keeping	Play on turn	Growth	4M		+2 Military Standing permanently
+Leoward	LIO001	The Mane Watch	Play on turn	Promise	1C		Cancel a Promise before it comes due; it is discarded, not broken
+Leoward	LIO002	The Banner Reckoning	Play on turn	Reputation	2C		+2 Capital Levy per Promise in your Word Kept pile this turn
+Leoward	LIO003	The Vow Cause	Promise	Promise	0		Term Tribute; consideration up to 2 Levy
+Leoward	LIO004	The Oath Bargain	Play on turn	Chaos	2C		Target House gains 1 Unrest
+Leoward	LIO005	The Standard Cause	Promise	Promise	0		Term Restraint; consideration up to 2 Levy
+Leoward	LIO006	The Sunlit Tally	Play on turn	Council	3C		gain 2 vote at the next Council
+Leoward	LIO007	The Standard Debt	Play on turn	Core	4C		Target House loses 2 Capital Standing
+Leoward	LIO008	The Pride Watch	Play on turn	Council	2C		gain 1 vote at the next Council
+Leoward	LIO009	The Golden Summons	Promise	Promise	1C		Term Tribute; consideration up to 3 Levy
+Leoward	LIO010	The Word Bargain	Promise	Promise	0		Term Peace; consideration up to 2 Levy
+Leoward	LIO011	The Oath Debt	Promise	Promise	0		Term Restraint; consideration up to 1 Levy
+Leoward	LIO012	The Pride Hall	Play on turn	Core	2C		+2 Gold Levy this turn
+Leoward	LIO013	The Roar Reckoning	Play on turn	Reputation	2C		+2 Capital Levy per Promise in your Word Kept pile this turn
+Leoward	LIO014	The Vow Tithe	Play on turn	Core	2C		+2 Gold Levy this turn
+Leoward	LIO015	The Banner Cause	Promise	Promise	1C		Term Restraint; consideration up to 3 Levy
+Leoward	LIO016	The Sunlit Host	Play on turn	Core	2C		+2 Military Levy this turn
+Leoward	LIO017	The Word Cause	Play on turn	Chaos	3C		Target House gains 2 Unrest
+Leoward	LIO018	The Mane Cause	Promise	Promise	1C		Term Tribute; consideration up to 3 Levy
+Leoward	LIO019	The Roar Vigil	Promise	Promise	0		Term Tribute; consideration up to 1 Levy
+Leoward	LIO020	The Sworn Hall	Promise	Promise	1C		Term Tribute; consideration up to 3 Levy
+Leoward	LIO021	The Loyal Season	Play on turn	Reputation	2C		+2 Capital Levy per Promise in your Word Kept pile this turn
+Leoward	LIO022	The Crown Cause	Play on turn	Chaos	2C		Target House gains 1 Unrest
+Leoward	LIO023	The Pride Summons	Play on turn	Core	2C		+2 Capital Levy this turn
+Leoward	LIO024	The Charge Vigil	Promise	Promise	0		Term Tribute; consideration up to 1 Levy
+Leoward	LIO025	The Vow Hall	Play on turn	Core	0		+1 Military Levy this turn
+Leoward	LIO026	The Crown March	Play on turn	Promise	1C		Cancel a Promise before it comes due; it is discarded, not broken
+Leoward	LIO027	The Sunlit Court	Play on turn	Growth	3C		+1 Military Standing permanently
+Leoward	LIO028	The Standard Summons	Play on turn	Core	2C		+2 Gold Levy this turn
+Leoward	LIO029	The Charge Answer	Play on turn	Core	3C		Clear 3 of your Unrest
+Leoward	LIO030	The Mane Tally	Play on turn	Growth	4C		+3 Gold Standing permanently
+Leoward	LIO031	The Charge Silence	Promise	Promise	0		Term Vote; consideration up to 2 Levy
+Leoward	LIO032	The Sworn Road	Promise	Promise	1C		Term Peace; consideration up to 3 Levy
+Leoward	LIO033	The Sworn Summons	Play on turn	Growth	4C		+2 Military Standing permanently
+Leoward	LIO034	The Mane Gate	Promise	Promise	0		Term Tribute; consideration up to 1 Levy
+Leoward	LIO035	The Golden Road	Promise	Promise	0		Term Tribute; consideration up to 2 Levy
+Leoward	LIO036	The Roar Court	Play on turn	Council	2C		gain 1 vote at the next Council
+Leoward	LIO037	The Mane Vigil	Promise	Promise	0		Term Vote; consideration up to 2 Levy
+Leoward	LIO038	The Loyal Reckoning	Promise	Promise	0		Term Tribute; consideration up to 2 Levy
+Leoward	LIO039	The Crown Keeping	Promise	Promise	0		Term Vote; consideration up to 2 Levy
+Leoward	LIO040	The Mane Feast	Play on turn	Core	2C		+3 Gold Levy this turn
+Leoward	LIO041	The Roar Bargain	Promise	Promise	1C		Term Restraint; consideration up to 3 Levy
+Leoward	LIO042	The Banner Gate	Play on turn	Reputation	2C		+2 Capital Levy per Promise in your Word Kept pile this turn
+Leoward	LIO043	The Honour Vigil	Play on turn	Reputation	2C		+2 Capital Levy per Promise in your Word Kept pile this turn
+Leoward	LIO044	The Word Tithe	Play on turn	Growth	4C		+2 Gold Standing permanently
+Leoward	LIO045	The Banner Road	Play on turn	Core	2C		+2 Military Levy this turn
+Leoward	LIO046	The Honour Summons	Play on turn	Growth	4C		+3 Capital Standing permanently
+Leoward	LIO047	The Standard Keeping	Play on turn	Reputation	2C		+2 Capital Levy per Promise in your Word Kept pile this turn
+Leoward	LIO048	The Standard Season	Promise	Promise	0		Term Peace; consideration up to 1 Levy
+Leoward	LIO049	The Pride Answer	Promise	Promise	0		Term Peace; consideration up to 1 Levy
+Leoward	LIO050	The Sunlit Gate	Play on turn	Chaos	3C		Every House including you loses 2 Gold Levy
+Leoward	LIO051	The Banner Host	Play on turn	Growth	3C		+1 Capital Standing permanently
+Leoward	LIO052	The Word Hall	Promise	Promise	0		Term Peace; consideration up to 1 Levy
+Leoward	LIO053	The Vow March	Promise	Promise	0		Term Vote; consideration up to 1 Levy
+Leoward	LIO054	The Loyal Watch	Promise	Promise	0		Term Vote; consideration up to 1 Levy
+Leoward	LIO055	The Standard Hall	Play on turn	Core	0		+1 Gold Levy this turn
+Leoward	LIO056	The Vow Watch	Play on turn	Core	3C		Take 2 Capital Levy from target House
+Leoward	LIO057	The Oath Answer	Play on turn	Core	2C		+2 Gold Levy this turn
+Leoward	LIO058	The Pride Bargain	Play on turn	Chaos	4C		Target House gains 3 Unrest
+Leoward	LIO059	The Sunlit Standard	Play on turn	Core	0		+1 Capital Levy this turn
+Leoward	LIO060	The Mane Answer	Play on turn	Core	3C		Take 2 Gold Levy from target House
+Leoward	LIO061	The Golden Court	Promise	Promise	0		Term Peace; consideration up to 2 Levy
+Leoward	LIO062	The Standard Vigil	Promise	Promise	0		Term Peace; consideration up to 1 Levy
+Leoward	LIO063	The Loyal Claim	Play on turn	Chaos	3C		Target House gains 2 Unrest
+Leoward	LIO064	The Oath Tally	Play on turn	Core	0		+1 Military Levy this turn
+Leoward	LIO065	The Pride Standard	Promise	Promise	0		Term Tribute; consideration up to 2 Levy
+Leoward	LIO066	The Crown Road	Promise	Promise	1C		Term Peace; consideration up to 3 Levy
+Leoward	LIO067	The Loyal Gate	Play on turn	Promise	1C		Cancel a Promise before it comes due; it is discarded, not broken
+Leoward	LIO068	The Loyal Road	Promise	Promise	0		Term Restraint; consideration up to 1 Levy
+Leoward	LIO069	The Pride Reckoning	Promise	Promise	0		Term Tribute; consideration up to 2 Levy
+Leoward	LIO070	The Vow Gate	Promise	Promise	0		Term Restraint; consideration up to 1 Levy
+Leoward	LIO071	The Honour Reckoning	Play on turn	Core	0		+1 Gold Levy this turn
+Leoward	LIO072	The Oath Vigil	Play on turn	Reputation	3C		+3 Capital Levy per Promise in your Word Kept pile this turn
+Leoward	LIO073	The Pride Road	Play on turn	Growth	4C		+2 Military Standing permanently
+Leoward	LIO074	The Charge Reckoning	Promise	Promise	0		Term Peace; consideration up to 2 Levy
+Leoward	LIO075	The Golden Debt	Play on turn	Chaos	3C		Target House gains 2 Unrest
+Leoward	LIO076	The Crown Debt	Promise	Promise	0		Term Vote; consideration up to 1 Levy
+Leoward	LIO077	The Oath Standard	Promise	Promise	0		Term Tribute; consideration up to 2 Levy
+Leoward	LIO078	The Word Reckoning	Play on turn	Promise	1C		Cancel a Promise before it comes due; it is discarded, not broken
+Leoward	LIO079	The Honour Debt	Promise	Promise	0		Term Peace; consideration up to 2 Levy
+Leoward	LIO080	The Banner Tithe	Promise	Promise	0		Term Forbearance; consideration up to 2 Levy
+Leoward	LIO081	The Vow Standard	Play on turn	Chaos	3C		Every House including you loses 3 Gold Levy
+Leoward	LIO082	The Sunlit Season	Play on turn	Core	2C		+2 Capital Levy this turn
+Leoward	LIO083	The Vow Debt	Promise	Promise	0		Term Tribute; consideration up to 1 Levy
+Leoward	LIO084	The Roar March	Play on turn	Core	0		+1 Capital Levy this turn
+Leoward	LIO085	The Charge Bargain	Play on turn	Core	2C		+3 Capital Levy this turn
+Leoward	LIO086	The Roar Summons	Promise	Promise	0		Term Vote; consideration up to 2 Levy
+Leoward	LIO087	The Oath Host	Play on turn	Chaos	3C		Every House including you loses 2 Military Levy
+Leoward	LIO088	The Word Vigil	Play on turn	Growth	4C		+2 Military Standing permanently
+Leoward	LIO089	The Banner Answer	Play on turn	Core	0		+1 Capital Levy this turn
+Leoward	LIO090	The Crown Hall	Play on turn	Chaos	1C		Every House including you loses 1 Gold Levy
+Leoward	LIO091	The Word Court	Promise	Promise	0		Term Tribute; consideration up to 1 Levy
+Leoward	LIO092	The Vow Answer	Play on turn	Reputation	2C		+2 Capital Levy per Promise in your Word Kept pile this turn
+Leoward	LIO093	The Loyal Silence	Promise	Promise	0		Term Vote; consideration up to 2 Levy
+Leoward	LIO094	The Word Summons	Promise	Promise	0		Term Vote; consideration up to 1 Levy
+Leoward	LIO095	The Sworn Debt	Play on turn	Chaos	2C		Target House gains 1 Unrest
+Leoward	LIO096	The Banner Court	Promise	Promise	0		Term Restraint; consideration up to 1 Levy
+Leoward	LIO097	The Mane Road	Play on turn	Council	2C		gain 1 vote at the next Council
+Leoward	LIO098	The Mane Host	Play on turn	Chaos	3C		Target House gains 2 Unrest
+Leoward	LIO099	The Golden Watch	Promise	Promise	1C		Term Tribute; consideration up to 3 Levy
+Leoward	LIO100	The Mane Bargain	Promise	Promise	0		Term Vote; consideration up to 2 Levy
+Stonegarth	OXX001	The Burden Reckoning	Play on turn	Chaos	4G		Target House gains 3 Unrest
+Stonegarth	OXX002	The Patient Debt	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX003	The Root Claim	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Stonegarth	OXX004	The Harvest Vigil	Play on turn	Core	4G		Target House loses 3 Capital Standing
+Stonegarth	OXX005	The Field Cause	Play on turn	Chaos	3G		Every House including you loses 2 Capital Levy
+Stonegarth	OXX006	The Yoke Feast	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX007	The Plough Silence	Play on turn	Growth	3G		+1 Military Standing permanently
+Stonegarth	OXX008	The Field Debt	Play on turn	Core	4G		Target House loses 2 Capital Standing
+Stonegarth	OXX009	The Plough Season	Play on turn	Chaos	3G		Target House gains 2 Unrest
+Stonegarth	OXX010	The Harvest Tithe	Lever	Bond	2G		Advance Servitude by 1
+Stonegarth	OXX011	The Plough Cause	Play on turn	Chaos	4G		Target House gains 3 Unrest
+Stonegarth	OXX012	The Furrow Watch	Play on turn	Core	2G		+3 Gold Levy this turn
+Stonegarth	OXX013	The Furrow Hall	Play on turn	Core	2G		+2 Military Levy this turn
+Stonegarth	OXX014	The Burden Tithe	Play on turn	Core	2G		+2 Gold Levy this turn
+Stonegarth	OXX015	The Harvest Season	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Stonegarth	OXX016	The Stone Answer	Play on turn	Core	1G		Clear 1 of your Unrest
+Stonegarth	OXX017	The Broad Vigil	Play on turn	Core	2G		+2 Gold Levy this turn
+Stonegarth	OXX018	The Broad Hall	Play on turn	Core	2G		+2 Gold Levy this turn
+Stonegarth	OXX019	The Iron Collar Reckoning	Play on turn	Core	2G		+2 Gold Levy this turn
+Stonegarth	OXX020	The Plough March	Play on turn	Core	2G		+2 Gold Levy this turn
+Stonegarth	OXX021	The Harvest Bargain	Lever	Bond	2G		Advance Servitude by 1
+Stonegarth	OXX022	The Plough Answer	Play on turn	Growth	4G		+2 Capital Standing permanently
+Stonegarth	OXX023	The Steady Road	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Stonegarth	OXX024	The Deep Keeping	Lever	Bond	3G		Advance Servitude by 2
+Stonegarth	OXX025	The Long Debt	Lever	Bond	2G		Advance Servitude by 1
+Stonegarth	OXX026	The Plough Tally	Play on turn	Core	2G		+2 Gold Levy this turn
+Stonegarth	OXX027	The Patient Season	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX028	The Furrow Cause	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX029	The Root Season	Play on turn	Bond	2G		Every lord the other House holds gains 1 hidden Revolution
+Stonegarth	OXX030	The Deep Standard	Play on turn	Council	4G		gain 3 vote at the next Council
+Stonegarth	OXX031	The Root Watch	Play on turn	Core	4G		Target House loses 2 Capital Standing
+Stonegarth	OXX032	The Stone Standard	Play on turn	Chaos	2G		Target House gains 1 Unrest
+Stonegarth	OXX033	The Broad Cause	Lever	Bond	3G		Advance Servitude by 2 against target House
+Stonegarth	OXX034	The Root Gate	Play on turn	Bond	2G		Every lord the other House holds gains 1 hidden Revolution
+Stonegarth	OXX035	The Root Reckoning	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Stonegarth	OXX036	The Long Host	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX037	The Stone Reckoning	Lever	Bond	2G		Advance Servitude by 1 against target House
+Stonegarth	OXX038	The Long Road	Play on turn	Bond	2G		Every lord the other House holds gains 1 hidden Revolution
+Stonegarth	OXX039	The Steady Answer	Play on turn	Core	1G		Clear 1 of your Unrest
+Stonegarth	OXX040	The Harvest Court	Lever	Bond	2G		Advance Servitude by 1 against target House
+Stonegarth	OXX041	The Steady Tithe	Lever	Bond	3G		Advance Servitude by 2
+Stonegarth	OXX042	The Patient Bargain	Lever	Bond	3G		Advance Servitude by 2
+Stonegarth	OXX043	The Slow Tithe	Play on turn	Core	1G		Clear 1 of your Unrest
+Stonegarth	OXX044	The Root Tally	Lever	Bond	3G		Advance Servitude by 2
+Stonegarth	OXX045	The Plough Hall	Play on turn	Bond	2G		Every lord the other House holds gains 1 hidden Revolution
+Stonegarth	OXX046	The Furrow March	Lever	Bond	3G		Advance Servitude by 3
+Stonegarth	OXX047	The Burden Court	Lever	Bond	2G		Advance Servitude by 1
+Stonegarth	OXX048	The Burden Silence	Lever	Bond	2G		Advance Servitude by 1 against target House
+Stonegarth	OXX049	The Yoke Vigil	Play on turn	Core	2G		+2 Capital Levy this turn
+Stonegarth	OXX050	The Broad Watch	Lever	Bond	3G		Advance Servitude by 3
+Stonegarth	OXX051	The Yoke Answer	Lever	Bond	3G		Advance Servitude by 2
+Stonegarth	OXX052	The Long March	Play on turn	Growth	4G		+2 Capital Standing permanently
+Stonegarth	OXX053	The Iron Collar Summons	Lever	Bond	3G		Advance Servitude by 2
+Stonegarth	OXX054	The Broad Reckoning	Lever	Bond	3G		Advance Servitude by 3 against target House
+Stonegarth	OXX055	The Root Cause	Play on turn	Council	4G		gain 3 vote at the next Council
+Stonegarth	OXX056	The Plough Vigil	Play on turn	Core	0		+1 Gold Levy this turn
+Stonegarth	OXX057	The Yoke Debt	Lever	Bond	3G		Advance Servitude by 2
+Stonegarth	OXX058	The Broad Season	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX059	The Steady Watch	Lever	Bond	2G		Advance Servitude by 1
+Stonegarth	OXX060	The Iron Collar Road	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX061	The Steady Claim	Play on turn	Core	2G		Take 1 Gold Levy from target House
+Stonegarth	OXX062	The Slow Tally	Play on turn	Chaos	4G		Target House gains 3 Unrest
+Stonegarth	OXX063	The Long Bargain	Play on turn	Bond	3G		Every lord the other House holds gains 2 hidden Revolution
+Stonegarth	OXX064	The Burden Cause	Lever	Bond	3G		Advance Servitude by 2 against target House
+Stonegarth	OXX065	The Deep Watch	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX066	The Broad Tithe	Play on turn	Council	4G		gain 3 vote at the next Council
+Stonegarth	OXX067	The Patient March	Lever	Bond	2G		Advance Servitude by 1
+Stonegarth	OXX068	The Slow Debt	Play on turn	Chaos	3G		Target House gains 2 Unrest
+Stonegarth	OXX069	The Plough Standard	Play on turn	Core	0		+1 Gold Levy this turn
+Stonegarth	OXX070	The Slow March	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX071	The Deep Summons	Play on turn	Core	3G		Take 2 Capital Levy from target House
+Stonegarth	OXX072	The Yoke Gate	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX073	The Deep Road	Play on turn	Core	3G		Take 2 Military Levy from target House
+Stonegarth	OXX074	The Furrow Host	Play on turn	Council	4G		gain 3 vote at the next Council
+Stonegarth	OXX075	The Stone Cause	Play on turn	Core	2G		+2 Military Levy this turn
+Stonegarth	OXX076	The Stone Court	Play on turn	Core	2G		+2 Capital Levy this turn
+Stonegarth	OXX077	The Deep Reckoning	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX078	The Steady Debt	Play on turn	Core	3G		Take 2 Capital Levy from target House
+Stonegarth	OXX079	The Broad Silence	Play on turn	Core	0		+1 Gold Levy this turn
+Stonegarth	OXX080	The Harvest Feast	Play on turn	Core	3G		Take 2 Capital Levy from target House
+Stonegarth	OXX081	The Plough Tithe	Lever	Bond	3G		Advance Servitude by 2 against target House
+Stonegarth	OXX082	The Patient Standard	Play on turn	Growth	4G		+2 Gold Standing permanently
+Stonegarth	OXX083	The Furrow Court	Lever	Bond	3G		Advance Servitude by 2 against target House
+Stonegarth	OXX084	The Burden Claim	Play on turn	Core	1G		Clear 1 of your Unrest
+Stonegarth	OXX085	The Iron Collar Tithe	Play on turn	Chaos	2G		Target House gains 1 Unrest
+Stonegarth	OXX086	The Yoke Tally	Play on turn	Growth	4G		+3 Capital Standing permanently
+Stonegarth	OXX087	The Patient Vigil	Play on turn	Growth	3G		+1 Military Standing permanently
+Stonegarth	OXX088	The Steady Court	Lever	Bond	2G		Advance Servitude by 1 against target House
+Stonegarth	OXX089	The Stone Summons	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX090	The Deep Feast	Lever	Bond	2G		Advance Servitude by 1
+Stonegarth	OXX091	The Stone Claim	Lever	Bond	3G		Advance Servitude by 3
+Stonegarth	OXX092	The Steady Vigil	Play on turn	Core	1G		Clear 1 of your Unrest
+Stonegarth	OXX093	The Burden Hall	Lever	Bond	3G		Advance Servitude by 3
+Stonegarth	OXX094	The Harvest Claim	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX095	The Root Road	Lever	Bond	3G		Advance Servitude by 3 against target House
+Stonegarth	OXX096	The Harvest Watch	Play on turn	Bond	2G		Set one of your lords' Revolution to 0
+Stonegarth	OXX097	The Steady Standard	Play on turn	Council	3G		gain 2 vote at the next Council
+Stonegarth	OXX098	The Harvest Cause	Play on turn	Core	2G		+3 Gold Levy this turn
+Stonegarth	OXX099	The Harvest Gate	Lever	Bond	3G		Advance Servitude by 2
+Stonegarth	OXX100	The Broad Claim	Play on turn	Core	3G		Target House loses 1 Military Standing
+Wulfren	WLF001	The Grudge Bargain	Play on turn	Chaos	0		gain 2 Grievance
+Wulfren	WLF002	The Old Wound Bargain	Reaction	Combat	2M		+3 Military Levy in one combat, this combat only
+Wulfren	WLF003	The Scar Reckoning	Play on turn	Reputation	4G 1Grv		gain 2 Favour with the Court
+Wulfren	WLF004	The Circling Keeping	Play on turn	Core	4G 1Grv		Take 3 Military Levy from target House
+Wulfren	WLF005	The Circling Tithe	Play on turn	Core	2M		+2 Military Levy this turn
+Wulfren	WLF006	The Long Memory Keeping	Play on turn	Growth	3G 1Grv		+1 Military Standing permanently
+Wulfren	WLF007	The Long Memory Silence	Play on turn	Growth	4M		+3 Military Standing permanently
+Wulfren	WLF008	The Hunger Cause	Play on turn	Growth	3G 1Grv		+1 Military Standing permanently
+Wulfren	WLF009	The Hunger Watch	Play on turn	Core	2G 1Grv		Take 1 Capital Levy from target House
+Wulfren	WLF010	The Scar Vigil	Reaction	Combat	0		+1 Military Levy in one combat, this combat only
+Wulfren	WLF011	The Hunt Tithe	Play on turn	Growth	4G 1Grv		+3 Capital Standing permanently
+Wulfren	WLF012	The Circling Debt	Play on turn	Chaos	4M		Target House gains 3 Unrest
+Wulfren	WLF013	The Snow Feast	Play on turn	Core	2M		+3 Military Levy this turn
+Wulfren	WLF014	The Old Wound Vigil	Play on turn	Chaos	0		gain 1 Grievance
+Wulfren	WLF015	The Long Memory Season	Play on turn	Core	3G 1Grv		Take 2 Military Levy from target House
+Wulfren	WLF016	The Snow Gate	Play on turn	Core	2M		+2 Military Levy this turn
+Wulfren	WLF017	The Scar Bargain	Play on turn	Core	0		+1 Military Levy this turn
+Wulfren	WLF018	The Winter Tally	Play on turn	Core	4M		Target House loses 2 Military Standing
+Wulfren	WLF019	The Long Memory Court	Play on turn	Core	4G 1Grv		Target House loses 3 Standing of your choosing
+Wulfren	WLF020	The Old Wound March	Play on turn	Chaos	0		gain 1 Grievance
+Wulfren	WLF021	The Throat Reckoning	Play on turn	Chaos	3M		Target House gains 2 Unrest
+Wulfren	WLF022	The Throat Claim	Play on turn	Reputation	4G 1Grv		gain 2 Favour with the Court
+Wulfren	WLF023	The Hunt Debt	Play on turn	Growth	3M		+1 Military Standing permanently
+Wulfren	WLF024	The Winter Debt	Play on turn	Chaos	2M		Target House gains 1 Unrest
+Wulfren	WLF025	The Circling Watch	Play on turn	Core	0		+1 Military Levy this turn
+Wulfren	WLF026	The Cold Gate	Play on turn	Chaos	2M		Target House gains 1 Unrest
+Wulfren	WLF027	The Throat Debt	Reaction	Combat	1M		Reduce an attacker's committed Military Levy by 1
+Wulfren	WLF028	The Lean Gate	Play on turn	Chaos	2M		Target House gains 1 Unrest
+Wulfren	WLF029	The Winter Road	Play on turn	Reputation	4G 1Grv		gain 2 Favour with the Court
+Wulfren	WLF030	The Hunt Season	Play on turn	Chaos	4M		Target House gains 3 Unrest
+Wulfren	WLF031	The Snow Road	Play on turn	Core	3M		Take 2 Military Levy from target House
+Wulfren	WLF032	The Long Memory Tithe	Play on turn	Core	4G 1Grv		Target House loses 2 Standing of your choosing
+Wulfren	WLF033	The Fang Claim	Play on turn	Core	2G 1Grv		Take 1 Military Levy from target House
+Wulfren	WLF034	The Lean Standard	Play on turn	Core	4G 1Grv		Target House loses 3 Standing of your choosing
+Wulfren	WLF035	The Cold Silence	Reaction	Combat	3M		Reduce an attacker's committed Military Levy by 2
+Wulfren	WLF036	The Hunger Keeping	Play on turn	Growth	4G 1Grv		+2 Military Standing permanently
+Wulfren	WLF037	The Snow Court	Play on turn	Core	2M		Clear 2 of your Unrest
+Wulfren	WLF038	The Scar Claim	Play on turn	Core	2M		+2 Military Levy this turn
+Wulfren	WLF039	The Lean Road	Reaction	Combat	2M		+2 Military Levy in one combat, this combat only
+Wulfren	WLF040	The Grudge Vigil	Play on turn	Growth	3M		+1 Military Standing permanently
+Wulfren	WLF041	The Snow Answer	Reaction	Combat	1M		Reduce an attacker's committed Military Levy by 1
+Wulfren	WLF042	The Hunger Host	Play on turn	Reputation	4G 1Grv		gain 3 Favour with the Court
+Wulfren	WLF043	The Circling Hall	Play on turn	Reputation	3G 1Grv		gain 1 Favour with the Court
+Wulfren	WLF044	The Grudge Silence	Play on turn	Chaos	0		gain 1 Grievance
+Wulfren	WLF045	The Cold Summons	Play on turn	Growth	4M		+3 Gold Standing permanently
+Wulfren	WLF046	The Snow Hall	Play on turn	Reputation	4G 1Grv		gain 2 Favour with the Court
+Wulfren	WLF047	The Circling Vigil	Play on turn	Core	4G 1Grv		Target House loses 3 Standing of your choosing
+Wulfren	WLF048	The Hunger Road	Play on turn	Chaos	0		gain 2 Grievance
+Wulfren	WLF049	The Cold Claim	Play on turn	Core	4G 1Grv		Take 3 Capital Levy from target House
+Wulfren	WLF050	The Pack Season	Play on turn	Core	2M		+2 Gold Levy this turn
+Wulfren	WLF051	The Scar Gate	Play on turn	Chaos	3M		Target House gains 2 Unrest
+Wulfren	WLF052	The Fang Standard	Play on turn	Growth	4G 1Grv		+2 Military Standing permanently
+Wulfren	WLF053	The Scar Hall	Reaction	Combat	1M		Reduce an attacker's committed Military Levy by 1
+Wulfren	WLF054	The Throat Season	Reaction	Combat	0		+1 Military Levy in one combat, this combat only
+Wulfren	WLF055	The Hunger Claim	Play on turn	Core	4G 1Grv		Target House loses 3 Standing of your choosing
+Wulfren	WLF056	The Pack Silence	Play on turn	Core	1M		Clear 1 of your Unrest
+Wulfren	WLF057	The Lean Host	Play on turn	Core	3G 1Grv		Target House loses 1 Standing of your choosing
+Wulfren	WLF058	The Pack Feast	Play on turn	Chaos	3M		Target House gains 2 Unrest
+Wulfren	WLF059	The Hunger Tally	Play on turn	Chaos	3M		Target House gains 2 Unrest
+Wulfren	WLF060	The Throat March	Play on turn	Chaos	0		gain 2 Grievance
+Wulfren	WLF061	The Long Memory Gate	Play on turn	Core	4G 1Grv		Take 3 Capital Levy from target House
+Wulfren	WLF062	The Fang Watch	Reaction	Combat	2M		+2 Military Levy in one combat, this combat only
+Wulfren	WLF063	The Howl Tithe	Play on turn	Reputation	4G 1Grv		gain 2 Favour with the Court
+Wulfren	WLF064	The Hunt Feast	Play on turn	Core	4M		Target House loses 2 Capital Standing
+Wulfren	WLF065	The Throat Watch	Play on turn	Chaos	4M		Target House gains 3 Unrest
+Wulfren	WLF066	The Snow Tithe	Reaction	Combat	3M		Reduce an attacker's committed Military Levy by 2
+Wulfren	WLF067	The Fang Road	Reaction	Combat	1M		Reduce an attacker's committed Military Levy by 1
+Wulfren	WLF068	The Lean Reckoning	Play on turn	Core	2M		Take 1 Military Levy from target House
+Wulfren	WLF069	The Scar Season	Reaction	Combat	3M		Reduce an attacker's committed Military Levy by 2
+Wulfren	WLF070	The Scar Tithe	Play on turn	Chaos	2M		Target House gains 1 Unrest
+Wulfren	WLF071	The Winter Host	Play on turn	Growth	3G 1Grv		+1 Military Standing permanently
+Wulfren	WLF072	The Throat Keeping	Play on turn	Reputation	4G 1Grv		gain 2 Favour with the Court
+Wulfren	WLF073	The Fang Debt	Play on turn	Chaos	3M		Target House gains 2 Unrest
+Wulfren	WLF074	The Howl Bargain	Play on turn	Core	3M		Target House loses 1 Military Standing
+Wulfren	WLF075	The Grudge Host	Play on turn	Chaos	2M		Target House gains 1 Unrest
+Wulfren	WLF076	The Hunger Gate	Play on turn	Reputation	4G 1Grv		gain 2 Favour with the Court
+Wulfren	WLF077	The Throat Tally	Play on turn	Growth	4G 1Grv		+3 Military Standing permanently
+Wulfren	WLF078	The Howl Vigil	Play on turn	Core	4G 1Grv		Target House loses 2 Standing of your choosing
+Wulfren	WLF079	The Hunt Watch	Play on turn	Chaos	0		gain 1 Grievance
+Wulfren	WLF080	The Winter Summons	Play on turn	Core	2G 1Grv		Take 1 Military Levy from target House
+Wulfren	WLF081	The Grudge Debt	Play on turn	Core	2M		+2 Capital Levy this turn
+Wulfren	WLF082	The Lean March	Reaction	Combat	2M		+2 Military Levy in one combat, this combat only
+Wulfren	WLF083	The Scar Host	Reaction	Combat	2M		+3 Military Levy in one combat, this combat only
+Wulfren	WLF084	The Pack Bargain	Play on turn	Reputation	4G 1Grv		gain 3 Favour with the Court
+Wulfren	WLF085	The Howl Answer	Play on turn	Chaos	0		gain 2 Grievance
+Wulfren	WLF086	The Old Wound Standard	Play on turn	Growth	3M		+1 Military Standing permanently
+Wulfren	WLF087	The Long Memory Hall	Play on turn	Core	3M		Take 2 Capital Levy from target House
+Wulfren	WLF088	The Snow Claim	Play on turn	Core	3M		Clear 3 of your Unrest
+Wulfren	WLF089	The Snow Tally	Play on turn	Core	2M		+3 Military Levy this turn
+Wulfren	WLF090	The Lean Answer	Play on turn	Core	3G 1Grv		Target House loses 1 Standing of your choosing
+Wulfren	WLF091	The Snow Debt	Play on turn	Chaos	0		gain 3 Grievance
+Wulfren	WLF092	The Circling Cause	Play on turn	Core	4G 1Grv		Target House loses 3 Standing of your choosing
+Wulfren	WLF093	The Howl Gate	Reaction	Combat	3M		Reduce an attacker's committed Military Levy by 3
+Wulfren	WLF094	The Cold Hall	Play on turn	Chaos	4M		Target House gains 3 Unrest
+Wulfren	WLF095	The Throat Hall	Play on turn	Growth	4G 1Grv		+2 Military Standing permanently
+Wulfren	WLF096	The Lean Season	Play on turn	Core	3M		Target House loses 1 Capital Standing
+Wulfren	WLF097	The Winter Standard	Play on turn	Chaos	0		gain 2 Grievance
+Wulfren	WLF098	The Old Wound Cause	Reaction	Combat	0		+1 Military Levy in one combat, this combat only
+Wulfren	WLF099	The Fang Tally	Play on turn	Core	3M		Take 2 Capital Levy from target House
+Wulfren	WLF100	The Winter Tithe	Play on turn	Core	2G 1Grv		Take 1 Military Levy from target House

@@ -1,22 +1,29 @@
 *.o
-TABLE.png
-# art/ is NOT ignored any more.  It is the one generated thing that
-# cannot be generated again: gen-art.py queues every face with seed -1
-# and logs/jobs.tsv records only the job id, so re-running the same
-# prompts yields 1455 different pictures.  The backs ARE reproducible
-# -- BACKS.tsv keeps model, seed and prompt for each.
-#
-# The faces composed from it and the small ones made from those stay
-# out: tools/mkassets.sh remakes both from art/ in a couple of minutes.
-card-*.png
+# Anchored.  Unanchored it matched client/assets/ui/table.png as well,
+# because this filesystem does not care about case -- which is how the
+# table texture stayed out of a repository that was meant to carry it.
+/TABLE.png
+# art/ is NOT ignored.  It is the one generated thing that cannot be
+# generated again: gen-art.py queues every face with seed -1 and
+# logs/jobs.tsv records only the job id, so re-running the same prompts
+# yields 1455 different pictures.  The backs ARE reproducible --
+# BACKS.tsv keeps model, seed and prompt for each.  art/ is kept
+# because the faces are composed from it whenever a card's text
+# changes, not because the game reads it.
+/card-*.png
 client/.godot/
-client/assets/backs/
-client/assets/cards.tsv
-client/assets/cards/
+# The faces, the backs, the UI surfaces and the card list are all in
+# the repository now.  They are generated, and the old rule was that
+# generated things are regenerated -- but the rule that matters is that
+# somebody who clones this can run it.  Composing 1455 faces is a few
+# minutes and needs ImageMagick; a clone should not need either.
+#
+# The small faces are the one exception: _card_tex falls back to the
+# full face when a thumb is missing, so they cost 231MB and change
+# nothing a player can see.  make setup makes them.
 client/assets/thumbs/
-client/assets/ui/
 court
 logs/
-sheet*.png
+/sheet*.png
 __pycache__/
 client/backgrounds/

@@ -1094,6 +1094,16 @@ func _load_background() -> void:
 	_set_background(at if at >= 0 else 0)
 
 func _tex(path: String) -> Texture2D:
+	# From the file, not through the import pipeline -- the same reason
+	# _fnt below gives for the faces, and it applies here too.
+	#
+	# A .import points at res://.godot/imported/<name>.ctex, and
+	# client/.godot is not in the repository, so load() fails on a fresh
+	# clone and every surface fell back to flat colour.  The table was
+	# grey in a game that carries a painted one.
+	var t := _tex_file(path)
+	if t:
+		return t
 	return load(path) if ResourceLoader.exists(path) else null
 
 func _fnt(path: String) -> Font:
