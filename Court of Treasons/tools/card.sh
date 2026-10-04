@@ -18,7 +18,7 @@ cd "$(dirname "$0")/.."
 ID=$1
 [ -n "$ID" ] || { echo "usage: tools/card.sh CARDID [OUT]"; exit 1; }
 OUT=${2:-card-$ID.png}
-ART="art/$ID.png"
+ART="art/$ID.webp"
 [ -f "$ART" ] || { echo "no art for $ID -- run: python3 gen-art.py --id $ID"; exit 1; }
 
 ROW=$(awk -F'\t' -v id="$ID" '$2==id' CARDS.tsv)

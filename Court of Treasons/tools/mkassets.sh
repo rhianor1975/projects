@@ -18,20 +18,26 @@ OUT=client/assets
 mkdir -p "$OUT/cards" "$OUT/backs"
 
 cp CARDS.tsv "$OUT/cards.tsv"
-cp art/backs/*.png "$OUT/backs/" 2>/dev/null || true
+for b in art/backs/*.webp; do
+  case "$b" in *-unshielded.webp) continue ;; esac
+  cp "$b" "$OUT/backs/"
+done 2>/dev/null || true
 
 n=0; had=0
 while IFS="$(printf '\t')" read -r deck id name rest; do
   [ "$id" = "id" ] && continue
-  [ -f "art/$id.png" ] || continue
+  [ -f "art/$id.webp" ] || continue
   had=$((had + 1))
   # Only recompose when the art is newer than the face, so a rerun after
   # twenty new cards costs twenty seconds and not four minutes.
-  if [ ! -f "$OUT/cards/$id.png" ] || [ "art/$id.png" -nt "$OUT/cards/$id.png" ]; then
+  if [ ! -f "$OUT/cards/$id.webp" ] || [ "art/$id.webp" -nt "$OUT/cards/$id.webp" ]; then
     # </dev/null matters: the loop is reading CARDS.tsv on stdin, and a
     # child that reads stdin eats the rest of the card list.  Without it
     # this composed one card and then failed on a half-line.
+    # Composed as PNG, stored as WebP: a face is a tenth the size and
+    # the client reads either.  See tools/webp.py.
     ./tools/card.sh "$id" "$OUT/cards/$id.png" >/dev/null 2>&1 </dev/null
+    python3 tools/webp.py "$OUT/cards/$id.png" 2>/dev/null </dev/null
     n=$((n + 1))
   fi
 done < CARDS.tsv
@@ -46,8 +52,8 @@ done < CARDS.tsv
 if [ "$n" -gt 0 ] || [ ! -d "$OUT/thumbs" ]; then
   mkdir -p "$OUT/thumbs"
   IM=$(command -v magick || command -v convert)
-  [ -n "$IM" ] && "$IM" mogrify -path "$OUT/thumbs" -resize 256x \
-    "$OUT/cards"/*.png 2>/dev/null || true
+  [ -n "$IM" ] && "$IM" mogrify -path "$OUT/thumbs" -resize 256x -quality 85 \
+    "$OUT/cards"/*.webp 2>/dev/null || true
   echo "  $(ls "$OUT/thumbs" 2>/dev/null | wc -l | tr -d ' ') small faces"
 fi
 
