@@ -99,7 +99,8 @@ typedef enum {
     E_COUNT
 } EffOp;
 
-enum { CO_BOW = 1, CO_DESTROY = 2, CO_BOWPERF = 4, CO_DESTROYPERF = 8 };
+enum { CO_BOW = 1, CO_DESTROY = 2, CO_BOWPERF = 4, CO_DESTROYPERF = 8,
+       CO_ATHOME = 16 };     /* "Home Battle": used from home, in a battle */
 
 /* Conditions on a target, written in brackets after it in an encoding:
  * epers[att,kw=Samurai,force<=3,lowerchi]. */
@@ -122,6 +123,7 @@ typedef struct {
     unsigned filt;          /* F_ conditions on the target                   */
     char   tkw[24];         /* the target must have this keyword (or clan)   */
     int    maxforce, maxchi, minph, maxph;  /* -1: no condition            */
+    int    discard;         /* cards discarded from the hand as a cost        */
     char   perfkw[32];      /* a performing Personality with one of these
                              * keywords, "Monk/Shugenja"; CO_BOWPERF bows it */
 } Ability;

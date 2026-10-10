@@ -5,9 +5,9 @@ Kakita Dueling Academy
 3 Voitagi
 3 Daidoji Hachi
 3 Yasuki Hachi
-3 Doji Okakura
+4 Doji Okakura
 3 Doji Yasuyo
-3 Usagi Kashira
+2 Usagi Kashira
 3 Large Farm
 3 Diamond Mine
 3 Small Farm

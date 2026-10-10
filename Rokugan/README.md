@@ -41,25 +41,34 @@ records legality per arc, which is what an era is.
 
 `tools/build-cards.py` reads each card's text into abilities the engine
 can apply — gold production, Ranged/Melee Attacks and Fear, ±Force, bow,
-straighten, destroy, move home, honor, card draw — and reports how many
-cards it understood completely:
+straighten, destroy, move home, honor, card draw. L5R text is a long
+tail of one-off wording, so pattern matching levels off quickly; the
+rest is written by hand in `fx/cards.tsv`, in this program's notation,
+by Oracle card id — one file for every era, since a card legal in
+several arcs is one record. Each line's note says where the notation
+falls short of the printed card.
 
-| Era | Fully automated | Partly | By hand |
+The notation covers conditions on a target (attacking, defending,
+opposed, bowed, keyword, Force/Chi/Personal Honor limits, lower Chi than
+the performer), a performing Monk, Shugenja or Courtier as a cost,
+discards as a cost, permanent bonuses, bowing a unit, bringing a unit
+into the battle, attacks whose strength is the performer's Chi, Province
+Strength until the turn ends, and duels.
+
+| Era | Cards | The engine runs | Of them, Strategies and Spells |
 |---|---|---|---|
-| Gold | 75 | 249 | 1,575 |
-| Celestial | 122 | 210 | 1,851 |
-| Ivory | 143 | 202 | 989 |
+| Gold | 1,899 | 118 | 37 of 585 |
+| Celestial | 2,183 | 177 | 44 of 801 |
+| Ivory | 1,334 | 196 | 45 of 387 |
 
-L5R text is a long tail of one-off wording, so pattern matching levels
-off there. The rest is written by hand, in this program's own notation,
-in `fx/ERA.tsv` — card names and encodings only, so it is committed.
-Every line there replaces what the reader made of that card.
+The starter decks are built from these, so a game against the machine
+plays itself: every Strategy and Spell in them is one the engine runs.
 
 A card the engine cannot run is still playable. It is marked 手 on the
 table; play it from its menu, read its text, and carry it out with the
 **table commands** on the right-click menu: bow, straighten, destroy,
 send home, ±1 Force, ±1 honor, draw. The machine opponent only uses
-what the engine can run, which is why its decks prefer those cards.
+what the engine can run.
 
 ## Decks
 
@@ -84,10 +93,15 @@ Surviving attackers go home bowed.
 Victory: 40 Family Honor at the start of your turn, all four enemy
 Provinces destroyed, or five Rings in play. Defeat at −20.
 
+Spells changed with Lotus: to Gold they are cast from the hand and
+gone; in Celestial and Ivory a Shugenja equips them and uses them again.
+
 House rules, marked in the code: an empty deck reshuffles its discard
 pile at no cost (the editions disagree); on your first turn you may
 discard face-up Province cards; Rings are played when you judge their
-condition met, because their conditions are one-offs.
+condition met, because their conditions are one-offs; in a duel each
+side focuses the top card of its Fate deck rather than choosing from
+the hand; a discard paid as a cost is chosen at random.
 
 ## Testing
 
@@ -103,7 +117,7 @@ The client takes test arguments after `--`:
 
 - Reactions and Interrupts ("after X happens…"): no trigger system yet,
   so those are by hand.
-- Duels: by hand.
-- The machine defends only when it can win or must save a Province, so
-  games run short — about eight turns, mostly Military victories.
-- `fx/` is empty: the hand encodings are the next step.
+- Duels are focused from the top of the deck, not chosen from the hand.
+- Terrains, tokens, Kharmic, the Imperial Favor and Winds.
+- The machine plays to break Provinces and defends what it can; games
+  run eight or nine turns, mostly Military victories.

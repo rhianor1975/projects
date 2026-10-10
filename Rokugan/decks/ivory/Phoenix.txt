@@ -2,19 +2,19 @@
 # Stronghold
 The Eternal Temple of the Phoenix
 # Dynasty (40)
+3 Shiba Koshiba
 3 Shiba Michiki
 3 Isawa Genma
-3 Shiba Koshiba
+3 Shiba Heirai
 3 Isawa Kouka
 3 Shiba Kintaro, the Remembered
-3 Shiba Heirai
 3 Cloth Market
 3 Productive Mine
+3 Bountiful Fields
 3 Coastal Lane
 3 Heavy Infantry Dojo
 3 House of Prophecy
-3 Nexus of Lies
-2 Bountiful Fields
+2 Nexus of Lies
 2 Isawa Amihiko
 # Fate (40)
 3 Light Infantry
@@ -32,4 +32,4 @@ The Eternal Temple of the Phoenix
 3 Colonial Edict
 3 Block Supply Lines
 3 Discretionary Valor
-1 The Wrath of Osano-Wo
+1 For the Fallen

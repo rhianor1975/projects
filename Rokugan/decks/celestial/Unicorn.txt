@@ -4,9 +4,9 @@ Mountain Watch Keep
 # Dynasty (40)
 3 Utaku Kohana
 1 Chikara
+3 Shinjo Rina
 3 Shinjo Sanenari
 1 Moto Rena
-3 Shinjo Rina
 3 Iuchi Xiong
 3 Moto Juncheng
 1 Pokku
@@ -28,12 +28,12 @@ Mountain Watch Keep
 1 Chain and Sword
 2 Peasant Armor
 1 A Game of Dice
+3 Costly Feud
 1 Creating Order
 3 Entrenched Position
 3 Fall Back!
 3 Hitsu-Do
 3 Inspired Devotion
+3 A Legion of One
 3 Discretionary Valor
-3 Last Gift
-3 Outer Walls
-1 The Wrath of Osano-Wo
+1 Inspire Fear

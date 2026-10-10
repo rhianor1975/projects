@@ -5,17 +5,17 @@ The Golden Plains of the Unicorn
 3 Shinjo Okiau
 3 Ide Aragaki
 3 Utaku Sang-Ju
-3 Utaku Saiken
-3 Ide Igo
 3 Moto Paikao
+3 Moto Okano
+3 Utaku Saiken
 3 Cloth Market
 3 Productive Mine
+3 Bountiful Fields
 3 Coastal Lane
 3 Heavy Infantry Dojo
 3 House of Prophecy
-3 Nexus of Lies
-2 Bountiful Fields
-2 Moto Okano
+2 Nexus of Lies
+2 Ide Igo
 # Fate (40)
 3 Light Infantry
 3 Lone Sentry
@@ -32,4 +32,4 @@ The Golden Plains of the Unicorn
 3 Colonial Edict
 3 Block Supply Lines
 3 Discretionary Valor
-1 Favors
+1 For the Fallen

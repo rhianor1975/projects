@@ -79,3 +79,74 @@
 6624	battle|bow|ocard[bowed]|straighten	# Servitors of Stone
 7620	battle|bow|ecard[noatt,unbowed]|bow	# Suitengu's Embrace
 1234	battle|bow|none|provstr:3	# Castle of Water
+# ------------------------------------------- Personalities in the decks
+9441	limited|bow|oholding[bowed]|straighten	# Yasuki Hachi -- Strongholds are not offered as targets
+2135	battle||epers[kw=Shadowlands,unbowed]|bow	# Doji Okakura -- once per battle and the Chi count are not checked
+6823	battle|bow|epers|duel:0	# Shiba Tsukune
+5104	battle||epers|duel:0	# Mirumoto Ichizo
+4951	enter||none|lose:3;battle||none|fear:2	# Matsu Masutaro -- the Follower restriction is not checked
+3285	battle||efol[lowerforce]|destroy	# Hiruma Aki -- one Follower, not several
+4928	battleopen|bow|opers[kw=Tactician,bowed]|straighten	# Matsu Hyun
+779	battle|destroy|opers[bowed]|straighten	# Bayushi Hirono -- his Courtier requirement is not checked
+3868	open||self|straighten	# Isawa Mizuhiko -- the Cavalry choice is not offered
+3853	open||opers[kw=Shugenja,bowed]|straighten	# Isawa Kumai -- the Reaction is not used
+4441	battle|discard:1|epers[ph<=3]|home,gain:2	# Kitsuki Taiko -- compares with 3, not with his Chi
+3856	battle|bow|epers|home,bow,gain:1	# Isawa Kyoko -- she stays where she is
+9081	battle|bow|epers[unbowed]|bow	# Utaku Kohana -- the Personal Honor condition and the Reaction are not checked
+6927	battle|discard:1|self|force:2	# Shinjo Rina -- the Recon bonus is not given
+6003	enter||none|lose:3	# Pokku -- the transfer and Fear abilities are not offered
+10443	open|bow|oholding[bowed]|straighten	# Yasuki Tono
+11165	battle||none|fear:1	# Kakita Ibara
+11187	static||self|attforce:2	# Matsu Tayuko
+11751	battle|gold:3|opers|force:1	# Matsu Marii -- a +1F bonus rather than a created Cat Follower
+11918	battle||ecard|force:-1	# Shiba Koshiba -- the -3F condition is not checked
+10865	battle|discard:1|self|force:2	# Shiba Heirai -- a flat +2F rather than the Focus Value
+11599	battle|athome|self|tobattle	# Bayushi Yasunari
+11768	battle|bow|none|melee:2	# Shosuro Kayo -- the dishonorable bonus is not given
+11921	battle||eunit|home	# Bayushi Irezu -- the Force-against-Chi condition is not checked
+11222	battle||ecard|force:-2	# Daigotsu Konishi
+10887	battle|discard:1|ecard|force:-2	# Moto Paikao -- a flat -2F rather than the Focus Value
+11240	battle||epers|force:-3	# Moto Okano
+# ---------------------------------------------------------- Strongholds
+7014	limited|bowperf=any|none|draw:1	# Shiro Mirumoto -- the 4-Chi condition is not checked
+2672	battle|bowperf=any|epers[unbowed]|bow	# Fortress of Blackened Sight -- the Weapon and Armor conditions are not checked
+8916	battle|perf=Samurai|ecard[nofol,lowerforce]|destroy	# Twin Soul Temple -- the Shugenja bonus is not offered
+11296	battle||opers[opposed,kw=Lion]|force:2	# The Honorable Garrison of the Lion -- +2F rather than his Personal Honor
+# --------------------------------------------------------------- Holdings
+680	produce|bow|none|produce:2;limited|bow|none|draw:1	# Bamboo Harvesters -- the third-turn delay is not checked
+11714	produce|bow|none|produce:4	# Bountiful Fields
+# ---------------------------------------- Celestial and Ivory Strategies
+4480	battle|bowperf=Ninja|epers|home,bow	# Knife in the Darkness -- the Ninja is bowed, not moved home
+1540	battle|bowperf=Samurai|epers|home,gain:2	# Courtesy -- the Samurai is bowed, not moved; +2 Honor rather than the other's Personal Honor
+2454	battle|perf=Monk|ecard|force:-3	# Falling Leaf Strike -- the Monk does not move, and the 0-Force bow is not applied
+6346	battleopen|bowperf=any|opers[bowed]|straighten	# Rise, Brother -- the clan conditions are not checked
+6391	battle|gold:1|eunit|home	# Rout -- no attachment is destroyed
+8971	battle|bowperf=any|epers|home	# Unexpected Intimidation -- the bow and destroy fall-backs are not applied
+42	battle||opers|force:2	# A Legion of One -- +2F once, not per enemy unit
+1044	battle|perf=Berserker|opers[kw=Berserker,unbowed]|force:5,lose:2	# Blind Rage
+1521	battle||ecard|force:-3	# Costly Feud -- the 0-Force bow is not applied
+1589	battle||opers[opposed]|force:3;battle||eattach|destroy	# Crushing Strength -- any enemy attachment, not only Followers and Items
+3717	battle||opers[opposed]|force:2	# Impressive Resilience -- the bow and movement are not negated
+3771	battle|perf=Monk/Shugenja|epers|home	# Inspire Fear -- the Human and Water parts are not checked
+6033	open|bowperf=Courtier/Shugenja|epers[unbowed]|bow	# Power of Innocence -- the Personal Honor condition is not checked
+2634	battle||opers[opposed]|force:2	# For the Fallen -- one Personality, not two
+7543	battle||opers[opposed]|force:2	# Strength of my Father -- +2F rather than his Personal Honor
+10143	battle||epers[home]|tobattle,straighten	# Determined Challenge -- the attacking-Personality condition is not checked
+10927	battle||opers[opposed]|force:3	# A Warrior's Brutality
+10714	battle||ocard[bowed]|straighten	# Ritual Preparation
+10738	battle||ecard|force:-3	# Allied Efforts
+10721	battle||opers[def]|force:2	# Defensive Formation -- one Personality, not up to three
+5859	battle||epers|bowunit	# Pack Tactics -- the two Personalities it bows are not paid
+# ------------------------------------------------ Celestial and Ivory Spells
+1464	battle|bow|eunit|destroy	# Consumed by Five Fires -- the fewer-cards condition is not checked
+325	battle|bow|ecard[noatt,unbowed]|bow	# All Water Flows -- the Water bonus is not given
+2261	battle|bow|opers[kw=Shugenja]|force:1	# Earth's Embrace -- one Shugenja, not each
+5522	battleopen|bow|opers[kw=Samurai]|force:2	# Nature's Embrace -- +2F rather than the Shugenja's Chi
+6567	battle|bow|epers[att]|home,gain:2	# Seeking the Way -- the Shugenja stays
+11653	battle|bow|epers[def]|home	# Impassable Waters
+9892	battle|bow|ecard|force:-2	# Touch the Emptiness
+10125	battle|bow|ecard|force:-2	# Deafening Thunder -- a flat -2F rather than the Shugenja's Chi
+10543	battle|destroy|epers[home]|tobattle	# Typhoon Surge -- an enemy brought in; yours are not offered
+10701	battle|bow|ecard[force<=4,unbowed]|bow	# Kiyoshi's Wrath
+10921	battle|discard:1|none|rangedchi	# Searing Siege -- the Shugenja's Chi, not the Focus Value
+6502	battle|bow|epers[def]|home	# Scouring Flood -- the +2F is not given

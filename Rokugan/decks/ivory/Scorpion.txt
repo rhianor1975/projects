@@ -2,20 +2,20 @@
 # Stronghold
 The Shadowed Estate of the Scorpion
 # Dynasty (40)
+3 Bayushi Yasunari
 3 Shosuro Rokujo
+3 Shosuro Kayo
+3 Bayushi Irezu
 3 Bayushi Aibako
 3 Bayushi Akane
-3 Bayushi Yasunari
-3 Shosuro Nigawa
-3 Shosuro Kayo
 3 Cloth Market
 3 Productive Mine
+3 Bountiful Fields
 3 Coastal Lane
 3 Heavy Infantry Dojo
 3 House of Prophecy
-3 Nexus of Lies
-2 Bountiful Fields
-2 Bayushi Irezu
+2 Nexus of Lies
+2 Shosuro Nigawa
 # Fate (40)
 3 Light Infantry
 3 Lone Sentry
@@ -32,4 +32,4 @@ The Shadowed Estate of the Scorpion
 3 Colonial Edict
 3 Block Supply Lines
 3 Discretionary Valor
-1 The Wrath of Osano-Wo
+1 For the Fallen

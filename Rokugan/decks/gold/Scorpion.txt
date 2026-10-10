@@ -2,11 +2,11 @@
 # Stronghold
 The Shadowed Tower of the Shosuro
 # Dynasty (40)
+3 Bayushi Hirono
 3 Voitagi
 3 Bayushi Kwanchai
 3 Usagi Kashira
 3 Soshi Angai
-3 Bayushi Hirono
 3 Bayushi Eitarou
 3 Large Farm
 3 Diamond Mine

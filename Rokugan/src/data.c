@@ -141,6 +141,10 @@ int fx_parse(const char *enc, Def *d, char *err, int errlen)
                 a->cost |= CO_DESTROY;
             else if (!strncmp(c, "gold:", 5))
                 a->gold = atoi(c + 5);
+            else if (!strcmp(c, "athome"))
+                a->cost |= CO_ATHOME;
+            else if (!strncmp(c, "discard:", 8))
+                a->discard = atoi(c + 8);
             else if (!strncmp(c, "destroyperf=", 12)) {
                 a->cost |= CO_BOWPERF | CO_DESTROYPERF;
                 snprintf(a->perfkw, sizeof a->perfkw, "%s", c + 12);

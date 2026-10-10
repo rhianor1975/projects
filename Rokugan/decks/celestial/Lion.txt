@@ -27,12 +27,12 @@ Central Castle
 1 Chain and Sword
 2 Peasant Armor
 1 A Game of Dice
+3 Costly Feud
 1 Creating Order
 3 Entrenched Position
 3 Fall Back!
 3 Inspired Devotion
+3 A Legion of One
 3 Discretionary Valor
 3 Last Gift
-3 Outer Walls
-3 Advance Warning
-1 Incapacitated
+1 Outer Walls

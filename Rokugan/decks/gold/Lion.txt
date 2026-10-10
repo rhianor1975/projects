@@ -3,12 +3,12 @@
 Kyuden Ikoma
 # Dynasty (40)
 3 Matsu Hyun
+3 Matsu Masutaro
 3 Voitagi
 4 Ikoma Otemi
 3 Akodo Ijiasu
 1 Matsu Ketsui
-3 Ikoma Fudai
-1 Matsu Masutaro
+1 Ikoma Fudai
 3 Large Farm
 3 Diamond Mine
 3 Small Farm

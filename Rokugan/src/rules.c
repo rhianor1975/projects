@@ -562,6 +562,24 @@ static int ability_targets(const Game *g, int q, const Ability *ab, int battle, 
 }
 
 /* ------------------------------------------------------------ resolving */
+/* A discard paid as a cost.  The card is chosen at random: the engine has
+ * no dialogue for picking one yet, and random is never better for the
+ * player paying than choosing. */
+static void discard_random(Game *g, int p, int n)
+{
+    while (n-- > 0) {
+        int pick = -1, seen = 0, j;
+        for (j = 0; j < g->nc; j++)
+            if (g->c[j].owner == p && g->c[j].zone == Z_HAND
+                && (int)(rnd(g) % (unsigned)(++seen)) == 0)
+                pick = j;
+        if (pick < 0)
+            return;
+        glog(g, "  %s discards %s.", player_clan(g, p), nm(g, pick));
+        to_discard(g, pick);
+    }
+}
+
 /* A duel.  HOUSE RULE: in the printed game each player focuses cards from
  * the hand, in turn, until both strike.  Here each side focuses the top
  * card of its Fate deck, unseen, and adds its Focus value -- a duel the
@@ -987,6 +1005,8 @@ static void legal_abilities(const Game *g, int q, Action *out, int *n)
                     continue;
                 if (gold_available(g, q) < ab->gold + d->cost)
                     continue;
+                if (ab->discard && count_zone(g, q, Z_HAND) <= ab->discard)
+                    continue;
                 np = 1;
                 perf[0] = -1;
                 if (ab->perfkw[0])
@@ -1030,7 +1050,10 @@ static void legal_abilities(const Game *g, int q, Action *out, int *n)
                     continue;
                 if ((ab->cost & CO_BOWPERF) && (unit_of(g, i) < 0 || g->c[unit_of(g, i)].bowed))
                     continue;
-                if (battle && unit_of(g, i) >= 0 && !at_battle(g, i))
+                if (battle && unit_of(g, i) >= 0
+                    && ((ab->cost & CO_ATHOME) ? location(g, i) >= 0 : !at_battle(g, i)))
+                    continue;
+                if (ab->discard && count_zone(g, q, Z_HAND) < ab->discard)
                     continue;
                 if (gold_available(g, q) < ab->gold)
                     continue;
@@ -1155,6 +1178,7 @@ static void play_card(Game *g, int q, Action a)
         }
         if (a.perf >= 0 && (ab->cost & CO_DESTROY))
             destroy(g, a.perf);
+        discard_random(g, q, ab->discard);
         glog(g, "%s plays %s%s%s.", player_clan(g, q), d->name,
              a.tgt >= 0 ? " on " : "", a.tgt >= 0 ? nm(g, a.tgt) : "");
         resolve(g, q, i, ab, a.tgt, a.perf);
@@ -1173,8 +1197,9 @@ static void use_ability(Game *g, int q, Action a)
         g->c[unit_of(g, i)].bowed = 1;
     glog(g, "%s uses %s%s%s.", player_clan(g, q), nm(g, i),
          a.tgt >= 0 ? " on " : "", a.tgt >= 0 ? nm(g, a.tgt) : "");
-    /* an equipped Spell is performed by the Shugenja carrying it */
-    resolve(g, q, i, ab, a.tgt, is_type(g, i, T_SPELL) ? unit_of(g, i) : -1);
+    discard_random(g, q, ab->discard);
+    /* a card in a unit is performed by the Personality leading it */
+    resolve(g, q, i, ab, a.tgt, unit_of(g, i));
     if (ab->cost & CO_DESTROY)
         destroy(g, i);
 }

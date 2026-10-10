@@ -139,20 +139,34 @@ static int find(const Action *acts, int n, AKind k, int src, int prov)
     return -1;
 }
 
+/* Send enough to break the weakest Province even if every enemy unit at
+ * home defends it, and keep the rest home: attackers who survive go home
+ * bowed, and a player who throws everything at one Province has nobody
+ * left to stop the counter-attack.  The first machine sent everyone, and
+ * nearly every game it played ended in a Military victory by turn 7. */
 static int choose_assign(const Game *g, int s, const Action *acts, int n)
 {
-    int k = weakest_province(g, 1 - s), i;
+    int k = weakest_province(g, 1 - s), i, best = -1, bf = -1;
+    int O = home_force(g, 1 - s, 1), S = prov_strength(g, 1 - s, k);
+    int A = army_force(g, s, k), M = A + home_force(g, s, 1);
+    int need = M > O + S ? O + S + 1 : O + 3;
+    if (A >= need)
+        return find(acts, n, A_DONE, -1, -1);
     for (i = 0; i < n; i++)
-        if (acts[i].k == A_ASSIGN && acts[i].prov == k)
-            return i;
-    return find(acts, n, A_DONE, -1, -1);
+        if (acts[i].k == A_ASSIGN && acts[i].prov == k) {
+            int f = unit_force(g, acts[i].src);
+            if (f > bf) { bf = f; best = i; }
+        }
+    return best >= 0 ? best : find(acts, n, A_DONE, -1, -1);
 }
 
-/* Defend where it wins the battle, or where it saves a province the
- * player cannot afford to lose; otherwise keep the units alive. */
+/* Defend where it wins the battle; where it cannot, defend a Province
+ * when the Province is worth more than the units that would die saving
+ * it -- and a Province is worth more the fewer are left. */
 static int choose_defend(const Game *g, int s, const Action *acts, int n)
 {
     int k, att = 1 - s;
+    double province = 9.0 + (provinces_left(g, s) <= 2 ? 12.0 : 0.0);
     for (k = 0; k < NPROV; k++) {
         int A = army_force(g, att, k), D = army_force(g, s, k), S, i, best = -1, bf = -1;
         int avail = 0;
@@ -165,14 +179,15 @@ static int choose_defend(const Game *g, int s, const Action *acts, int n)
                 avail += f;
                 if (f > bf) { bf = f; best = i; }
             }
-        if (best < 0)
-            continue;
-        if (D > A)                               /* already winning   */
+        if (best < 0 || D > A)
             continue;
         if (D + avail > A)                       /* can win: add more */
             return best;
-        if (A > D + S && A <= D + avail + S && provinces_left(g, s) <= 2)
-            return best;                         /* save the province */
+        if (A > D + S && A <= D + avail + S) {   /* can save the Province */
+            int need = A - S - D;
+            if (1.2 * need + 2.0 < province)
+                return best;
+        }
     }
     return find(acts, n, A_DONE, -1, -1);
 }
