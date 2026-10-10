@@ -137,6 +137,21 @@ Your ether-ship came down through the canopy and the jungle let you out into a c
 
 ---
 
+### ⛩️ [Rokugan](./Rokugan/) – Legend of the Five Rings CCG
+
+The collectible card game of 1995–2015 against a machine opponent: a C engine that knows the rules, and a Godot client in two skins — the 1997 Windows window, or dark lacquer.
+
+* Pick the era at the start of a game: Gold, Celestial or Ivory, each its own card pool
+* Cards imported from the Oracle of the Void, kept local (AEG's text and art stay out of the repo)
+* Rebuilt cards with the original art cropped in, and the printed card on hover
+* Abilities the engine can read run for both players; the rest you play by hand with table commands
+* 200 machine games per era with the rules invariants armed
+
+**Build:** cd Rokugan && make setup && make
+**Run:** godot --path client — or ./rokugan --era gold --games 200
+
+---
+
 ## 🔧 Dependencies
 
 ### Common
@@ -161,6 +176,10 @@ Your ether-ship came down through the canopy and the jungle let you out into a c
 
 ### Talisman, Prophecy and Djarhun (board games)
 * `ncurses` – UI library. Nothing else: the cards are compiled in
+
+### Rokugan (card game)
+* `godot` 4.4 – the client
+* `python3` – the card importer (`make setup`)
 
 ### Aether Descent (roguelike)
 * `ncurses` – UI library

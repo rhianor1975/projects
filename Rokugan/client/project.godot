@@ -1,0 +1,26 @@
+; Rokugan -- the client.
+;
+; It holds no game state.  Everything it draws came from a View the
+; engine sent, and everything it does is a line it sends back: "act N"
+; for one of the actions the View listed, "manual OP CARD" for the table
+; commands that carry out what the engine could not read.
+
+config_version=5
+
+[application]
+config/name="Rokugan"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.4", "GL Compatibility")
+boot_splash/show_image=false
+
+[display]
+window/size/viewport_width=1600
+window/size/viewport_height=1000
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+window/size/resizable=true
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.1, 0.08, 0.06, 1)
