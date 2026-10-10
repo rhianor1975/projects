@@ -958,8 +958,11 @@ func _sync_classic(m: Dictionary, o: Dictionary) -> void:
 	ui["bulb"].queue_redraw()
 	ui["icon"].texture = mon_tex(m["clan"])
 	ui["honor_legend"].text = "You %s     Opp %s" % [_n(m["honor"]), _n(o["honor"])]
-	ui["my_banner"].text = "%s CLAN" % str(m["clan"]).to_upper()
-	ui["opp_banner"].text = "%s CLAN" % str(o["clan"]).to_upper()
+	for pair in [[ui["my_banner"], m], [ui["opp_banner"], o]]:
+		var t := "%s CLAN" % str(pair[1]["clan"]).to_upper()
+		pair[0].text = t
+		# "SCORPION CLAN" in 19pt is wider than the bar
+		pair[0].add_theme_font_size_override("font_size", 19 if t.length() <= 11 else 15)
 	ui["my_mon"].texture = mon_tex(m["clan"])
 	ui["opp_mon"].texture = mon_tex(o["clan"])
 	ui["dyn_mon"].texture = mon_tex(m["clan"])
@@ -1062,6 +1065,7 @@ func _sync_buttons() -> void:
 			else:
 				label = ("Province: %s" if skin == "classic" else "%s") % p["card"]["n"]
 		b.text = label
+		b.add_theme_font_size_override("font_size", 13 if label.length() <= 24 else 11)
 		b.disabled = acts.is_empty()
 		b.flat = skin == "classic" and acts.is_empty()
 
