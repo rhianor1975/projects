@@ -1,0 +1,33 @@
+# Mantis, ivory era -- built by tools/make-decks.py
+# Stronghold
+The Fruitful Port of the Mantis
+# Dynasty (40)
+3 Yoritomo Yakuwa
+3 Tsuruchi Gombei
+3 Moshi Madohime
+3 Yoritomo Teihiko
+3 Sasada
+3 Yoritomo Shotsuo
+3 Cloth Market
+3 Productive Mine
+3 Coastal Lane
+3 Heavy Infantry Dojo
+3 House of Prophecy
+3 Nexus of Lies
+2 Bountiful Fields
+2 Yoritomo Tonogi
+# Fate (40)
+3 Light Infantry
+3 Lone Sentry
+3 Light Cavalry
+1 Medium Infantry
+3 Parangu
+3 Simple Spears
+3 Colonial Edict
+3 Tactical Setback
+3 Ancestral Aid
+3 A Small Favor
+3 Strike as the Earth
+3 In Defense
+3 Fueling the Flames
+3 Focus

@@ -304,6 +304,21 @@ def abilities(card):
     return enc, ok, total, miss
 
 
+def stronghold_stat(card, key):
+    """Ivory's double-sided Strongholds keep their numbers on a printing,
+    not the card, and in the Personality fields: Force is province
+    strength, cost is gold production, Personal Honor is starting honor.
+    Read there when the card itself has none."""
+    if first(card, key):
+        return num(card, key)
+    alt = {"strength": "force", "production": "cost", "startinghonor": "personalhonor"}[key]
+    for p in card.get("printing", []):
+        v = p.get(alt)
+        if v and str(v[0]).strip() not in ("", "-"):
+            return num({alt: v}, alt)
+    return "0"
+
+
 def production(card, enc):
     for a in enc:
         if a.startswith("produce|"):
@@ -332,9 +347,10 @@ def row(card):
         "hreq": num(card, "honor"),
         "ph": num(card, "ph"),
         "focus": num(card, "focus"),
-        "gold": production(card, enc) if ctype in ("Holding", "Stronghold") else "0",
-        "pstr": num(card, "strength"),
-        "shonor": num(card, "startinghonor"),
+        "gold": (stronghold_stat(card, "production") if ctype == "Stronghold"
+                 else production(card, enc) if ctype == "Holding" else "0"),
+        "pstr": stronghold_stat(card, "strength") if ctype == "Stronghold" else num(card, "strength"),
+        "shonor": stronghold_stat(card, "startinghonor") if ctype == "Stronghold" else "0",
         "auto": auto,
         "fx": ";".join(enc),
         "text": text,

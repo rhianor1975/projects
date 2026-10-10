@@ -1,0 +1,38 @@
+# Phoenix, celestial era -- built by tools/make-decks.py
+# Stronghold
+Twin Soul Temple
+# Dynasty (40)
+1 Chikara
+3 Isawa Mizuhiko
+3 Isawa Kyoko
+3 Shiba Kotaro
+3 Asako Hoshimi
+3 Agasha Ueda
+2 Asako Moeru
+3 Large Farm
+1 Bamboo Harvesters
+1 Border Keep
+3 Remote Village
+3 Low Quality Mine
+3 Traveling Peddler
+3 Diamond Mine
+3 Heavy Infantry Dojo
+2 Isawa Kumai
+# Fate (40)
+3 Light Infantry
+3 Aspiring Ronin
+3 Goblin Chuckers
+1 Junghar Legion
+3 A Samurai's Soul
+1 Chain and Sword
+2 Peasant Armor
+3 Fueling the Flames
+3 A Brave New World
+1 A Game of Dice
+3 A Gentle Word
+3 A Rival Eliminated
+3 A Warrior's Wisdom
+1 All Within the World
+3 Amazing Feat
+3 An Imperial Marriage
+1 Arrival of the Emerald Champion

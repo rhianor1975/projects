@@ -1,0 +1,35 @@
+# Phoenix, gold era -- built by tools/make-decks.py
+# Stronghold
+Kyuden Agasha
+# Dynasty (40)
+3 Voitagi
+3 Shiba Tsukune
+3 Shiba Kai
+3 Shiba Aikune
+1 Asako Misao
+3 Usagi Kashira
+2 Isawa Yoriko
+3 Large Farm
+3 Diamond Mine
+3 Small Farm
+3 Silk Works
+3 Kabuki Theater Troupe
+3 Jade Works
+2 Akodo's Grave
+1 Shiba Ningen
+1 Isawa Ihara
+# Fate (40)
+3 Light Infantry
+3 Iron Defenders
+3 Lesser Mujina
+1 Light Cavalry
+3 Kiseru
+3 Naginata
+3 Burning Smoke
+3 Focus
+3 A New Path
+3 A Wish Granted
+3 Aid of the Grand Master
+3 Ancestral Protection
+3 Balance in Nothingness
+3 Bane of the Anvil

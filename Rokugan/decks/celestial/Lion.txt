@@ -1,0 +1,37 @@
+# Lion, celestial era -- built by tools/make-decks.py
+# Stronghold
+Central Castle
+# Dynasty (40)
+3 Matsu Akuto
+1 Chikara
+3 Akodo Nagataka
+3 Ikoma Toraji
+3 Akodo Dosei
+3 Matsu Mikura
+2 Matsu Misuka
+3 Large Farm
+1 Bamboo Harvesters
+1 Border Keep
+3 Remote Village
+3 Low Quality Mine
+3 Traveling Peddler
+3 Diamond Mine
+3 Heavy Infantry Dojo
+2 Akodo Sagashite
+# Fate (40)
+3 Light Infantry
+3 Aspiring Ronin
+3 Goblin Chuckers
+1 Junghar Legion
+3 A Samurai's Soul
+1 Chain and Sword
+2 Peasant Armor
+3 A Brave New World
+1 A Game of Dice
+3 A Gentle Word
+3 A Rival Eliminated
+3 A Warrior's Wisdom
+3 Amazing Feat
+3 An Imperial Marriage
+3 Arrival of the Emerald Champion
+2 Asijin's Legacy

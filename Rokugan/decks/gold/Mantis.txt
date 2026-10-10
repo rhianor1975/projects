@@ -1,0 +1,34 @@
+# Mantis, gold era -- built by tools/make-decks.py
+# Stronghold
+Castle of the Wasp
+# Dynasty (40)
+3 Voitagi
+3 Yoritomo Kitao
+3 Usagi Kashira
+3 Seppun Matsuo
+3 Goblin Wizard
+1 Yoritomo Komori
+2 Tsuruchi Nobumoto
+3 Large Farm
+3 Diamond Mine
+3 Small Farm
+3 Silk Works
+3 Kabuki Theater Troupe
+3 Jade Works
+2 Akodo's Grave
+2 Moshi Kalani
+# Fate (40)
+3 Light Infantry
+3 Iron Defenders
+3 Lesser Mujina
+1 Light Cavalry
+3 Kiseru
+3 Naginata
+3 Burning Smoke
+3 Focus
+3 A New Path
+3 A Wish Granted
+3 Aid of the Grand Master
+3 Ancestral Protection
+3 Balance in Nothingness
+3 Bane of the Anvil

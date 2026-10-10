@@ -1,0 +1,38 @@
+# Scorpion, celestial era -- built by tools/make-decks.py
+# Stronghold
+Fortress of Blackened Sight
+# Dynasty (40)
+3 Bayushi Minoru
+1 Chikara
+3 The Student
+3 Shosuro Rokujo
+3 Bayushi Eisaku
+3 Soshi Mayumi
+2 Bayushi Kindebu
+3 Large Farm
+1 Bamboo Harvesters
+1 Border Keep
+3 Remote Village
+3 Low Quality Mine
+3 Traveling Peddler
+3 Diamond Mine
+3 Heavy Infantry Dojo
+2 Soshi Neiru
+# Fate (40)
+3 Light Infantry
+3 Aspiring Ronin
+3 Goblin Chuckers
+1 Junghar Legion
+3 A Samurai's Soul
+1 Chain and Sword
+2 Peasant Armor
+3 Fueling the Flames
+3 A Brave New World
+1 A Game of Dice
+3 A Gentle Word
+3 A Rival Eliminated
+3 A Warrior's Wisdom
+1 All Within the World
+3 Amazing Feat
+3 An Imperial Marriage
+1 Arrival of the Emerald Champion

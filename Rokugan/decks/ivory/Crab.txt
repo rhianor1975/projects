@@ -1,0 +1,36 @@
+# Crab, ivory era -- built by tools/make-decks.py
+# Stronghold
+The Impregnable Fortress of the Crab
+# Dynasty (40)
+3 Hiruma Toshi
+3 Hida Iguchi
+3 Kaiu Akemi, the Diplomat
+3 Yasuki Tono
+3 Hida Saiyuki
+1 Kasuga Aizawa, the Razor's Edge
+2 Hiruma Maiko
+3 Cloth Market
+3 Productive Mine
+3 Coastal Lane
+3 Heavy Infantry Dojo
+3 House of Prophecy
+3 Nexus of Lies
+2 Bountiful Fields
+2 Hiruma Moritoki
+# Fate (40)
+3 Light Infantry
+3 Lone Sentry
+3 Light Cavalry
+1 Medium Infantry
+3 Parangu
+3 Simple Spears
+3 Colonial Edict
+3 Tactical Setback
+3 A Small Favor
+3 Strike as the Earth
+3 In Defense
+3 Focus
+1 A Game of Dice
+3 Coward!
+1 Creating Order
+1 Entrenched Position
