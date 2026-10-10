@@ -73,17 +73,25 @@ def colorize(n, dark, light):
 
 # ---------------------------------------------------------------- textures
 def wood():
+    """Boards of slightly different tone, grain that warps around knots,
+    dark seams.  Tileable: the boards repeat every 512px."""
     w, h = 512, 512
-    n = noise(w, h, 3)
-    y = np.arange(h)[:, None]
-    x = np.arange(w)[None, :]
+    y = np.arange(h)[:, None].astype(float)
+    x = np.arange(w)[None, :].astype(float)
+    board_h = 64
+    board = (y // board_h).astype(int)
+    tone = rng.random(h // board_h + 1)[board] * 0.25
     warp = noise(w, h, 2, 3)
-    grain = 0.5 + 0.5 * np.sin((y / h * 2 * math.pi * 9) + warp * 14.0 + np.sin(x / w * 2 * math.pi) * 1.5)
-    fine = noise(w, h, 64, 2)
-    planks = ((y % 128) < 2).astype(float)       # the seams between boards
-    v = 0.35 * grain + 0.40 * n + 0.25 * fine - 0.5 * planks
-    img = colorize(v, (52, 30, 16), (128, 82, 46))
-    save(img, "wood")
+    for _ in range(5):                       # knots pull the grain round them
+        kx, ky = rng.random() * w, rng.random() * h
+        d = np.hypot(((x - kx + w / 2) % w) - w / 2, ((y - ky + h / 2) % h) - h / 2)
+        warp += 1.6 * np.exp(-(d / 18.0) ** 2)
+    grain = 0.5 + 0.5 * np.sin(y / board_h * 2 * math.pi * 3.0 + warp * 7.0
+                               + np.sin(x / w * 2 * math.pi * 2) * 0.8)
+    fine = noise(w, h, 80, 2)
+    seam = ((y % board_h) < 2).astype(float) + 0.5 * ((y % board_h) == 2)
+    v = 0.30 * grain + 0.30 * fine + 0.25 * noise(w, h, 4) + tone - 0.75 * seam
+    save(colorize(np.clip(v, 0, 1), (46, 26, 12), (138, 88, 48)), "wood")
 
 
 def parchment():
@@ -328,6 +336,42 @@ def glyph(name, k, size, col, bg=None):
     save(img, name)
 
 
+def ingot():
+    s = 128
+    img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.polygon([(14, 78), (40, 46), (112, 46), (114, 74), (88, 104), (16, 104)], fill=(150, 104, 24))
+    d.polygon([(40, 46), (112, 46), (88, 76), (16, 78)], fill=(246, 206, 92))
+    d.polygon([(88, 76), (112, 46), (114, 74), (88, 104)], fill=(196, 146, 40))
+    d.polygon([(16, 78), (88, 76), (88, 104), (16, 104)], fill=(220, 172, 60))
+    d.line([(48, 52), (100, 52)], fill=(255, 240, 190), width=3)
+    save(img, "ingot")
+
+
+def lattice(w=300, h=336):
+    """A face-down Province in the second Classic mockup: a brown lattice
+    in a gilded frame."""
+    img = Image.new("RGBA", (w, h))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([0, 0, w - 1, h - 1], 10, fill=(52, 32, 14))
+    gold_grad(d, (5, 5, w - 6, h - 6), 9)
+    d.rectangle([16, 16, w - 17, h - 17], fill=(104, 66, 32))
+    step = 18
+    for k in range(-h, w + h, step):
+        d.line([(16 + k, 16), (16 + k + h, 16 + h)], fill=(70, 42, 18), width=3)
+        d.line([(16 + k, h - 17), (16 + k + h, h - 17 - h)], fill=(70, 42, 18), width=3)
+    for yy in range(16, h - 16, step):
+        for xx in range(16 + (yy // step % 2) * step // 2, w - 16, step):
+            d.ellipse([xx - 2, yy - 2, xx + 2, yy + 2], fill=(150, 104, 52))
+    img2 = Image.new("RGBA", (w, h))
+    img2.paste(img)
+    d2 = ImageDraw.Draw(img2)
+    d2.rectangle([0, 0, w - 1, 15], fill=None)
+    gold_grad(d2, (5, 5, w - 6, h - 6), 9)
+    d2.rectangle([16, 16, w - 17, h - 17], outline=(60, 36, 14), width=2)
+    save(img2, "back_lattice")
+
+
 def banner():
     """五輪の書 down a dark strip, for the Modern right column."""
     w, h = 90, 330
@@ -376,6 +420,8 @@ def main():
         ring("ring_" + k + "_off", g, False)
     banner()
     hand_mark()
+    ingot()
+    lattice()
     print("painted", len(os.listdir(OUT)), "files into", OUT)
 
 

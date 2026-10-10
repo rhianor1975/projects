@@ -1,28 +1,32 @@
 # One card on the table.
 #
-# Laid out once at a fixed size and scaled to whatever slot it sits in: a
-# Province, the Home Zone, the hand, the opponent's band.  So every size
-# has the same layout, and a card moving between zones only has to tween
-# its position and scale.
+# Laid out once at a fixed size and scaled to whatever slot it sits in, so
+# every size has the same layout and a card moving between zones only has
+# to tween its position and scale.
 #
-# The size depends on the skin.  Classic cards are nearly square, as in
-# the first mockup -- a name banner, the art, and a stat block of
-# Force | Chi | Cost over the clan mon | Honor Requirement | Personal
-# Honor.  Modern cards are portrait, as in the second.
+# Classic, after the second Classic mockup: one gilded frame for every
+# card, a name bar between two clubs, the art, and the stats as a list --
+# Force, Chi, Cost, Personal Honor, Honor Requirement.  Holdings are their
+# art.  In the hand, a card is its text: name, type line, rules.  Modern
+# cards are portrait, after the Modern mockup.
 #
 # The frame is a 9-patch over the art and the parchment; the stats are
 # drawn; an overlay child draws what must sit on top of everything (the
 # glow when the card has something to do, the Province's Strength, the
-# 手 mark on a card played by hand, the battle tag).
+# 手 mark on a card played by hand, the battle tag, a pile's count).
 extends Control
 
-const CLASSIC := Vector2(170, 196)
+const SQUARE := Vector2(150, 168)
+const TEXT := Vector2(176, 132)
 const MODERN := Vector2(150, 210)
 
-static func base_for(skin: String) -> Vector2:
-	return MODERN if skin == "modern" else CLASSIC
+static func base_for(skin: String, variant := "") -> Vector2:
+	if skin == "modern":
+		return MODERN
+	return TEXT if variant == "text" else SQUARE
 
-var base := CLASSIC
+var base := SQUARE
+var variant := ""
 var main
 var inst := -1
 var oid := -1
@@ -33,6 +37,7 @@ var mine := false
 var lit := false
 var strength := -1       # a Province's Strength, shown as a badge
 var tag := ""
+var pile := ""           # "7 Holdings · 9 gold ready" on a pile
 var bowed := false
 
 var _frame: NinePatchRect
@@ -42,9 +47,6 @@ var _tween: Tween
 
 func setup(m) -> void:
 	main = m
-	base = base_for(m.skin)
-	size = base
-	pivot_offset = base * 0.5
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	tooltip_text = " "
 	_art = TextureRect.new()
@@ -54,15 +56,22 @@ func setup(m) -> void:
 	add_child(_art)
 	_frame = NinePatchRect.new()
 	_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_frame.size = base
 	add_child(_frame)
 	_over = Control.new()
-	_over.size = base
 	_over.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_over.draw.connect(_draw_over)
 	add_child(_over)
 	mouse_entered.connect(_hover.bind(true))
 	mouse_exited.connect(_hover.bind(false))
+	set_variant("")
+
+func set_variant(v: String) -> void:
+	variant = v
+	base = base_for(main.skin, v)
+	size = base
+	pivot_offset = base * 0.5
+	_frame.size = base
+	_over.size = base
 
 # A face-up card from the View, or a back.
 func show_card(card: Dictionary, back_kind := "") -> void:
@@ -71,7 +80,7 @@ func show_card(card: Dictionary, back_kind := "") -> void:
 	inst = int(card.get("i", -1))
 	oid = int(card.get("o", -1))
 	_style()
-	set_bowed(int(card.get("b", 0)) == 1)
+	set_bowed(int(card.get("b", 0)) == 1 and pile == "")
 	queue_redraw()
 	_over.queue_redraw()
 
@@ -93,6 +102,12 @@ func set_bowed(b: bool) -> void:
 func modern() -> bool:
 	return main.skin == "modern"
 
+func ctype() -> String:
+	return c.get("t", main.db.card(oid).get("type", ""))
+
+func _art_only() -> bool:
+	return ctype() in ["Holding", "Stronghold", "Region", "Event", "Ring"]
+
 func _style() -> void:
 	_frame.texture = main.tex("frame_modern" if modern() else "frame_classic")
 	var m := 10 if modern() else 14
@@ -102,21 +117,29 @@ func _style() -> void:
 	_frame.patch_margin_bottom = m
 	_frame.draw_center = false
 	_frame.visible = back == ""
+	_art.visible = true
 	if back != "":
-		# the backs are portrait; a square card shows the middle of one
-		_art.texture = main.tex("back_modern" if modern() else "back_" + back)
+		var t := "back_modern"
+		if not modern():
+			t = "back_lattice" if back == "province" else "back_" + back
+		_art.texture = main.tex(t)
 		_art.position = Vector2.ZERO
 		_art.size = base
-		_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		_art.stretch_mode = TextureRect.STRETCH_SCALE
 		return
 	_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_art.texture = main.db.art(oid)
 	if modern():
 		_art.position = Vector2(8, 8)
 		_art.size = Vector2(134, 124)
+	elif variant == "text":
+		_art.visible = false
+	elif _art_only():
+		_art.position = Vector2(11, 31)
+		_art.size = Vector2(base.x - 22, base.y - 42)
 	else:
-		_art.position = Vector2(12, 34)
-		_art.size = Vector2(146, 80)
+		_art.position = Vector2(11, 31)
+		_art.size = Vector2(base.x - 22, 64)
 
 func _hover(on: bool) -> void:
 	if zone == "hand":
@@ -130,8 +153,12 @@ func _gui_input(e: InputEvent) -> void:
 		main.card_clicked(self, e.button_index)
 		accept_event()
 
-# The printed card, as the hover tooltip.
+# The printed card, as the hover tooltip; a pile lists what is in it.
 func _make_custom_tooltip(_t: String) -> Object:
+	if pile != "":
+		var pl := Label.new()
+		pl.text = main.pile_tooltip(self)
+		return pl
 	if oid < 0:
 		return null
 	var box := VBoxContainer.new()
@@ -161,6 +188,12 @@ func _row() -> Dictionary:
 	return main.db.card(oid)
 
 func _draw() -> void:
+	if pile != "":
+		# the cards beneath, peeking out
+		for k in [2, 1]:
+			var off := Vector2(5 * k, -5 * k)
+			draw_rect(Rect2(off, base), Color(0.30, 0.20, 0.10))
+			draw_rect(Rect2(off, base), Color(0.75, 0.58, 0.28), false, 2)
 	if back != "":
 		return
 	if modern():
@@ -176,82 +209,63 @@ func _fit(s: String, f: Font, sz: int, w: float) -> int:
 		sz -= 1
 	return sz
 
-func _cell(r: Rect2, s: String, sz: int, ink: Color, f: Font = null) -> void:
-	var font: Font = f if f else main.f_bold
-	var z := _fit(s, font, sz, r.size.x - 4)
-	_txt(Vector2(r.position.x, r.position.y + r.size.y * 0.5 + z * 0.36), s, z, ink, font, r.size.x)
+func _type_line(row: Dictionary) -> String:
+	var kw: String = row.get("keywords", "")
+	var t := ctype()
+	return t + (" • " + kw.replace(",", " • ") if kw != "" else "")
 
-# The first mockup's card, square.
 func _draw_classic() -> void:
 	var row := _row()
-	var t: String = c.get("t", row.get("type", ""))
+	var t := ctype()
 	var ink := Color(0.17, 0.10, 0.04)
-	var line := Color(0.55, 0.40, 0.20)
-	var paper := Color(0.97, 0.93, 0.82)
+	var soft := Color(0.42, 0.26, 0.10)
 	draw_texture_rect(main.tex("parchment"), Rect2(4, 4, base.x - 8, base.y - 8), true)
-	# the name banner, with the cost coin on the right where there is one
-	var title := Rect2(12, 10, base.x - 24, 22)
-	draw_rect(title, Color(0.90, 0.82, 0.62))
-	draw_rect(title, line, false, 1)
-	var coin: bool = t in ["Holding", "Follower", "Item", "Spell", "Strategy"] and row.get("cost", "0") != "0"
-	var tw := title.size.x - (26 if coin else 6)
+	# the name bar, between two clubs
+	var title := Rect2(10, 9, base.x - 20, 20)
+	draw_rect(title, Color(0.91, 0.84, 0.66))
+	draw_rect(title, Color(0.55, 0.40, 0.20), false, 1)
+	_txt(Vector2(title.position.x + 3, title.position.y + 15), "♣", 12, ink, main.f_ui, 14, HORIZONTAL_ALIGNMENT_LEFT)
+	_txt(Vector2(title.end.x - 15, title.position.y + 15), "♣", 12, ink, main.f_ui, 14, HORIZONTAL_ALIGNMENT_LEFT)
 	var name: String = c.get("n", "")
-	_txt(Vector2(title.position.x + 3, title.position.y + 16), name, _fit(name, main.f_serif, 14, tw), ink, main.f_serif, tw)
-	if coin:
-		var cc := Vector2(title.end.x - 11, title.position.y + 11)
-		draw_circle(cc, 11, Color(0.62, 0.44, 0.12))
-		draw_circle(cc, 9, Color(0.96, 0.80, 0.34))
-		_txt(Vector2(cc.x - 11, cc.y + 5), _n(row.get("cost", "0")), 13, ink, main.f_bold, 22)
-	draw_rect(Rect2(12, 34, base.x - 24, 80), line, false, 1)
-	var box := Rect2(12, 117, base.x - 24, base.y - 117 - 9)
-	if t == "Personality":
-		# Force | Chi | Cost, then mon | Hon. Req | Personal Honor
-		var cw := box.size.x / 3.0
-		var hh := 20.0
-		for i in 3:
-			var col := Rect2(box.position.x + cw * i + 1, box.position.y, cw - 2, box.size.y)
-			draw_rect(col, paper)
-			draw_rect(col, line, false, 1)
-			draw_line(Vector2(col.position.x, col.position.y + hh), Vector2(col.end.x, col.position.y + hh), line, 1)
-		var low := box.size.y - hh
-		_cell(Rect2(box.position.x, box.position.y, cw, hh), "Force " + _n(c.get("f", row.get("force", "0"))), 12, ink)
-		_cell(Rect2(box.position.x + cw, box.position.y, cw, hh), "Chi", 12, ink)
-		_cell(Rect2(box.position.x + cw * 2, box.position.y, cw, hh), "Cost " + _n(row.get("cost", "0")), 12, ink)
-		var ms := minf(cw - 10, low - 10)
-		draw_texture_rect(main.mon_tex(row.get("clan", "")),
-				Rect2(box.position.x + (cw - ms) * 0.5, box.position.y + hh + (low - ms) * 0.5, ms, ms), false)
-		# the middle box holds two numbers, as in the mockup: Chi, and
-		# under a line the Honor Requirement, named
-		var mx := box.position.x + cw
-		var y0 := box.position.y + hh
-		_cell(Rect2(mx, y0, cw, low * 0.5), _n(c.get("c", row.get("chi", "0"))), 18, ink, main.f_serif)
-		draw_line(Vector2(mx + 4, y0 + low * 0.5), Vector2(mx + cw - 4, y0 + low * 0.5), line, 1)
-		_txt(Vector2(mx, y0 + low * 0.5 + 9), "Hon. Req", 7, Color(0.45, 0.28, 0.1), main.f_ui, cw)
-		_cell(Rect2(mx, y0 + low * 0.5 + 7, cw, low * 0.5 - 7), str(row.get("hreq", "0")), 15, ink, main.f_serif)
-		var px := box.position.x + cw * 2
-		_txt(Vector2(px, y0 + 12), "Personal", 8, Color(0.45, 0.28, 0.1), main.f_ui, cw)
-		_txt(Vector2(px, y0 + 21), "Honor", 8, Color(0.45, 0.28, 0.1), main.f_ui, cw)
-		_cell(Rect2(px, y0 + 22, cw, low - 22), _n(row.get("ph", "0")), 20, ink, main.f_serif)
+	var tw := title.size.x - 30
+	_txt(Vector2(title.position.x + 15, title.position.y + 15), name, _fit(name, main.f_serif, 13, tw), ink, main.f_serif, tw)
+	if variant == "text":
+		var y := 44.0
+		_txt(Vector2(12, y), _type_line(row), _fit(_type_line(row), main.f_bold, 11, base.x - 24), soft, main.f_bold,
+				base.x - 24, HORIZONTAL_ALIGNMENT_LEFT)
+		# as many lines as fit above the footer, so the text never runs into it
+		var lines := int((base.y - 18 - (y + 16)) / 11.5) + 1
+		draw_multiline_string(main.f_ui, Vector2(12, y + 16), main.db.text(oid), HORIZONTAL_ALIGNMENT_LEFT,
+				base.x - 24, 10, lines, ink)
+		var foot := "Focus %s" % _n(row.get("focus", "0"))
+		if row.get("cost", "0") != "0":
+			foot += "   ·   %s gold" % _n(row.get("cost", "0"))
+		_txt(Vector2(12, base.y - 12), foot, 10, soft, main.f_bold, base.x - 24, HORIZONTAL_ALIGNMENT_RIGHT)
 		return
-	draw_rect(box, paper)
-	draw_rect(box, line, false, 1)
-	var head := t
-	match t:
-		"Holding", "Stronghold": head = "%s · %s gold" % [t, _n(row.get("gold", "0"))]
-		"Follower", "Item": head = "%s · %+dF%s" % [t, int(row.get("force", "0")),
-				(" %+dC" % int(row.get("chi", "0"))) if int(row.get("chi", "0")) else ""]
-		"Strategy", "Spell": head = "%s · focus %s" % [t, _n(row.get("focus", "0"))]
-	_txt(Vector2(box.position.x + 4, box.position.y + 12), head, 10, Color(0.45, 0.22, 0.06), main.f_bold,
-			box.size.x - 8, HORIZONTAL_ALIGNMENT_LEFT)
-	var gold := t == "Holding" or t == "Stronghold"
-	draw_multiline_string(main.f_ui, Vector2(box.position.x + 4, box.position.y + 24), main.db.text(oid),
-			HORIZONTAL_ALIGNMENT_LEFT, box.size.x - (34 if gold else 8), 9, 5, ink)
-	if gold:
-		draw_texture_rect(main.tex("coin_gold"), Rect2(box.end.x - 28, box.end.y - 28, 26, 26), false)
+	if _art_only():
+		return
+	draw_rect(Rect2(11, 31, base.x - 22, 64), Color(0.45, 0.30, 0.15), false, 1)
+	# the stats as a list
+	var rows: Array = []
+	if t == "Personality":
+		rows = [["Force", _n(c.get("f", row.get("force", "0")))], ["Chi", _n(c.get("c", row.get("chi", "0")))],
+				["Cost", _n(row.get("cost", "0"))], ["Personal Honor", _n(row.get("ph", "0"))],
+				["Honor Req.", str(row.get("hreq", "-"))]]
+	elif t == "Follower" or t == "Item":
+		rows = [["Force", "%+d" % int(row.get("force", "0"))], ["Chi", ("%+d" % int(row.get("chi", "0"))) if int(row.get("chi", "0")) else "–"],
+				["Cost", _n(row.get("cost", "0"))], ["Personal Honor", "–"]]
+	else:
+		rows = [["Focus", _n(row.get("focus", "0"))], ["Cost", _n(row.get("cost", "0"))]]
+	var y0 := 98.0
+	var rh := minf(13.0, (base.y - 10 - y0) / rows.size())
+	for i in rows.size():
+		var y := y0 + (i + 1) * rh - 2
+		_txt(Vector2(14, y), rows[i][0], 11, ink, main.f_ui, base.x - 28, HORIZONTAL_ALIGNMENT_LEFT)
+		_txt(Vector2(14, y), rows[i][1], 12, ink, main.f_bold, base.x - 28, HORIZONTAL_ALIGNMENT_RIGHT)
 
 func _draw_modern() -> void:
 	var row := _row()
-	var t: String = c.get("t", row.get("type", ""))
+	var t := ctype()
 	var ink := Color(0.16, 0.10, 0.05)
 	draw_rect(Rect2(4, 4, base.x - 8, base.y - 8), Color(0.08, 0.06, 0.05))
 	var box := Rect2(8, 134, base.x - 16, base.y - 142)
@@ -269,9 +283,8 @@ func _draw_modern() -> void:
 func _draw_over() -> void:
 	if back == "":
 		var row := _row()
-		var t: String = c.get("t", row.get("type", ""))
+		var t := ctype()
 		if modern():
-			# the name plate over the art, the stat column down its edge
 			_over.draw_rect(Rect2(8, 8, 134, 20), Color(0.95, 0.90, 0.78, 0.93))
 			var name: String = c.get("n", "")
 			_over.draw_string(main.f_serif, Vector2(13, 23), name, HORIZONTAL_ALIGNMENT_LEFT, 124,
@@ -284,16 +297,25 @@ func _draw_over() -> void:
 					_over.draw_rect(b, Color(0.3, 0.2, 0.1), false, 1)
 					_over.draw_string(main.f_bold, Vector2(b.position.x, b.end.y - 6), vals[i],
 							HORIZONTAL_ALIGNMENT_CENTER, b.size.x, 16, Color(0.15, 0.1, 0.05))
+		elif _art_only() and variant != "text":
+			# the clan's mon in the corner, and the gold a Holding makes
+			if t == "Holding" or t == "Stronghold":
+				_over.draw_texture_rect(main.tex("coin_gold"), Rect2(base.x - 36, base.y - 36, 28, 28), false)
+				_over.draw_string(main.f_bold, Vector2(base.x - 36, base.y - 16), _n(row.get("gold", "0")),
+						HORIZONTAL_ALIGNMENT_CENTER, 28, 13, Color(0.25, 0.12, 0.02))
 		if int(c.get("auto", 1)) == 0 and t != "Personality" and t != "Holding":
-			_over.draw_texture_rect(main.tex("hand"), Rect2(14, 36 if not modern() else 32, 22, 22), false)
+			_over.draw_texture_rect(main.tex("hand"), Rect2(base.x - 34, 32, 22, 22), false)
+	if pile != "":
+		_over.draw_rect(Rect2(6, base.y - 30, base.x - 12, 24), Color(0.12, 0.07, 0.03, 0.88))
+		_over.draw_string(main.f_bold, Vector2(6, base.y - 13), pile, HORIZONTAL_ALIGNMENT_CENTER, base.x - 12,
+				_fit(pile, main.f_bold, 12, base.x - 16), Color(1, 0.92, 0.7))
 	if strength >= 0:
-		# top left, half off the card, so it covers nothing printed
 		var p := Vector2(6, 6)
-		_over.draw_circle(p, 18, Color(0.35, 0.05, 0.03))
-		_over.draw_circle(p, 15, Color(0.75, 0.16, 0.08))
-		_over.draw_string(main.f_bold, Vector2(p.x - 18, p.y + 7), str(strength), HORIZONTAL_ALIGNMENT_CENTER, 36, 20, Color.WHITE)
+		_over.draw_circle(p, 16, Color(0.35, 0.05, 0.03))
+		_over.draw_circle(p, 13, Color(0.75, 0.16, 0.08))
+		_over.draw_string(main.f_bold, Vector2(p.x - 16, p.y + 6), str(strength), HORIZONTAL_ALIGNMENT_CENTER, 32, 17, Color.WHITE)
 	if tag != "":
-		_over.draw_rect(Rect2(0, base.y - 26, base.x, 26), Color(0.55, 0.04, 0.04, 0.92))
-		_over.draw_string(main.f_bold, Vector2(0, base.y - 8), tag, HORIZONTAL_ALIGNMENT_CENTER, base.x, 15, Color.WHITE)
+		_over.draw_rect(Rect2(0, base.y - 24, base.x, 24), Color(0.55, 0.04, 0.04, 0.92))
+		_over.draw_string(main.f_bold, Vector2(0, base.y - 7), tag, HORIZONTAL_ALIGNMENT_CENTER, base.x, 14, Color.WHITE)
 	if lit:
 		_over.draw_rect(Rect2(-3, -3, base.x + 6, base.y + 6), Color(1.0, 0.82, 0.25, 0.95), false, 4)

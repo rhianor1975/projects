@@ -51,6 +51,7 @@ var shell: Control
 var board: Control
 var top: Control
 var cards := {}
+var piles := {}
 var ui := {}
 var L := {}
 var popup: PopupMenu
@@ -453,7 +454,7 @@ func _portrait(parent: Control, r: Rect2, key: String) -> void:
 # ------------------------------------------------------------- classic
 func _build_classic() -> void:
 	_rect(shell, Rect2(0, 0, W, H), Color(0.75, 0.75, 0.75))
-	# title bar
+	# title bar, with the clan's mon as its icon
 	var g := Gradient.new()
 	g.set_color(0, Color(0.0, 0.0, 0.5))
 	g.set_color(1, Color(0.06, 0.52, 0.82))
@@ -462,13 +463,13 @@ func _build_classic() -> void:
 	gt.width = 256
 	gt.height = 4
 	_texr(shell, Rect2(3, 3, W - 6, 30), gt)
-	_label(shell, Rect2(12, 3, 800, 30), "Legend of the Five Rings (L5R)", 18, Color.WHITE, f_bold)
+	ui["icon"] = _texr(shell, Rect2(8, 7, 22, 22), mon_tex(my_clan))
+	_label(shell, Rect2(36, 3, 800, 30), "Legend of the Five Rings (L5R)", 18, Color.WHITE, f_bold)
 	var bx := W - 90
 	for gl in ["_", "□", "X"]:
 		var cb := (func(): get_tree().quit()) if gl == "X" else (func(): pass)
 		_button(shell, Rect2(bx, 7, 26, 22), gl, cb, 13)
 		bx += 28
-	# menus
 	var mb := MenuBar.new()
 	mb.position = Vector2(8, 34)
 	mb.size = Vector2(400, 26)
@@ -486,97 +487,101 @@ func _build_classic() -> void:
 			cmds.append(it[1])
 		pm.id_pressed.connect(func(id): _menu_command(cmds[id]))
 		mb.add_child(pm)
-	# the table
-	_panel(shell, Rect2(4, 62, W - 8, 878), _sb_tex("bevel_down", 3))
-	_texr(shell, Rect2(7, 65, W - 14, 872), tex("wood"), TextureRect.STRETCH_TILE)
-	# left: honor, my portrait
-	_panel(shell, Rect2(10, 70, 200, 862))
-	_button(shell, Rect2(20, 80, 180, 32), "HONOR", func(): pass, 18)
+	# the table, with a darker strip under each zone
+	_panel(shell, Rect2(4, 62, W - 8, 872), _sb_tex("bevel_down", 3))
+	_texr(shell, Rect2(6, 64, W - 12, 868), tex("wood"), TextureRect.STRETCH_TILE)
+	var cx := 192.0
+	var cw := W - 384.0
+	for band in [Rect2(cx, 66, cw, 210), Rect2(cx, 474, cw, 214)]:
+		_rect(shell, band, Color(0.08, 0.04, 0.01, 0.30))
+		_rect(shell, Rect2(band.position, Vector2(band.size.x, 2)), Color(0.05, 0.02, 0.0, 0.5))
+		_rect(shell, Rect2(band.position.x, band.end.y - 2, band.size.x, 2), Color(0.05, 0.02, 0.0, 0.5))
+	# left: the honor track, my clan
+	_panel(shell, Rect2(8, 66, 176, 632))
+	_label(shell, Rect2(8, 70, 176, 28), "HONOR", 19, Color.BLACK, f_bold, HORIZONTAL_ALIGNMENT_CENTER)
 	var track := Control.new()
-	track.position = Vector2(20, 118)
-	track.size = Vector2(180, 500)
+	track.position = Vector2(14, 102)
+	track.size = Vector2(164, 236)
 	track.draw.connect(_draw_track.bind(track))
 	shell.add_child(track)
 	ui["track"] = track
-	ui["honor_legend"] = _label(shell, Rect2(20, 622, 180, 22), "", 14, Color(0.1, 0.1, 0.1), f_bold)
-	_portrait(shell, Rect2(20, 650, 180, 216), "my_face")
-	ui["my_banner"] = _banner_classic(Rect2(20, 870, 180, 52))
-	# right: FATE, GOLD (KOKU), the opponent
-	_panel(shell, Rect2(W - 210, 70, 200, 862))
-	var x := W - 200
-	_panel(shell, Rect2(x, 80, 180, 112), _sb_tex("bevel_down", 3))
-	_button(shell, Rect2(x + 4, 84, 172, 28), "FATE", func(): pass, 16)
-	_texr(shell, Rect2(x + 14, 120, 62, 62), tex("coin_fate"))
-	ui["fate"] = _label(shell, Rect2(x + 84, 116, 90, 70), "", 48, Color.BLACK, f_bold)
-	_panel(shell, Rect2(x, 200, 180, 112), _sb_tex("bevel_down", 3))
-	_button(shell, Rect2(x + 4, 204, 172, 28), "GOLD (KOKU)", func(): pass, 15)
-	_texr(shell, Rect2(x + 14, 240, 62, 62), tex("coin_gold"))
-	ui["gold"] = _label(shell, Rect2(x + 84, 236, 90, 70), "", 48, Color.BLACK, f_bold)
-	ui["pool"] = _label(shell, Rect2(x + 84, 290, 90, 18), "", 11, Color(0.3, 0.3, 0.3))
-	_portrait(shell, Rect2(x, 322, 180, 230), "opp_face")
-	ui["opp_banner"] = _banner_classic(Rect2(x, 556, 180, 52))
-	_panel(shell, Rect2(x, 616, 180, 306), _sb_tex("bevel_down", 3))
-	ui["info"] = _label(shell, Rect2(x + 10, 622, 164, 294), "", 14, Color.BLACK, f_ui,
-			HORIZONTAL_ALIGNMENT_LEFT, VERTICAL_ALIGNMENT_TOP)
-	ui["info"].autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	# center
-	var cx := 218.0
-	var cw := W - 436.0
-	_rect(shell, Rect2(cx, 70, cw, 156), Color(0, 0, 0, 0.22))
-	ui["opp_title"] = _label(shell, Rect2(cx + 10, 70, 500, 22), "", 15, Color(1, 0.93, 0.78), f_bold)
-	var hold := Rect2(cx + cw - 250, 76, 242, 144)
-	_texr(shell, hold, tex("parchment"), TextureRect.STRETCH_TILE)
-	_rect(shell, Rect2(hold.position, Vector2(hold.size.x, 2)), Color(0.4, 0.26, 0.12))
-	ui["opp_holds"] = _rich(shell, hold.grow(-6), 12)
-	L["opp_prov"] = []
-	for k in 4:
-		L["opp_prov"].append(Rect2(cx + 12 + k * 94, 96, 88, 88 * cr()))
-	L["opp_units"] = Rect2(cx + 12 + 4 * 94 + 14, 96, hold.position.x - (cx + 12 + 4 * 94 + 14) - 10, 112)
-	# my provinces and their buttons
+	ui["honor_legend"] = _label(shell, Rect2(8, 342, 176, 24), "", 16, Color.BLACK, f_ui, HORIZONTAL_ALIGNMENT_CENTER)
+	ui["my_banner"] = _clan_head(Rect2(14, 372, 164, 32))
+	_portrait(shell, Rect2(14, 406, 164, 284), "my_face")
+	ui["my_mon"] = _texr(shell, Rect2(132, 642, 42, 42), null)
+	# right: FATE, GOLD (KOKU), the opponent and the table's numbers
+	var x := W - 184
+	_panel(shell, Rect2(x, 66, 176, 70))
+	_label(shell, Rect2(x, 68, 176, 24), "FATE", 17, Color.BLACK, f_bold, HORIZONTAL_ALIGNMENT_CENTER)
+	_texr(shell, Rect2(x + 14, 94, 36, 36), tex("coin_fate"))
+	ui["fate"] = _counter(Rect2(x + 64, 94, 98, 34))
+	_panel(shell, Rect2(x, 142, 176, 74))
+	_label(shell, Rect2(x, 144, 176, 24), "GOLD (KOKU)", 17, Color.BLACK, f_bold, HORIZONTAL_ALIGNMENT_CENTER)
+	_texr(shell, Rect2(x + 10, 168, 44, 44), tex("ingot"))
+	ui["gold"] = _counter(Rect2(x + 64, 172, 98, 34))
+	_panel(shell, Rect2(x, 222, 176, 270))
+	ui["opp_banner"] = _clan_head(Rect2(x + 6, 228, 164, 32))
+	_portrait(shell, Rect2(x + 6, 262, 164, 222), "opp_face")
+	ui["opp_mon"] = _texr(shell, Rect2(x + 124, 436, 42, 42), null)
+	_panel(shell, Rect2(x, 498, 176, 236), _sb_tex("bevel_down", 3))
+	ui["info"] = []
+	for i in 8:
+		var y := 506 + i * 27
+		var l := _label(shell, Rect2(x + 10, y, 90, 24), "", 15, Color.BLACK, f_ui)
+		var r := _label(shell, Rect2(x + 76, y, 92, 24), "", 15, Color.BLACK, f_ui, HORIZONTAL_ALIGNMENT_RIGHT)
+		ui["info"].append([l, r])
+	# the opponent's row
+	ui["opp_title"] = _label(shell, Rect2(cx, 68, cw, 28), "", 21, Color(1, 0.94, 0.80), f_serif, HORIZONTAL_ALIGNMENT_CENTER)
+	L["sq"] = 140.0
+	L["opp_row"] = Rect2(cx + 16, 100, cw - 32, 172)
+	# my Provinces, each with its label -- a button only when it has something to do
 	L["my_prov"] = []
 	ui["prov_btn"] = []
-	var pw := 150.0
-	var gap := (cw - pw * 4) / 5.0
+	var pw: float = L["sq"]
+	var gap := 40.0
+	var px := cx + (cw - (pw * 4 + gap * 3)) * 0.5
 	for k in 4:
-		var r := Rect2(cx + gap + k * (pw + gap), 236, pw, pw * cr())
+		var r := Rect2(px + k * (pw + gap), 284, pw, pw * cr())
 		L["my_prov"].append(r)
-		ui["prov_btn"].append(_button(shell, Rect2(r.position.x - 8, r.end.y + 6, pw + 16, 28), "Province",
-				_prov_pressed.bind(k), 15))
-	# the Home Zone
-	var home := Rect2(cx + 10, 456, cw - 20, 272)
-	_panel(shell, home, _sb_flat(Color(0.22, 0.13, 0.06, 0.35), Color(0.55, 0.38, 0.20), 2))
-	_label(shell, Rect2(home.position.x, home.position.y + 2, home.size.x, 22), "Home Zone", 16,
-			Color(1, 0.94, 0.82), f_bold, HORIZONTAL_ALIGNMENT_CENTER)
-	L["fate_deck"] = Rect2(home.position.x + 14, home.position.y + 34, 112, 112 * cr())
-	L["dyn_deck"] = Rect2(home.end.x - 126, home.position.y + 34, 112, 112 * cr())
+		var b := _button(shell, Rect2(r.position.x - 22, r.end.y + 3, pw + 44, 24), "", _prov_pressed.bind(k), 13)
+		b.add_theme_color_override("font_disabled_color", Color(1, 0.94, 0.80))
+		b.add_theme_font_override("font", f_serif)
+		ui["prov_btn"].append(b)
+	# the Home Zone, between the decks
+	var tagr := Rect2(cx + cw * 0.5 - 80, 478, 160, 26)
+	_panel(shell, tagr, _sb_flat(Color(0.20, 0.12, 0.05, 0.9), Color(0.80, 0.62, 0.30), 2))
+	_label(shell, tagr, "Home Zone:", 17, Color(1, 0.94, 0.80), f_serif, HORIZONTAL_ALIGNMENT_CENTER)
+	L["fate_deck"] = Rect2(cx + 16, 512, 118, 118 * cr())
+	L["dyn_deck"] = Rect2(cx + cw - 134, 512, 118, 118 * cr())
 	_deck_stack(L["fate_deck"], "back_fate")
 	_deck_stack(L["dyn_deck"], "back_dynasty")
-	ui["fate_btn"] = _button(shell, Rect2(L["fate_deck"].position.x, L["fate_deck"].end.y + 14, 112, 28), "Fate Deck", func(): pass, 14)
-	ui["dyn_btn"] = _button(shell, Rect2(L["dyn_deck"].position.x - 6, L["dyn_deck"].end.y + 14, 112, 28), "Dynasty Deck", func(): pass, 14)
-	L["home_holds"] = Rect2(home.position.x + 140, home.position.y + 30, 5 * 66, home.size.y - 36)
-	L["home_units"] = Rect2(L["home_holds"].end.x + 12, home.position.y + 30,
-			L["dyn_deck"].position.x - L["home_holds"].end.x - 30, home.size.y - 36)
-	L["unit_w"] = 140.0
-	L["hand"] = Rect2(cx, 736, cw, 196)
-	L["hand_w"] = 140.0
+	ui["fate_deck_lbl"] = _deck_label(L["fate_deck"])
+	ui["dyn_deck_lbl"] = _deck_label(L["dyn_deck"])
+	ui["dyn_mon"] = _texr(shell, Rect2(L["dyn_deck"].get_center() - Vector2(28, 14), Vector2(56, 56)), null)
+	L["home_row"] = Rect2(L["fate_deck"].end.x + 26, 506, L["dyn_deck"].position.x - L["fate_deck"].end.x - 52, 178)
+	# the hand
+	L["hand"] = Rect2(cx + 10, 700, cw - 20, 156)
+	L["hand_w"] = CARD.TEXT.x
 	# the status bar
-	_panel(shell, Rect2(4, H - 58, W - 8, 54))
-	ui["phase"] = _label(shell, Rect2(18, H - 56, 420, 50), "", 21, Color.BLACK, f_bold)
+	_panel(shell, Rect2(4, H - 62, W - 8, 58))
+	_panel(shell, Rect2(12, H - 54, 340, 44), _sb_tex("bevel_down", 3))
+	ui["phase"] = _label(shell, Rect2(22, H - 54, 280, 44), "", 20, Color.BLACK, f_bold)
 	var bulb := Control.new()
-	bulb.position = Vector2(420, H - 52)
+	bulb.position = Vector2(306, H - 52)
 	bulb.size = Vector2(40, 44)
 	bulb.draw.connect(_draw_bulb.bind(bulb))
 	shell.add_child(bulb)
 	ui["bulb"] = bulb
-	ui["ticker"] = _label(shell, Rect2(470, H - 56, 520, 50), "", 15, Color(0.15, 0.15, 0.15))
+	_panel(shell, Rect2(362, H - 54, 620, 44), _sb_tex("bevel_down", 3))
+	ui["ticker"] = _label(shell, Rect2(374, H - 54, 600, 44), "", 17, Color.BLACK, f_ui)
 	var acts := HBoxContainer.new()
-	acts.position = Vector2(1000, H - 53)
-	acts.size = Vector2(500, 44)
+	acts.position = Vector2(990, H - 55)
+	acts.size = Vector2(486, 46)
 	acts.alignment = BoxContainer.ALIGNMENT_END
 	acts.add_theme_constant_override("separation", 8)
 	shell.add_child(acts)
 	ui["acts"] = acts
-	_button(shell, Rect2(W - 92, H - 53, 80, 44), "Log", _toggle_log, 16)
+	_button(shell, Rect2(W - 116, H - 55, 104, 46), "Log", _toggle_log, 19)
 	# the log, as a window over the table
 	var lw := Panel.new()
 	lw.position = Vector2(W * 0.5 - 380, 140)
@@ -589,9 +594,23 @@ func _build_classic() -> void:
 	ui["log"] = _rich(lw, Rect2(14, 40, 732, 548), 15)
 	ui["log_win"] = lw
 
-func _banner_classic(r: Rect2) -> Label:
-	var p := _panel(shell, r, _sb_flat(Color(0.5, 0.1, 0.08), Color(0.9, 0.74, 0.4), 2))
-	return _label(p, Rect2(Vector2.ZERO, r.size), "", 21, Color.WHITE, f_bold, HORIZONTAL_ALIGNMENT_CENTER)
+# A clan's name in a navy bar, over its portrait.
+func _clan_head(r: Rect2) -> Label:
+	var p := _panel(shell, r, _sb_flat(Color(0.05, 0.10, 0.42), Color(0.85, 0.70, 0.35), 2))
+	return _label(p, Rect2(Vector2.ZERO, r.size), "", 19, Color.WHITE, f_serif, HORIZONTAL_ALIGNMENT_CENTER)
+
+# A number in a white sunken box, as the mockup counts Fate and Gold.
+func _counter(r: Rect2) -> Label:
+	_panel(shell, r, _sb_tex("bevel_down", 3))
+	_rect(shell, r.grow(-3), Color.WHITE)
+	return _label(shell, r, "", 26, Color.BLACK, f_bold, HORIZONTAL_ALIGNMENT_CENTER)
+
+func _deck_label(r: Rect2) -> Label:
+	var l := _label(shell, Rect2(r.position.x, r.position.y + 10, r.size.x, 52), "", 15, Color(1, 0.95, 0.82),
+			f_serif, HORIZONTAL_ALIGNMENT_CENTER, VERTICAL_ALIGNMENT_TOP)
+	l.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+	l.add_theme_constant_override("outline_size", 4)
+	return l
 
 func _deck_stack(r: Rect2, t: String) -> void:
 	for i in 3:
@@ -611,24 +630,31 @@ func _rich(parent: Control, r: Rect2, size: int) -> RichTextLabel:
 	parent.add_child(t)
 	return t
 
+# The honor track as a graph: a line every 10, from 40 (win) to -20
+# (lose), and a marker for each player, tagged at the right.
 func _draw_track(c: Control) -> void:
-	c.draw_rect(Rect2(Vector2.ZERO, c.size), Color(0.05, 0.05, 0.05))
-	var steps := 13
-	var rh := c.size.y / steps
-	for i in steps:
-		var rr := Rect2(2, i * rh + 1, c.size.x - 4, rh - 2)
-		c.draw_rect(rr, Color(0.13, 0.13, 0.13))
-		c.draw_string(f_bold, Vector2(0, rr.end.y - rh * 0.27), str(40 - i * 5), HORIZONTAL_ALIGNMENT_CENTER,
-				c.size.x, 19, Color(0.86, 0.86, 0.8))
+	c.draw_rect(Rect2(Vector2.ZERO, c.size), Color(0.97, 0.97, 0.95))
+	var top := 12.0
+	var bot := c.size.y - 12
+	var lx := 34.0
+	var rx := c.size.x - 8
+	for val in range(40, -21, -10):
+		var y := top + (40 - val) / 60.0 * (bot - top)
+		c.draw_line(Vector2(lx, y), Vector2(rx, y), Color(0.55, 0.55, 0.55) if val != 0 else Color(0.2, 0.2, 0.2), 1)
+		c.draw_string(f_ui, Vector2(0, y + 6), str(val), HORIZONTAL_ALIGNMENT_RIGHT, lx - 6, 15, Color(0.1, 0.1, 0.1))
 	if v.is_empty():
 		return
-	for who in [[opp(), Color(0.15, 0.35, 0.95)], [me(), Color(0.8, 0.1, 0.1)]]:
-		var hv := clampi(int(who[0]["honor"]), -20, 40)
-		var yy := (40.0 - hv) / 5.0 * rh + rh * 0.5
-		var mark := Rect2(2, yy - rh * 0.5 + 1, c.size.x - 4, rh - 2)
-		c.draw_rect(mark, who[1])
-		c.draw_string(f_bold, Vector2(0, mark.end.y - rh * 0.27), _n(who[0]["honor"]), HORIZONTAL_ALIGNMENT_CENTER,
-				c.size.x, 19, Color.WHITE)
+	var ys: Array = []
+	for who in [[me(), Color(0.12, 0.30, 0.85), "You"], [opp(), Color(0.78, 0.10, 0.08), "Opp"]]:
+		var hv := clampf(float(who[0]["honor"]), -20, 40)
+		var y := top + (40 - hv) / 60.0 * (bot - top)
+		# a second tag that would sit on the first steps left of it
+		var tx := rx - 42 - (46 if ys.size() and absf(ys[0] - y) < 20 else 0)
+		ys.append(y)
+		c.draw_line(Vector2(lx, y), Vector2(tx, y), who[1], 4)
+		var tag := Rect2(tx, y - 10, 42, 20)
+		c.draw_rect(tag, who[1])
+		c.draw_string(f_serif, Vector2(tag.position.x, tag.end.y - 5), who[2], HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 13, Color.WHITE)
 
 func _draw_bulb(c: Control) -> void:
 	var on := my_say()
@@ -930,26 +956,34 @@ func _sync() -> void:
 func _sync_classic(m: Dictionary, o: Dictionary) -> void:
 	ui["track"].queue_redraw()
 	ui["bulb"].queue_redraw()
-	ui["honor_legend"].text = "■ You %s    ■ Opp %s" % [_n(m["honor"]), _n(o["honor"])]
+	ui["icon"].texture = mon_tex(m["clan"])
+	ui["honor_legend"].text = "You %s     Opp %s" % [_n(m["honor"]), _n(o["honor"])]
 	ui["my_banner"].text = "%s CLAN" % str(m["clan"]).to_upper()
-	ui["my_banner"].get_parent().add_theme_stylebox_override("panel",
-			_sb_flat(CLAN_COLOR.get(m["clan"], Color.GRAY).darkened(0.2), Color(0.9, 0.74, 0.4), 2))
 	ui["opp_banner"].text = "%s CLAN" % str(o["clan"]).to_upper()
-	ui["opp_banner"].get_parent().add_theme_stylebox_override("panel",
-			_sb_flat(CLAN_COLOR.get(o["clan"], Color.GRAY).darkened(0.2), Color(0.9, 0.74, 0.4), 2))
+	ui["my_mon"].texture = mon_tex(m["clan"])
+	ui["opp_mon"].texture = mon_tex(o["clan"])
+	ui["dyn_mon"].texture = mon_tex(m["clan"])
 	ui["fate"].text = _n(m["hand"])
 	ui["gold"].text = _n(m["gold"])
-	ui["pool"].text = ("pool %s" % _n(m["pool"])) if int(m["pool"]) > 0 else ""
-	ui["info"].text = "Turn %s\n\n%s Clan\nHonor  %s\nHand  %s\nProvinces  %d\nRings  %s\n\nYour rings  %s\nFate discard  %s\nDynasty discard  %s" % [
-		_n(v["turn"]), o["clan"], _n(o["honor"]), _n(o["hand"]), _alive(o), _n(o["rings"]),
-		_n(m["rings"]), _n(m["fdisc"]), _n(m["ddisc"])]
+	var rows := [["Turn:", _n(v["turn"])], ["Clan:", "%s" % o["clan"]], ["Honor:", _n(o["honor"])],
+			["Hand:", _n(o["hand"])], ["Provinces:", str(_alive(o))], ["Fate Deck:", _n(o["fate"])],
+			["Dynasty:", _n(o["dynasty"])], ["Rings:", _n(o["rings"])]]
+	for i in rows.size():
+		ui["info"][i][0].text = rows[i][0]
+		ui["info"][i][1].text = rows[i][1]
 	ui["opp_title"].text = "%s Clan — opponent" % o["clan"]
-	ui["fate_btn"].text = "Fate Deck  %s" % _n(m["fate"])
-	ui["dyn_btn"].text = "Dynasty Deck  %s" % _n(m["dynasty"])
+	ui["fate_deck_lbl"].text = "Fate Deck\n%s" % _n(m["fate"])
+	ui["dyn_deck_lbl"].text = "Dynasty Deck\n%s" % _n(m["dynasty"])
 	var who := "Your Turn" if my_turn() else "%s's Turn" % o["clan"]
 	ui["phase"].text = "%s - Phase: %s" % [who, phase_label()]
 	var logs: Array = v.get("log", [])
-	ui["ticker"].text = str(logs[-1]) if logs.size() else ""
+	var last := ""
+	for i in range(logs.size() - 1, -1, -1):
+		var s := str(logs[i])
+		if "battle" in s or "wins" in s or "holds" in s:
+			last = "Battle Result: " + s.strip_edges()
+			break
+	ui["ticker"].text = last if last != "" else (str(logs[-1]).strip_edges() if logs.size() else "")
 
 func _sync_modern(m: Dictionary, o: Dictionary) -> void:
 	var have := int(m["rings"])
@@ -1005,22 +1039,31 @@ func _sync_buttons() -> void:
 			var b := Button.new()
 			b.text = v["actions"][i]["l"]
 			b.focus_mode = Control.FOCUS_NONE
-			b.add_theme_font_size_override("font_size", 17)
-			b.custom_minimum_size = Vector2(140 if skin == "classic" else 220, 44 if skin == "classic" else 40)
+			b.add_theme_font_size_override("font_size", 19 if skin == "classic" else 17)
+			b.custom_minimum_size = Vector2(150 if skin == "classic" else 220, 46 if skin == "classic" else 40)
 			b.pressed.connect(_act.bind(i))
 			box.add_child(b)
 	for k in 4:
 		var b: Button = ui["prov_btn"][k]
 		var p: Dictionary = me()["provinces"][k]
 		var acts := actions_for_prov(k)
-		var label := "Province" if int(p["alive"]) else "Destroyed"
+		var label := ""
 		for i in acts:
 			if int(v["actions"][i]["k"]) == A_BUY:
 				label = "Recruit · " + str(v["actions"][i]["l"]).get_slice("(", 1).trim_suffix(")")
-		if acts.size() and label == "Province":
+		if acts.size() and label == "":
 			label = "Discard"
+		if label == "":
+			# not a button now, only the Province's name, small, as in the mockup
+			if not int(p["alive"]):
+				label = "Destroyed"
+			elif p["card"] == null:
+				label = "Province: face down" if skin == "classic" else "Face down"
+			else:
+				label = ("Province: %s" if skin == "classic" else "%s") % p["card"]["n"]
 		b.text = label
 		b.disabled = acts.is_empty()
+		b.flat = skin == "classic" and acts.is_empty()
 
 func _prov_pressed(k: int) -> void:
 	var acts := actions_for_prov(k)
@@ -1031,32 +1074,13 @@ func _prov_pressed(k: int) -> void:
 
 # ----------------------------------------------------------- the cards
 func _sync_cards(m: Dictionary, o: Dictionary) -> void:
-	var want := {}
 	var placed: Array = []
-	# the opponent's Provinces and units
-	for k in 4:
-		var p: Dictionary = o["provinces"][k]
-		if int(p["alive"]):
-			placed.append(_place("o%d" % k, p["card"], "province", L["opp_prov"][k], "opp", false, int(p["str"])))
-	var ounits: Array = (o["play"] as Array).filter(func(c): return c["t"] == "Personality" or c["t"] == "Ring")
-	_spread(placed, ounits, L["opp_units"], L["opp_prov"][0].size.x, "opp", false)
-	ui["opp_holds"].text = _holdings_text(o)
-	# mine
-	for k in 4:
-		var p: Dictionary = m["provinces"][k]
-		if int(p["alive"]):
-			placed.append(_place("m%d" % k, p["card"], "province", L["my_prov"][k], "province", true, int(p["str"])))
-	var mh: Array = (m["play"] as Array).filter(func(c): return c["t"] != "Personality" and c["t"] != "Ring")
-	var hr: Rect2 = L["home_holds"]
-	var per := maxi(1, ceili(mh.size() / 5.0))
-	var th := 60.0 * cr()
-	var vstep := minf(th + 8, (hr.size.y - th - 2) / maxf(per - 1, 1))
-	for j in mh.size():
-		placed.append(_place(str(int(mh[j]["i"])), mh[j], "", Rect2(hr.position.x + (j % 5) * 66, hr.position.y + (j / 5) * vstep, 60, th), "play", true))
-	var mu: Array = (m["play"] as Array).filter(func(c): return c["t"] == "Personality" or c["t"] == "Ring")
-	_spread(placed, mu, L["home_units"], L["unit_w"], "play", true)
-	var hand: Array = m.get("handcards", [])
-	_spread(placed, hand, L["hand"], L["hand_w"], "hand", true)
+	piles.clear()
+	if skin == "classic":
+		_cards_classic(placed, m, o)
+	else:
+		_cards_modern(placed, m, o)
+	var want := {}
 	for p in placed:
 		want[p] = true
 	for key in cards.keys():
@@ -1067,43 +1091,109 @@ func _sync_cards(m: Dictionary, o: Dictionary) -> void:
 			t.tween_property(n, "modulate:a", 0.0, 0.25)
 			t.tween_callback(n.queue_free)
 
-# Lay cards out in a row inside r, overlapping if they must; a unit's
-# attachments peek out above the Personality, so his stats stay readable.
-func _spread(placed: Array, list: Array, r: Rect2, w: float, zone: String, mine: bool) -> void:
+func _units(p: Dictionary) -> Array:
+	return (p["play"] as Array).filter(func(c): return c["t"] == "Personality" or c["t"] == "Ring")
+
+func _holdings(p: Dictionary) -> Array:
+	return (p["play"] as Array).filter(func(c): return c["t"] != "Personality" and c["t"] != "Ring")
+
+# Classic, after the second mockup: one card size everywhere; the
+# opponent's Provinces, Holdings and units along the top; my Provinces;
+# the Home Zone between the decks; text cards in the hand.
+func _cards_classic(placed: Array, m: Dictionary, o: Dictionary) -> void:
+	var w: float = L["sq"]
 	var h := w * cr()
+	var row: Rect2 = L["opp_row"]
+	var x := row.position.x
+	var y := row.end.y - h
+	for k in 4:
+		var p: Dictionary = o["provinces"][k]
+		if int(p["alive"]):
+			placed.append(_place("o%d" % k, p["card"], "province", Rect2(x, y, w, h), "opp", false, int(p["str"])))
+		x += w + 10
+	x += 8
+	var oh := _holdings(o)
+	if oh.size():
+		placed.append(_place_pile("pile_o", oh, Rect2(x + 6, y, w, h), false))
+		x += w + 22
+	_spread(placed, _units(o), Rect2(x, row.position.y, row.end.x - x, row.size.y), w, "opp", false)
+	for k in 4:
+		var p: Dictionary = m["provinces"][k]
+		if int(p["alive"]):
+			placed.append(_place("m%d" % k, p["card"], "province", L["my_prov"][k], "province", true, int(p["str"])))
+	var home: Rect2 = L["home_row"]
+	var hx := home.position.x
+	var mh := _holdings(m)
+	if mh.size():
+		placed.append(_place_pile("pile_m", mh, Rect2(hx + 6, home.end.y - h - 4, w, h), true))
+		hx += w + 24
+	_spread(placed, _units(m), Rect2(hx, home.position.y, home.end.x - hx, home.size.y - 4), w, "play", true)
+	_spread(placed, me().get("handcards", []), L["hand"], L["hand_w"], "hand", true, "text")
+
+func _cards_modern(placed: Array, m: Dictionary, o: Dictionary) -> void:
+	for k in 4:
+		var p: Dictionary = o["provinces"][k]
+		if int(p["alive"]):
+			placed.append(_place("o%d" % k, p["card"], "province", L["opp_prov"][k], "opp", false, int(p["str"])))
+	_spread(placed, _units(o), L["opp_units"], L["opp_prov"][0].size.x, "opp", false)
+	ui["opp_holds"].text = _holdings_text(o)
+	for k in 4:
+		var p: Dictionary = m["provinces"][k]
+		if int(p["alive"]):
+			placed.append(_place("m%d" % k, p["card"], "province", L["my_prov"][k], "province", true, int(p["str"])))
+	var mh := _holdings(m)
+	var hr: Rect2 = L["home_holds"]
+	var th := 60.0 * cr()
+	var per := maxi(1, ceili(mh.size() / 5.0))
+	var vstep := minf(th + 8, (hr.size.y - th - 2) / maxf(per - 1, 1))
+	for j in mh.size():
+		placed.append(_place(str(int(mh[j]["i"])), mh[j], "", Rect2(hr.position.x + (j % 5) * 66, hr.position.y + (j / 5) * vstep, 60, th), "play", true))
+	_spread(placed, _units(m), L["home_units"], L["unit_w"], "play", true)
+	_spread(placed, m.get("handcards", []), L["hand"], L["hand_w"], "hand", true)
+
+# Lay cards out in a row inside r, overlapping if they must, bottom
+# aligned; a unit's attachments peek out above the Personality, so his
+# stats stay readable.
+func _spread(placed: Array, list: Array, r: Rect2, w: float, zone: String, mine: bool, variant := "") -> void:
+	var h := w * CARD.base_for(skin, variant).y / CARD.base_for(skin, variant).x
 	var n := list.size()
-	var step := minf(w + 10, (r.size.x - w) / maxf(n - 1, 1))
+	var step := minf(w + 12, (r.size.x - w) / maxf(n - 1, 1))
 	var x := r.position.x + maxf(0, (r.size.x - (step * (n - 1) + w)) * 0.5)
 	for c in list:
 		var att: Array = c.get("att", [])
-		var ah := minf(18.0, (r.size.y - h - 4) / maxf(att.size(), 1)) if att.size() else 0.0
-		var top_y := r.position.y
+		var ah := minf(16.0, (r.size.y - h - 2) / maxf(att.size(), 1)) if att.size() else 0.0
+		var y := r.end.y - h
 		for j in att.size():
 			var a: Dictionary = att[j]
-			var ar := Rect2(x + 4, top_y + j * ah, w - 8, (w - 8) * cr())
-			placed.append(_place(str(int(a["i"])), a, "", ar, zone, mine))
-		var pr := Rect2(x, top_y + att.size() * ah, w, h)
-		placed.append(_place(str(int(c["i"])), c, "", pr, zone, mine))
+			placed.append(_place(str(int(a["i"])), a, "", Rect2(x + 4, y - (att.size() - j) * ah, w - 8, (w - 8) * h / w),
+					zone, mine, -1, variant))
+		placed.append(_place(str(int(c["i"])), c, "", Rect2(x, y, w, h), zone, mine, -1, variant))
 		x += step
 
-func _place(key: String, c, back_kind: String, r: Rect2, zone: String, mine: bool, strength := -1) -> String:
+func _place(key: String, c, back_kind: String, r: Rect2, zone: String, mine: bool, strength := -1, variant := "") -> String:
 	var face: Dictionary = c if c is Dictionary else {}
 	var k := key if face.is_empty() else str(int(face["i"]))
 	var node: Control = cards.get(k)
-	var target_scale := Vector2(r.size.x / cbase().x, r.size.x / cbase().x)
-	if node == null:
+	var fresh := node == null
+	if fresh:
 		node = CARD.new()
 		node.setup(self)
 		board.add_child(node)
 		cards[k] = node
+	node.pile = ""
+	if node.variant != variant:
+		node.set_variant(variant)
+	var s: float = r.size.x / node.base.x
+	var target_scale := Vector2(s, s)
+	if fresh:
 		node.scale = target_scale
 		# drawn cards fly in from the deck they came from
 		if zone == "hand" and L.has("fate_deck"):
-			node.position = _at(L["fate_deck"].position, target_scale)
+			node.position = _at(L["fate_deck"].position, target_scale, node.base)
 		elif zone == "province" and mine and L.has("dyn_deck"):
-			node.position = _at(L["dyn_deck"].position, target_scale)
+			node.position = _at(L["dyn_deck"].position, target_scale, node.base)
 		else:
-			node.position = _at(r.position, target_scale)
+			node.position = _at(r.position, target_scale, node.base)
 			node.modulate.a = 0.0
 	node.zone = zone
 	node.mine = mine
@@ -1115,22 +1205,53 @@ func _place(key: String, c, back_kind: String, r: Rect2, zone: String, mine: boo
 	node.set_marks(not face.is_empty() and my_say() and actions_for(int(face["i"])).size() > 0, badge, tag)
 	board.move_child(node, -1)
 	var t := node.create_tween().set_parallel(true)
-	t.tween_property(node, "position", _at(r.position, target_scale), 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(node, "position", _at(r.position, target_scale, node.base), 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	t.tween_property(node, "scale", target_scale, 0.35)
 	t.tween_property(node, "modulate:a", 1.0, 0.3)
 	return k
 
-# A Card scales and turns about its centre, so the top-left a scaled card
-# is drawn at is not its position: shift it back by what the scale took.
-func _at(p: Vector2, s: Vector2) -> Vector2:
-	return p - cbase() * 0.5 * (Vector2.ONE - s)
+# A player's Holdings and Stronghold as one pile: the top card is one
+# that can still be bowed, the count says how many and what they make.
+func _place_pile(key: String, holds: Array, r: Rect2, mine: bool) -> String:
+	var top: Dictionary = holds[0]
+	for c in holds:
+		if int(c.get("b", 0)) == 0 and c["t"] != "Stronghold":
+			top = c
+			break
+	var ready := 0
+	var lit := false
+	for c in holds:
+		if int(c.get("b", 0)) == 0:
+			ready += int(db.card(int(c["o"])).get("gold", "0"))
+		if mine and actions_for(int(c["i"])).size():
+			lit = true
+	var node: Control = cards.get(key)
+	if node == null:
+		node = CARD.new()
+		node.setup(self)
+		board.add_child(node)
+		cards[key] = node
+		node.modulate.a = 0.0
+	var s: float = r.size.x / node.base.x
+	node.pile = "%d Holding%s · %d gold ready" % [holds.size(), "" if holds.size() == 1 else "s", ready]
+	node.zone = "pile"
+	node.mine = mine
+	node.show_card(top, "")
+	node.inst = -2
+	node.set_marks(lit and my_say(), -1, "")
+	board.move_child(node, -1)
+	piles[key] = holds
+	node.set_meta("pile", key)
+	var t := node.create_tween().set_parallel(true)
+	t.tween_property(node, "position", _at(r.position, Vector2(s, s), node.base), 0.35)
+	t.tween_property(node, "scale", Vector2(s, s), 0.35)
+	t.tween_property(node, "modulate:a", 1.0, 0.3)
+	return key
 
 func _holdings_text(p: Dictionary) -> String:
 	var ready := 0
 	var lines: PackedStringArray = []
-	for c in p["play"]:
-		if c["t"] == "Personality" or c["t"] == "Ring":
-			continue
+	for c in _holdings(p):
 		var row: Dictionary = db.card(int(c["o"]))
 		var bowed := int(c.get("b", 0)) == 1
 		if not bowed:
@@ -1139,12 +1260,38 @@ func _holdings_text(p: Dictionary) -> String:
 		lines.append(("[color=#8a7a66]⤵ %s[/color]" % s) if bowed else s)
 	return "[color=#2a1a0a][b]Holdings · %d gold ready[/b]\n%s[/color]" % [ready, "\n".join(lines)]
 
+func pile_tooltip(node) -> String:
+	var holds: Array = piles.get(node.get_meta("pile", ""), [])
+	var lines: PackedStringArray = []
+	for c in holds:
+		var row: Dictionary = db.card(int(c["o"]))
+		lines.append("%s%s  (%s gold)" % ["⤵ " if int(c.get("b", 0)) else "", c["n"], row.get("gold", "0")])
+	return "\n".join(lines)
+
+# A Card scales and turns about its centre, so the top-left a scaled card
+# is drawn at is not its position: shift it back by what the scale took.
+func _at(p: Vector2, s: Vector2, base: Vector2) -> Vector2:
+	return p - base * 0.5 * (Vector2.ONE - s)
+
 # ------------------------------------------------------------ clicking
 func hovered(_node, _on) -> void:
 	pass
 
 func card_clicked(node, button: int) -> void:
 	if v.is_empty():
+		return
+	if node.pile != "":
+		# a pile: each Holding in it, with what it can do
+		popup.clear()
+		popup_cmds.clear()
+		for c in piles.get(node.get_meta("pile", ""), []):
+			var acts := actions_for(int(c["i"]))
+			for i in acts:
+				_pop(v["actions"][i]["l"], "act %d" % i)
+			if node.mine and button == MOUSE_BUTTON_RIGHT:
+				_pop("Bow %s   (by hand)" % c["n"], "manual bow %d" % int(c["i"]))
+			_pop("View %s%s" % [c["n"], "  (bowed)" if int(c.get("b", 0)) else ""], "zoom %d" % int(c["o"]))
+		_show_popup()
 		return
 	if button == MOUSE_BUTTON_LEFT:
 		var acts := actions_for(node.inst) if node.inst >= 0 else []
