@@ -1,0 +1,6 @@
+# Imported card data (AEG card text and images): kept local, never
+# committed.  The repository is public.
+/data/
+__pycache__/
+/rokugan
+client/.godot/
