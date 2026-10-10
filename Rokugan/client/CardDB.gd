@@ -8,7 +8,7 @@
 # percent of the same place on all of them, so one crop serves.
 extends RefCounted
 
-const ART := Rect2(0.095, 0.105, 0.81, 0.45)
+const ART := Rect2(0.10, 0.13, 0.80, 0.42)
 
 var root := ""
 var cards := {}

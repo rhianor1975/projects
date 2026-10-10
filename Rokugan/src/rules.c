@@ -1188,6 +1188,22 @@ static int add_card(Game *g, int def, int owner, Zone z)
     return g->nc++;
 }
 
+/* The face on a player's portrait: the deck's Clan Champion if it has
+ * one, else its grandest Unique of the clan.  Only the client reads it. */
+static int champion(const int *deck, int n, const char *clan)
+{
+    int i, best = -1, bs = -1;
+    for (i = 0; i < n; i++) {
+        const Def *d = &defs[deck[i]];
+        int s;
+        if (d->type != T_PERSONALITY || strcmp(d->clan, clan))
+            continue;
+        s = (strstr(d->kwtext, "Champion") ? 1000 : 0) + (d->kw & KW_UNIQUE ? 100 : 0) + d->cost;
+        if (s > bs) { bs = s; best = d->oid; }
+    }
+    return best;
+}
+
 int l5r_setup(Game *g, const Era *era, const int *deck0, int n0,
               const int *deck1, int n1, unsigned long seed)
 {
@@ -1222,6 +1238,7 @@ int l5r_setup(Game *g, const Era *era, const int *deck0, int n0,
         if (g->p[p].stronghold < 0)
             return -1;
         g->p[p].honor = D(g, g->p[p].stronghold)->shonor;
+        g->p[p].face = champion(decks[p], ns[p], D(g, g->p[p].stronghold)->clan);
         g->p[p].first_turn = 1;
         for (k = 0; k < NPROV; k++)
             g->p[p].alive[k] = 1;

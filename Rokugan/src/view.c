@@ -63,6 +63,7 @@ static void player(FILE *f, const Game *g, int p, int seat)
     int k, i, first;
     fprintf(f, "{\"clan\":");
     jstr(f, player_clan(g, p));
+    fprintf(f, ",\"face\":%d,\"stronghold\":%d", g->p[p].face, defs[g->c[g->p[p].stronghold].def].oid);
     fprintf(f, ",\"honor\":%d,\"pool\":%d,\"gold\":%d,\"hand\":%d,\"fate\":%d,"
                "\"dynasty\":%d,\"fdisc\":%d,\"ddisc\":%d,\"rings\":%d,\"provinces\":[",
             g->p[p].honor, g->p[p].pool, gold_available(g, p), count(g, p, Z_HAND),

@@ -145,6 +145,7 @@ typedef struct {
     int  stronghold;
     int  first_turn;
     int  won_battle;
+    int  face;      /* the Oracle id of the clan's champion, for the portrait */
 } Player;
 
 typedef enum {
