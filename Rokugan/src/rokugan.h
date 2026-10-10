@@ -51,6 +51,9 @@ typedef struct {
     int holdings_bowed;     /* Holdings enter play bowed                    */
     int pool_per_phase;     /* gold keeps to the end of the phase, rather
                              * than vanishing after each payment           */
+    int spells_equip;       /* Spells attach to a Shugenja and are used
+                             * again and again (Lotus on), rather than cast
+                             * from the hand once (to Gold)                 */
     int kill_honor;         /* attacker's honor per card destroyed by
                              * battle resolution                           */
 } Era;
@@ -65,21 +68,46 @@ typedef enum {
 extern const char *type_name[T_COUNT];
 
 typedef enum { TM_BATTLE, TM_LIMITED, TM_OPEN, TM_ENTER, TM_PRODUCE,
-               TM_STATIC, TM_REVEAL, TM_COUNT } Timing;
+               TM_STATIC, TM_REVEAL, TM_BATTLEOPEN, TM_COUNT } Timing;
 
 typedef enum {
     TG_NONE, TG_SELF, TG_OPERS, TG_EPERS, TG_EFOL, TG_ECARD, TG_EUNIT,
-    TG_OUNIT, TG_EHOLD, TG_APERS, TG_AFOL, TG_COUNT
+    TG_OUNIT, TG_EHOLD, TG_APERS, TG_AFOL,
+    TG_ACARD,       /* any Personality or Follower                         */
+    TG_OCARD,       /* your Personality or Follower                        */
+    TG_EATT,        /* an enemy Follower or Item, attached                 */
+    TG_OHOLD,       /* your Holding                                        */
+    TG_COUNT
 } Target;
 
 typedef enum {
     E_FORCE, E_CHI, E_DESTROY, E_BOW, E_STRAIGHTEN, E_HOME, E_GAIN, E_LOSE,
     E_OLOSE, E_DRAW, E_PRODUCE, E_RANGED, E_MELEE, E_FEAR,
     E_ATTFORCE, E_DEFFORCE, E_PSTR, E_PH, E_KW, E_ATTACHONLY, E_DISCOUNT,
-    E_NOENLIGHTEN, E_COUNT
+    E_NOENLIGHTEN,
+    E_PFORCE, E_PCHI, E_PPH,  /* permanent: they outlast the turn          */
+    E_BOWFOL,                 /* bow every Follower in the target's unit   */
+    E_TOBATTLE,               /* your unit at home joins the battle        */
+    E_ODISCARD,               /* your opponent discards N cards at random  */
+    E_RANGEDCHI, E_FEARCHI,   /* strength equal to the performer's Chi     */
+    E_BOWUNIT,                /* bow the target and his whole unit         */
+    E_DUEL,                   /* performer duels target on Chi: the loser
+                               * is destroyed, the winner's player gains N  */
+    E_FDUELBOW,               /* a duel on Force: the loser bows           */
+    E_PROVSTR,                /* the current battlefield's Province +N
+                               * Strength until the turn ends              */
+    E_COUNT
 } EffOp;
 
-enum { CO_BOW = 1, CO_DESTROY = 2 };
+enum { CO_BOW = 1, CO_DESTROY = 2, CO_BOWPERF = 4, CO_DESTROYPERF = 8 };
+
+/* Conditions on a target, written in brackets after it in an encoding:
+ * epers[att,kw=Samurai,force<=3,lowerchi]. */
+enum {
+    F_ATT = 1, F_DEF = 2, F_BOWED = 4, F_UNBOWED = 8, F_OPPOSED = 16,
+    F_NOFOL = 32, F_NOATT = 64, F_LOWERF = 128, F_LOWERC = 256, F_HOME = 512,
+    F_LECHI = 1024
+};
 
 typedef struct { EffOp op; int n; } Eff;
 
@@ -91,6 +119,11 @@ typedef struct {
     int    neff;
     Eff    eff[MAX_EFF];
     char   arg[32];         /* kw:, attachonly:, discount: argument         */
+    unsigned filt;          /* F_ conditions on the target                   */
+    char   tkw[24];         /* the target must have this keyword (or clan)   */
+    int    maxforce, maxchi, minph, maxph;  /* -1: no condition            */
+    char   perfkw[32];      /* a performing Personality with one of these
+                             * keywords, "Monk/Shugenja"; CO_BOWPERF bows it */
 } Ability;
 
 enum { KW_UNIQUE = 1, KW_SHUGENJA = 2, KW_CAVALRY = 4, KW_COURTIER = 8,
@@ -133,6 +166,7 @@ typedef struct {
     int  bowed;
     int  host;      /* Z_ATTACHED: the Personality carrying it, else -1     */
     int  fbonus, cbonus;   /* until the end of the turn                    */
+    int  pf, pc, pph;      /* permanent changes to Force, Chi, Personal Honor */
     int  at;        /* -1 home, else the province (of the defender) whose
                      * battlefield this unit is at                         */
 } Inst;
@@ -142,6 +176,7 @@ typedef struct {
     int  honor;
     int  pool;      /* gold produced and not yet spent                     */
     int  alive[NPROV];
+    int  pbonus[NPROV];     /* Province Strength until the turn ends     */
     int  stronghold;
     int  first_turn;
     int  won_battle;

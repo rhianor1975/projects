@@ -222,7 +222,7 @@ def parse_line(line, ctype, name=""):
     m = re.fullmatch(LEAD + TIMINGS + r"(?:, ([^:]+))?: (.+)", s)
     if m:
         timing = {"Engage": "battle", "Battle/Engage": "battle",
-                  "Battle/Open": "open"}.get(m.group(1), m.group(1).lower())
+                  "Battle/Open": "battleopen"}.get(m.group(1), m.group(1).lower())
         costs = cost_of(m.group(2))
         body = m.group(3)
         # "Bow this card to ..." / "Destroy this card: ..." as a cost inside the body

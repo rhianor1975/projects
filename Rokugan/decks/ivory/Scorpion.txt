@@ -23,11 +23,13 @@ The Shadowed Estate of the Scorpion
 1 Medium Infantry
 3 Parangu
 3 Simple Spears
+1 A Game of Dice
+1 Creating Order
+3 Entrenched Position
+3 Fall Back!
+3 Inspired Devotion
+3 Treachery and Deceit
 3 Colonial Edict
-3 Tactical Setback
-3 Ancestral Aid
-3 A Small Favor
-3 Strike as the Earth
-3 In Defense
-3 Fueling the Flames
-3 Focus
+3 Block Supply Lines
+3 Discretionary Valor
+1 The Wrath of Osano-Wo

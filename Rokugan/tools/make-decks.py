@@ -14,12 +14,42 @@ what each clan plays before it has imported anything.
 """
 import csv
 import os
+import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CLANS = ["Crab", "Crane", "Dragon", "Lion", "Phoenix", "Scorpion", "Unicorn",
          "Mantis", "Spider"]
 NEUTRAL = ("Unaligned", "")
+
+
+def encoded():
+    """Oracle id -> hand-written encoding from fx/cards.tsv: the engine
+    runs those, whatever the text reader made of them."""
+    ids = {}
+    path = os.path.join(ROOT, "fx", "cards.tsv")
+    if os.path.exists(path):
+        for line in open(path):
+            if line[:1].isdigit():
+                f = line.rstrip("\n").split("\t")
+                ids[f[0]] = f[1]
+    return ids
+
+
+def performable(r, people):
+    """Can this deck's Personalities perform the card?  A card that names
+    a performing Monk or Shugenja is a dead card in a deck of bushi -- the
+    first Crab decks held nine of them and never played a Strategy."""
+    enc = FX.get(r["id"]) or r["fx"]
+    need = re.findall(r"(?:bowperf|destroyperf|perf)=([A-Za-z/]+)", enc)
+    if r["type"] == "Spell":
+        need.append("Shugenja")
+    for kws in need:
+        if "any" in kws.split("/"):
+            continue
+        if not any(k in p["keywords"] or k == p["clan"] for p in people for k in kws.split("/")):
+            return False
+    return True
 
 
 def load(era):
@@ -33,7 +63,9 @@ def load(era):
             except ValueError:
                 r[k] = 0
         r["unique"] = "Unique" in r["keywords"]
-        r["auto"] = r["auto"] == "all"
+        r["auto"] = r["auto"] == "all" or r["id"] in FX
+        if r["id"] in FX:
+            r["fx"] = r["fx"] or "hand-written"
     return rows
 
 
@@ -90,9 +122,9 @@ def deck(rows, clan):
              and 0 < r["cost"] <= 5 and r["force"] > 0]
     fate += take(items, 6, lambda r: (r["force"] + r["chi"] * 0.3) / max(r["cost"], 1)
                  + (0.5 if r["auto"] else 0))
-    shug = any("Shugenja" in r["keywords"] for r in pers if r["name"] in dyn)
-    acts = [r for r in rows if (r["type"] == "Strategy" or (shug and r["type"] == "Spell"))
-            and (mine(r) or neutral(r)) and r["cost"] <= 4]
+    people = [r for r in pers if r["name"] in dyn]
+    acts = [r for r in rows if r["type"] in ("Strategy", "Spell")
+            and (mine(r) or neutral(r)) and r["cost"] <= 4 and performable(r, people)]
     fate += take([r for r in acts if r["auto"] and r["fx"]], 40 - len(fate),
                  lambda r: r["focus"] + (1 if r["type"] == "Strategy" else 0))
     if len(fate) < 40:
@@ -121,7 +153,12 @@ def write(era, clan, built):
         f.write("# Fate (%d)\n%s\n" % (len(fate), "\n".join(counted(fate))))
 
 
+FX = {}
+
+
 def main():
+    global FX
+    FX = encoded()
     eras = sys.argv[1:] or ["gold", "celestial", "ivory"]
     for era in eras:
         rows = load(era)

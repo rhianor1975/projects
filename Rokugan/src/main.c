@@ -47,8 +47,15 @@ static int load_era(const Era *e)
         fprintf(stderr, "rokugan: %s\n", err);
         return -1;
     }
-    snprintf(path, sizeof path, "%s/fx/%s.tsv", home, e->key);
+    /* fx/cards.tsv by Oracle id serves every era; fx/ERA.tsv, if there
+     * is one, has the last word for that era alone. */
+    snprintf(path, sizeof path, "%s/fx/cards.tsv", home);
     if ((n = fx_overrides(path, err, sizeof err)) < 0) {
+        fprintf(stderr, "rokugan: %s\n", err);
+        return -1;
+    }
+    snprintf(path, sizeof path, "%s/fx/%s.tsv", home, e->key);
+    if (fx_overrides(path, err, sizeof err) < 0) {
         fprintf(stderr, "rokugan: %s\n", err);
         return -1;
     }

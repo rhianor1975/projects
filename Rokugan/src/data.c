@@ -22,17 +22,18 @@ const char *type_name[T_COUNT] = {
     "Follower", "Item", "Strategy", "Spell", "Ring", "Other"
 };
 static const char *timing_name[TM_COUNT] = {
-    "battle", "limited", "open", "enter", "produce", "static", "reveal"
+    "battle", "limited", "open", "enter", "produce", "static", "reveal", "battleopen"
 };
 static const char *target_name[TG_COUNT] = {
     "none", "self", "opers", "epers", "efol", "ecard", "eunit", "ounit",
-    "eholding", "apers", "afol"
+    "eholding", "apers", "afol", "acard", "ocard", "eattach", "oholding"
 };
 static const char *eff_name[E_COUNT] = {
     "force", "chi", "destroy", "bow", "straighten", "home", "gain", "lose",
     "olose", "draw", "produce", "ranged", "melee", "fear",
     "attforce", "defforce", "pstr", "ph", "kw", "attachonly", "discount",
-    "noenlighten"
+    "noenlighten", "pforce", "pchi", "pph", "bowfollowers", "tobattle", "odiscard",
+    "rangedchi", "fearchi", "bowunit", "duel", "fduelbow", "provstr"
 };
 
 /* Each era's rules, where they changed.  The values are the ones this
@@ -42,14 +43,14 @@ static const char *eff_name[E_COUNT] = {
 const Era eras[] = {
     /* Gold Edition, the Four Winds arc (2000-2002). */
     { "gold", "Gold (Four Winds)",
-      2, 1, 1, 0, 2 },
+      2, 1, 1, 0, 0, 2 },
     /* Celestial Edition, the Destroyer War arc (2009-2011).  The gold
      * pool lasting the phase arrived with Lotus. */
     { "celestial", "Celestial (Destroyer War)",
-      2, 1, 1, 1, 2 },
+      2, 1, 1, 1, 1, 2 },
     /* Ivory Edition, A Brother's Destiny (2013-2015). */
     { "ivory", "Ivory (A Brother's Destiny)",
-      2, 1, 1, 1, 2 },
+      2, 1, 1, 1, 1, 2 },
 };
 const int neras = sizeof eras / sizeof eras[0];
 
@@ -140,9 +141,50 @@ int fx_parse(const char *enc, Def *d, char *err, int errlen)
                 a->cost |= CO_DESTROY;
             else if (!strncmp(c, "gold:", 5))
                 a->gold = atoi(c + 5);
+            else if (!strncmp(c, "destroyperf=", 12)) {
+                a->cost |= CO_BOWPERF | CO_DESTROYPERF;
+                snprintf(a->perfkw, sizeof a->perfkw, "%s", c + 12);
+            } else if (!strncmp(c, "bowperf=", 8)) {
+                a->cost |= CO_BOWPERF;
+                snprintf(a->perfkw, sizeof a->perfkw, "%s", c + 8);
+            } else if (!strncmp(c, "perf=", 5))
+                snprintf(a->perfkw, sizeof a->perfkw, "%s", c + 5);
             else {
                 snprintf(err, errlen, "%s: unknown cost '%s'", d->name, c);
                 return -1;
+            }
+        }
+        a->maxforce = a->maxchi = a->minph = a->maxph = -1;
+        {
+            char *br = strchr(part[2], '['), *cond, *s2;
+            if (br) {
+                char *end = strchr(br, ']');
+                *br++ = 0;
+                if (end)
+                    *end = 0;
+                for (cond = strtok_r(br, ",", &s2); cond; cond = strtok_r(NULL, ",", &s2)) {
+                    if (!strcmp(cond, "att")) a->filt |= F_ATT;
+                    else if (!strcmp(cond, "def")) a->filt |= F_DEF;
+                    else if (!strcmp(cond, "bowed")) a->filt |= F_BOWED;
+                    else if (!strcmp(cond, "unbowed")) a->filt |= F_UNBOWED;
+                    else if (!strcmp(cond, "opposed")) a->filt |= F_OPPOSED;
+                    else if (!strcmp(cond, "nofol")) a->filt |= F_NOFOL;
+                    else if (!strcmp(cond, "noatt")) a->filt |= F_NOATT;
+                    else if (!strcmp(cond, "lowerforce")) a->filt |= F_LOWERF;
+                    else if (!strcmp(cond, "lowerchi")) a->filt |= F_LOWERC;
+                    else if (!strcmp(cond, "home")) a->filt |= F_HOME;
+                    else if (!strcmp(cond, "lechi")) a->filt |= F_LECHI;
+                    else if (!strncmp(cond, "kw=", 3))
+                        snprintf(a->tkw, sizeof a->tkw, "%s", cond + 3);
+                    else if (!strncmp(cond, "force<=", 7)) a->maxforce = atoi(cond + 7);
+                    else if (!strncmp(cond, "chi<=", 5)) a->maxchi = atoi(cond + 5);
+                    else if (!strncmp(cond, "ph>=", 4)) a->minph = atoi(cond + 4);
+                    else if (!strncmp(cond, "ph<=", 4)) a->maxph = atoi(cond + 4);
+                    else {
+                        snprintf(err, errlen, "%s: unknown condition '%s'", d->name, cond);
+                        return -1;
+                    }
+                }
             }
         }
         if ((x = lookup(part[2], target_name, TG_COUNT)) < 0) {
@@ -285,11 +327,15 @@ int fx_overrides(const char *path, char *err, int errlen)
             continue;
         if (split(line, fld, 3, '\t') < 2)
             continue;
-        if ((d = def_by_name(fld[0])) < 0) {
-            snprintf(err, errlen, "%s:%d: no card named '%s' in this era", path, lineno, fld[0]);
-            fclose(f);
-            return -1;
-        }
+        /* By Oracle id: one file serves every era, and two cards that
+         * share a name -- there are three Yasuki Jinn-Kuen -- cannot be
+         * confused.  A card not in this era's pool is skipped. */
+        if (fld[0][0] >= '0' && fld[0][0] <= '9')
+            d = def_by_oid(atoi(fld[0]));
+        else
+            d = def_by_name(fld[0]);
+        if (d < 0)
+            continue;
         if (fx_parse(fld[1], &defs[d], err, errlen) < 0) {
             fclose(f);
             return -1;

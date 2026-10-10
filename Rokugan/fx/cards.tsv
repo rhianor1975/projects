@@ -1,0 +1,81 @@
+# Hand-written abilities, in the engine's notation, by Oracle of the Void
+# card id.  One file serves every era: a card legal in several arcs is one
+# record, and a line for a card not in an era's pool is skipped there.
+#
+#   id <TAB> TIMING|COSTS|TARGET[conditions]|EFFECTS <TAB> # name -- notes
+#
+# Timings: battle limited open battleopen enter static reveal
+# Costs:   bow (this card)  destroy  gold:N  perf=KW/KW  bowperf=KW/KW
+#          destroyperf=KW/KW  (KW "any" for any Personality)
+# Targets: none self opers epers apers efol afol ecard acard ocard eunit
+#          ounit eattach eholding oholding
+# Conditions: att def home bowed unbowed opposed nofol noatt lowerforce
+#          lowerchi lechi kw=X force<=N chi<=N ph>=N ph<=N
+# Effects: force:N chi:N pforce:N pchi:N pph:N destroy bow bowunit
+#          bowfollowers straighten home tobattle gain:N lose:N olose:N
+#          draw:N odiscard:N ranged:N rangedchi melee:N fear:N fearchi
+#          duel:N fduelbow:N provstr:N produce:N
+#
+# A line encodes what the card does as faithfully as the notation allows;
+# where it falls short, the note after the name says how.
+#
+# ---------------------------------------------------------- Strategies
+8692	limited|bow|epers[bowed,lechi]|destroy	# Touch of Death
+5867	battle|perf=Monk|epers[unbowed]|bow	# Palm Strike -- the Weapon conditions are not checked
+8440	battle|bowperf=Monk/Shugenja|none|rangedchi	# The Wrath of Osano-Wo
+1045	battle||epers[att]|home,bowunit	# Block Supply Lines
+1298	battle||opers[att]|force:2	# Charge -- the Lion Clan's +3F is not given
+2445	battle||opers|home,straighten	# Fall Back! -- the second straighten is not offered
+3730	battle||epers[def]|home	# Incapacitated
+3398	battle|destroyperf=Monk/Shugenja|ecard[nofol,lechi]|destroy	# Hitsu-Do
+8948	battleopen||epers|force:-2,chi:-2	# Uncertainty
+2014	battle||opers[opposed]|home,gain:1,draw:1	# Discretionary Valor -- the Focus Effect is not used
+3743	battle|perf=Courtier|ecard[noatt]|bow,gain:2	# Inexplicable Challenge
+6157	battle||epers[ph<=0]|home,olose:2	# Ramifications
+3774	battleopen||opers|force:2	# Inspired Devotion -- the Yojimbo bonus is not given
+9143	battle|gold:3|epers[unbowed]|bow;battle|gold:3|opers[bowed]|straighten	# Versatile Army -- the cost reduction is not applied
+4666	open||opers|pph:1	# Last Gift
+25	limited|gold:3|none|draw:2	# A Game of Dice -- drawn at once, not at the end of the turn
+1557	battleopen||opers[bowed]|straighten	# Creating Order -- the bonus-negating choice is not offered
+2355	battle||ecard[noatt]|bow	# Entrenched Position -- the Interrupt is not used
+2492	limited|bowperf=Courtier|none|gain:2	# Favors
+9032	limited||none|odiscard:1	# Unwelcome Supervision
+3548	battle|perf=any|epers|duel:5	# Iaijutsu Duel
+3547	limited|perf=any|epers|duel:5	# Iaijutsu Challenge -- refusing is not offered
+4514	limited||epers[chi<=4]|destroy,lose:4	# Kolat Assassin -- the Retainer ability is not offered
+7546	battle||opers[ph>=3]|force:3	# Strength of Purity
+9380	battle||epers|chi:-2	# Wounded in Battle
+1217	battleopen||opers|force:1,chi:1	# Careful Planning
+475	battle||none|ranged:2	# Arrows from the Woods -- the Reaction is not used
+5831	battle||opers[def]|force:3	# Outflank
+7929	battle|perf=any|epers|fduelbow:3	# Test of Might
+2586	battle|bowperf=Monk/Shugenja|ecard[nofol,unbowed]|bow	# Fist of the Earth
+7542	battleopen|bowperf=Monk/Shugenja|opers[unbowed]|force:2,chi:2	# Strength of My Ancestors
+8741	battle||epers[force<=99]|home	# Treachery and Deceit -- the 7-Force condition is not checked
+3759	battle||opers[bowed]|straighten	# Inner Fire
+4302	battle|bowperf=Monk/Shugenja|epers[lowerforce]|home	# Kaze-do -- compares Force with Force, not with Chi
+6111	battle|bowperf=Monk/Shugenja|epers[lowerchi,unbowed]|bow	# Purity of Spirit
+7475	battle|bowperf=Samurai|none|draw:3	# Stay Your Blade -- he is bowed, not moved home
+1982	battle||opers|force:2,chi:2	# Destiny Has No Secrets
+5014	limited||opers|force:1,chi:2	# Meditation
+6674	open||epers[kw=Shadowlands,unbowed]|bow	# Shadowlands Sickness
+32	battle|bowperf=Shugenja|none|fearchi	# A Glimpse of the Soul's Shadow
+5830	battle||none|provstr:3	# Outer Walls -- the Reaction is not used
+7413	battle|perf=Monk|opers[kw=Monk,bowed]|straighten	# Spinning Heel Kick -- the extra action is not given
+121	battle||opers|home	# Advance Warning -- the Scout and strength parts are not used
+6291	battle||epers|home	# Return For Training -- the lowest-honor condition is not checked
+8889	battle|gold:1|none|ranged:3	# Tsuruchi Technique
+# ------------------------------------------------------------------ Spells
+2266	battle|bow|epers[unbowed]|bow	# Earthquake (Gold: cast from the hand)
+2585	limited|bow|eholding|destroy	# Fist of Osano-Wo
+8085	battle|destroyperf=Shugenja|epers|destroy	# The Fires that Cleanse
+8083	battle|bow|none|rangedchi	# The Fire from Within -- one Ranged Attack, not two
+7489	battle|bow|efol[unbowed]|bow;battle|bow|epers[nofol,unbowed]|bow	# Stifling Wind
+981	battleopen|bow|opers|force:2,chi:2	# Biting Steel -- the Dragon bonus is not given
+2574	battleopen|bow|opers[ph>=3]|force:3,chi:3	# Fires of Purity
+1059	battle|bow|opers[att,kw=Shadowlands]|force:4	# Blood of Midnight
+1416	battle|destroy|none|ranged:4	# Cleansing the Path
+2557	battle|bow|none|ranged:2	# Fire and Air -- the Air ability is not offered
+6624	battle|bow|ocard[bowed]|straighten	# Servitors of Stone
+7620	battle|bow|ecard[noatt,unbowed]|bow	# Suitengu's Embrace
+1234	battle|bow|none|provstr:3	# Castle of Water

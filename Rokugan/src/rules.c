@@ -106,7 +106,7 @@ static int card_force(const Game *g, int i)
     int f;
     if (c->bowed)
         return 0;
-    f = D(g, i)->force + c->fbonus;
+    f = D(g, i)->force + c->fbonus + c->pf;
     if (location(g, i) >= 0) {
         int owner = c->owner;
         f += static_sum(g, i, owner == g->active ? E_ATTFORCE : E_DEFFORCE);
@@ -130,7 +130,7 @@ int unit_force(const Game *g, int i)
 
 int card_chi(const Game *g, int i)
 {
-    int k, c = D(g, i)->chi + g->c[i].cbonus;
+    int k, c = D(g, i)->chi + g->c[i].cbonus + g->c[i].pc;
     for (k = 0; k < g->nc; k++)
         if (g->c[k].zone == Z_ATTACHED && g->c[k].host == i && is_type(g, k, T_ITEM))
             c += D(g, k)->chi;
@@ -157,7 +157,7 @@ static int army_size(const Game *g, int p, int prov)
 
 int prov_strength(const Game *g, int p, int prov)
 {
-    int i, s = D(g, g->p[p].stronghold)->pstr;
+    int i, s = D(g, g->p[p].stronghold)->pstr + g->p[p].pbonus[prov];
     for (i = 0; i < g->nc; i++) {
         const Inst *c = &g->c[i];
         if (c->owner != p)
@@ -453,43 +453,89 @@ static int follower_in_play(const Game *g, int i)
     return g->c[i].zone == Z_ATTACHED && g->c[i].host >= 0 && is_type(g, i, T_FOLLOWER);
 }
 
+static int has_attachments(const Game *g, int i)
+{
+    int k;
+    for (k = 0; k < g->nc; k++)
+        if (g->c[k].zone == Z_ATTACHED && g->c[k].host == i)
+            return 1;
+    return 0;
+}
+
+static int has_kw(const Game *g, int i, const char *kw)
+{
+    const Def *d = D(g, i);
+    return strstr(d->kwtext, kw) || strstr(d->clan, kw) || strstr(d->name, kw);
+}
+
 /* Does card i suit target code t for player q?  In a battle, battle
- * actions reach only the current battlefield. */
-static int target_ok(const Game *g, int q, Target t, int i, int battle)
+ * actions reach only the current battlefield.  perf is the performing
+ * Personality, for conditions measured against him ("lower Chi"). */
+static int target_ok(const Game *g, int q, const Ability *ab, int i, int battle, int perf)
 {
     int own = g->c[i].owner == q;
-    int pers = is_pers_in_play(g, i), fol = follower_in_play(g, i);
-    if (battle && !at_battle(g, i))
+    int pers = is_pers_in_play(g, i), fol = follower_in_play(g, i), ok;
+    unsigned f = ab->filt;
+    if (battle && !at_battle(g, i) && !(f & F_HOME))
         return 0;
-    switch (t) {
-    case TG_OPERS: case TG_OUNIT: return own && pers;
-    case TG_EPERS: case TG_EUNIT: return !own && pers;
-    case TG_EFOL:  return !own && fol;
-    case TG_ECARD: return !own && (pers || fol);
-    case TG_EHOLD: return !own && in_play(g, i) && is_type(g, i, T_HOLDING);
-    case TG_APERS: return pers;
-    case TG_AFOL:  return fol;
-    default:       return 0;
+    switch (ab->target) {
+    case TG_OPERS: case TG_OUNIT: ok = own && pers; break;
+    case TG_EPERS: case TG_EUNIT: ok = !own && pers; break;
+    case TG_EFOL:  ok = !own && fol; break;
+    case TG_ECARD: ok = !own && (pers || fol); break;
+    case TG_EHOLD: ok = !own && in_play(g, i) && is_type(g, i, T_HOLDING); break;
+    case TG_OHOLD: ok = own && in_play(g, i) && is_type(g, i, T_HOLDING); break;
+    case TG_APERS: ok = pers; break;
+    case TG_AFOL:  ok = fol; break;
+    case TG_ACARD: ok = pers || fol; break;
+    case TG_OCARD: ok = own && (pers || fol); break;
+    case TG_EATT:  ok = !own && g->c[i].zone == Z_ATTACHED && g->c[i].host >= 0; break;
+    default:       ok = 0;
     }
+    if (!ok)
+        return 0;
+    if ((f & F_ATT) && !(location(g, i) >= 0 && g->c[i].owner == g->active)) return 0;
+    if ((f & F_DEF) && !(location(g, i) >= 0 && g->c[i].owner != g->active)) return 0;
+    if ((f & F_HOME) && location(g, i) >= 0) return 0;
+    if ((f & F_BOWED) && !g->c[i].bowed) return 0;
+    if ((f & F_UNBOWED) && g->c[i].bowed) return 0;
+    if ((f & F_OPPOSED) && !(g->phase == PH_BATTLE && location(g, i) == g->battle
+                             && army_size(g, 1 - g->c[i].owner, g->battle))) return 0;
+    if ((f & F_NOFOL) && pers && has_followers(g, i)) return 0;
+    if ((f & F_NOATT) && pers && has_attachments(g, i)) return 0;
+    if (ab->tkw[0] && !has_kw(g, i, ab->tkw)) return 0;
+    if (ab->maxforce >= 0 && (pers ? unit_force(g, i) : card_force(g, i)) > ab->maxforce) return 0;
+    if (ab->maxchi >= 0 && (!pers || card_chi(g, i) > ab->maxchi)) return 0;
+    if (ab->minph >= 0 && (!pers || D(g, i)->ph + g->c[i].pph < ab->minph)) return 0;
+    if (ab->maxph >= 0 && (!pers || D(g, i)->ph + g->c[i].pph > ab->maxph)) return 0;
+    if (perf >= 0) {
+        if ((f & F_LOWERF) && unit_force(g, i) >= unit_force(g, perf)) return 0;
+        if ((f & F_LOWERC) && card_chi(g, i) >= card_chi(g, perf)) return 0;
+        if ((f & F_LECHI) && card_chi(g, i) > card_chi(g, perf)) return 0;
+    }
+    return 1;
 }
 
 /* The effect that decides what a target must be, if any: a Ranged
  * Attack needs a Follower or a Personality without Followers, with no
  * more Force than its strength; a destroy needs something to destroy. */
-static int ability_targets(const Game *g, int q, const Ability *ab, int battle, int *out)
+static int ability_targets(const Game *g, int q, const Ability *ab, int battle, int perf, int *out)
 {
     int i, e, n = 0;
     for (e = 0; e < ab->neff; e++) {
         EffOp op = ab->eff[e].op;
-        if (op == E_RANGED || op == E_MELEE || op == E_FEAR) {
+        if (op == E_RANGED || op == E_MELEE || op == E_FEAR || op == E_RANGEDCHI || op == E_FEARCHI) {
+            int str = ab->eff[e].n;
+            if (op == E_RANGEDCHI || op == E_FEARCHI)
+                str = perf >= 0 ? card_chi(g, perf) : 0;
             for (i = 0; i < g->nc; i++) {
                 int ok;
                 if (g->c[i].owner == q || !at_battle(g, i))
                     continue;
                 ok = follower_in_play(g, i)
                    || (is_pers_in_play(g, i) && !has_followers(g, i));
-                if (ok && card_force(g, i) <= ab->eff[e].n
-                    && !(op == E_FEAR && g->c[i].bowed))
+                if (ok && card_force(g, i) <= str
+                    && !((op == E_FEAR || op == E_FEARCHI) && g->c[i].bowed))
                     out[n++] = i;
             }
             return n;
@@ -500,13 +546,14 @@ static int ability_targets(const Game *g, int q, const Ability *ab, int battle, 
         return 1;
     }
     for (i = 0; i < g->nc; i++) {
-        if (!target_ok(g, q, ab->target, i, battle))
+        if (!target_ok(g, q, ab, i, battle, perf))
             continue;
         /* skip targets the effect cannot change */
         for (e = 0; e < ab->neff; e++) {
             if (ab->eff[e].op == E_BOW && g->c[i].bowed) break;
             if (ab->eff[e].op == E_STRAIGHTEN && !g->c[i].bowed) break;
             if (ab->eff[e].op == E_HOME && location(g, i) < 0) break;
+            if (ab->eff[e].op == E_TOBATTLE && (location(g, i) >= 0 || g->c[i].bowed)) break;
         }
         if (e == ab->neff)
             out[n++] = i;
@@ -515,6 +562,43 @@ static int ability_targets(const Game *g, int q, const Ability *ab, int battle, 
 }
 
 /* ------------------------------------------------------------ resolving */
+/* A duel.  HOUSE RULE: in the printed game each player focuses cards from
+ * the hand, in turn, until both strike.  Here each side focuses the top
+ * card of its Fate deck, unseen, and adds its Focus value -- a duel the
+ * engine can resolve without a dialogue it does not have yet.  The higher
+ * total wins; a tie, both lose. */
+static int focus_top(Game *g, int p)
+{
+    int i = draw_from(g, p, Z_FATEDECK, Z_FATEDISC), f;
+    if (i < 0)
+        return 0;
+    f = D(g, i)->focus;
+    to_discard(g, i);
+    return f;
+}
+
+static void duel(Game *g, int a, int b, int on_force, int honor)
+{
+    int pa = g->c[a].owner, pb = g->c[b].owner;
+    int sa = (on_force ? unit_force(g, a) : card_chi(g, a)) + focus_top(g, pa);
+    int sb = (on_force ? unit_force(g, b) : card_chi(g, b)) + focus_top(g, pb);
+    glog(g, "  Duel: %s %d against %s %d.", nm(g, a), sa, nm(g, b), sb);
+    if (sa != sb) {
+        int win = sa > sb ? a : b, lose = sa > sb ? b : a;
+        honor_change(g, g->c[win].owner, honor);
+        glog(g, "  %s wins the duel.", nm(g, win));
+        if (on_force)
+            g->c[lose].bowed = 1;
+        else
+            destroy(g, lose);
+    } else if (on_force) {
+        g->c[a].bowed = g->c[b].bowed = 1;
+    } else {
+        destroy(g, a);
+        destroy(g, b);
+    }
+}
+
 static void resolve(Game *g, int q, int src, const Ability *ab, int tgt, int perf)
 {
     int e, self = perf >= 0 ? perf : src;
@@ -528,13 +612,33 @@ static void resolve(Game *g, int q, int src, const Ability *ab, int tgt, int per
         case E_CHI:        if (who >= 0) g->c[who].cbonus += n; break;
         case E_DESTROY:
         case E_RANGED:
+        case E_RANGEDCHI:
         case E_MELEE:      if (tgt >= 0) {
                                glog(g, "  %s is destroyed.", nm(g, tgt));
                                destroy(g, tgt);
                            }
                            break;
         case E_BOW:
-        case E_FEAR:       if (who >= 0) g->c[who].bowed = 1; break;
+        case E_FEAR:
+        case E_FEARCHI:    if (who >= 0) g->c[who].bowed = 1; break;
+        case E_BOWUNIT:
+            if (who >= 0 && unit_of(g, who) >= 0) {
+                int k, u = unit_of(g, who);
+                g->c[u].bowed = 1;
+                for (k = 0; k < g->nc; k++)
+                    if (g->c[k].zone == Z_ATTACHED && g->c[k].host == u)
+                        g->c[k].bowed = 1;
+            }
+            break;
+        case E_DUEL:
+        case E_FDUELBOW:
+            if (perf >= 0 && tgt >= 0)
+                duel(g, perf, tgt, ab->eff[e].op == E_FDUELBOW, n);
+            break;
+        case E_PROVSTR:
+            if (g->phase == PH_BATTLE)
+                g->p[OPP(g->active)].pbonus[g->battle] += n;
+            break;
         case E_STRAIGHTEN: if (who >= 0) g->c[who].bowed = 0; break;
         case E_HOME:       if (who >= 0) move_home(g, who); break;
         case E_GAIN:       honor_change(g, q, n); break;
@@ -542,6 +646,38 @@ static void resolve(Game *g, int q, int src, const Ability *ab, int tgt, int per
         case E_OLOSE:      honor_change(g, OPP(q), -n); break;
         case E_DRAW:       draw_fate(g, q, n); break;
         case E_PRODUCE:    g->p[q].pool += n; break;
+        case E_PFORCE:     if (who >= 0) g->c[who].pf += n; break;
+        case E_PCHI:       if (who >= 0) g->c[who].pc += n; break;
+        case E_PPH:        if (who >= 0) g->c[who].pph += n; break;
+        case E_BOWFOL:
+            if (who >= 0) {
+                int k, u = unit_of(g, who);
+                for (k = 0; k < g->nc; k++)
+                    if (g->c[k].zone == Z_ATTACHED && g->c[k].host == u && is_type(g, k, T_FOLLOWER))
+                        g->c[k].bowed = 1;
+            }
+            break;
+        case E_TOBATTLE:
+            if (who >= 0 && g->phase == PH_BATTLE && unit_of(g, who) >= 0) {
+                g->c[unit_of(g, who)].at = g->battle;
+                glog(g, "  %s joins the battle.", nm(g, who));
+            }
+            break;
+        case E_ODISCARD: {
+            int k;
+            for (k = 0; k < n; k++) {
+                int pick = -1, seen = 0, j;
+                for (j = 0; j < g->nc; j++)
+                    if (g->c[j].owner == OPP(q) && g->c[j].zone == Z_HAND
+                        && (int)(rnd(g) % (unsigned)(++seen)) == 0)
+                        pick = j;
+                if (pick >= 0) {
+                    glog(g, "  %s discards %s.", player_clan(g, OPP(q)), nm(g, pick));
+                    to_discard(g, pick);
+                }
+            }
+            break;
+        }
         default:           break;     /* statics are read, not resolved */
         }
     }
@@ -619,6 +755,8 @@ static void start_turn(Game *g, int p)
     }
     end_phase_pool(g);
     g->p[p].won_battle = 0;
+    memset(g->p[0].pbonus, 0, sizeof g->p[0].pbonus);
+    memset(g->p[1].pbonus, 0, sizeof g->p[1].pbonus);
     glog(g, "Turn %d: %s.", (g->turn + 1) / 2, player_clan(g, p));
     reveal(g, p);
     g->phase = PH_ACTION;
@@ -753,6 +891,31 @@ static int has_presence(const Game *g, int q)
     return army_size(g, q, g->battle) > 0;
 }
 
+/* The Personalities who could perform an ability that names one -- "your
+ * performing Monk or Shugenja" -- or a Spell, which a Shugenja casts. */
+static int performers(const Game *g, int q, const Ability *ab, int battle, int *out)
+{
+    char kws[32], *k, *save;
+    int i, n = 0;
+    snprintf(kws, sizeof kws, "%s", ab->perfkw);
+    for (i = 0; i < g->nc; i++) {
+        int ok = 0;
+        if (g->c[i].owner != q || !is_pers_in_play(g, i))
+            continue;
+        if ((ab->cost & CO_BOWPERF) && g->c[i].bowed)
+            continue;
+        if (battle && !at_battle(g, i))
+            continue;
+        snprintf(kws, sizeof kws, "%s", ab->perfkw);
+        for (k = strtok_r(kws, "/", &save); k; k = strtok_r(NULL, "/", &save))
+            if (!strcmp(k, "any") || has_kw(g, i, k))
+                ok = 1;
+        if (ok)
+            out[n++] = i;
+    }
+    return n;
+}
+
 static int shugenja_for(const Game *g, int q, int battle, int *out)
 {
     int i, n = 0;
@@ -766,9 +929,9 @@ static int shugenja_for(const Game *g, int q, int battle, int *out)
 static int timing_now(const Game *g, int q, Timing t)
 {
     if (g->phase == PH_BATTLE)
-        return t == TM_BATTLE;
+        return t == TM_BATTLE || t == TM_BATTLEOPEN;
     if (g->phase == PH_ACTION)
-        return t == TM_OPEN || (t == TM_LIMITED && q == g->active);
+        return t == TM_OPEN || t == TM_BATTLEOPEN || (t == TM_LIMITED && q == g->active);
     return 0;
 }
 
@@ -785,6 +948,8 @@ static int attach_ok(const Game *g, int card, int pers)
 {
     const Def *d = D(g, card), *pd = D(g, pers);
     int a;
+    if (d->type == T_SPELL && !(pd->kw & KW_SHUGENJA))
+        return 0;                 /* a Spell is equipped by a Shugenja */
     for (a = 0; a < d->nabil; a++)
         if (d->abil[a].timing == TM_STATIC && d->abil[a].neff
             && d->abil[a].eff[0].op == E_ATTACHONLY) {
@@ -811,11 +976,10 @@ static void legal_abilities(const Game *g, int q, Action *out, int *n)
         if (c->owner != q)
             continue;
         /* Fate cards from the hand */
-        if (c->zone == Z_HAND && (d->type == T_STRATEGY || d->type == T_SPELL)) {
+        if (c->zone == Z_HAND && (d->type == T_STRATEGY
+                                  || (d->type == T_SPELL && !g->era->spells_equip))) {
             int perf[MAX_INST], np = 1, pi;
             perf[0] = -1;
-            if (d->type == T_SPELL && !(np = shugenja_for(g, q, battle, perf)))
-                continue;
             for (a = 0; a < d->nabil; a++) {
                 const Ability *ab = &d->abil[a];
                 int nt, t;
@@ -823,10 +987,17 @@ static void legal_abilities(const Game *g, int q, Action *out, int *n)
                     continue;
                 if (gold_available(g, q) < ab->gold + d->cost)
                     continue;
-                nt = ability_targets(g, q, ab, battle, tg);
-                for (pi = 0; pi < np; pi++)
+                np = 1;
+                perf[0] = -1;
+                if (ab->perfkw[0])
+                    np = performers(g, q, ab, battle, perf);
+                else if (d->type == T_SPELL)
+                    np = shugenja_for(g, q, battle, perf);
+                for (pi = 0; pi < np; pi++) {
+                    nt = ability_targets(g, q, ab, battle, perf[pi], tg);
                     for (t = 0; t < nt; t++)
                         add(out, n, A_PLAY, i, a, tg[t], perf[pi], -1);
+                }
             }
             /* A card the engine cannot read is still playable by hand. */
             if (!d->understood && (g->phase == PH_ACTION || battle)
@@ -834,7 +1005,8 @@ static void legal_abilities(const Game *g, int q, Action *out, int *n)
                 add(out, n, A_PLAY, i, -1, -1, -1, -1);
         }
         /* Followers and Items attach, as a Limited action, at home */
-        if (c->zone == Z_HAND && (d->type == T_FOLLOWER || d->type == T_ITEM)
+        if (c->zone == Z_HAND && (d->type == T_FOLLOWER || d->type == T_ITEM
+                                  || (d->type == T_SPELL && g->era->spells_equip))
             && g->phase == PH_ACTION && q == g->active
             && honor_ok(g, q, i) && gold_available(g, q) >= d->cost) {
             int k;
@@ -856,11 +1028,13 @@ static void legal_abilities(const Game *g, int q, Action *out, int *n)
                     continue;
                 if ((ab->cost & CO_BOW) && c->bowed)
                     continue;
+                if ((ab->cost & CO_BOWPERF) && (unit_of(g, i) < 0 || g->c[unit_of(g, i)].bowed))
+                    continue;
                 if (battle && unit_of(g, i) >= 0 && !at_battle(g, i))
                     continue;
                 if (gold_available(g, q) < ab->gold)
                     continue;
-                nt = ability_targets(g, q, ab, battle, tg);
+                nt = ability_targets(g, q, ab, battle, unit_of(g, i), tg);
                 for (t = 0; t < nt; t++)
                     add(out, n, A_USE, i, a, tg[t], -1, -1);
             }
@@ -945,7 +1119,7 @@ static void play_card(Game *g, int q, Action a)
     int i = a.src;
     const Def *d = D(g, i);
 
-    if (d->type == T_FOLLOWER || d->type == T_ITEM) {
+    if (d->type == T_FOLLOWER || d->type == T_ITEM || (d->type == T_SPELL && a.abil < 0 && a.perf >= 0)) {
         pay(g, q, d->cost);
         g->c[i].zone = Z_ATTACHED;
         g->c[i].host = a.perf;
@@ -973,8 +1147,12 @@ static void play_card(Game *g, int q, Action a)
         const Ability *ab = &d->abil[a.abil];
         pay(g, q, d->cost + ab->gold);
         g->c[i].zone = Z_FATEDISC;      /* gone from the hand while it resolves */
-        if (a.perf >= 0 && (ab->cost & CO_BOW))
+        if (a.perf >= 0 && (ab->cost & (CO_BOW | CO_BOWPERF)))
             g->c[a.perf].bowed = 1;
+        if (a.perf >= 0 && (ab->cost & CO_DESTROYPERF)) {
+            destroy(g, a.perf);
+            a.perf = -1;
+        }
         if (a.perf >= 0 && (ab->cost & CO_DESTROY))
             destroy(g, a.perf);
         glog(g, "%s plays %s%s%s.", player_clan(g, q), d->name,
@@ -991,9 +1169,12 @@ static void use_ability(Game *g, int q, Action a)
     pay(g, q, ab->gold);
     if (ab->cost & CO_BOW)
         g->c[i].bowed = 1;
+    if ((ab->cost & CO_BOWPERF) && unit_of(g, i) >= 0)
+        g->c[unit_of(g, i)].bowed = 1;
     glog(g, "%s uses %s%s%s.", player_clan(g, q), nm(g, i),
          a.tgt >= 0 ? " on " : "", a.tgt >= 0 ? nm(g, a.tgt) : "");
-    resolve(g, q, i, ab, a.tgt, -1);
+    /* an equipped Spell is performed by the Shugenja carrying it */
+    resolve(g, q, i, ab, a.tgt, is_type(g, i, T_SPELL) ? unit_of(g, i) : -1);
     if (ab->cost & CO_DESTROY)
         destroy(g, i);
 }

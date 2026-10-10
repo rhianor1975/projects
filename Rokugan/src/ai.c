@@ -31,7 +31,7 @@ static int is_pers(const Game *g, int i)
  * Counting them here made the machine spend +Force actions at home. */
 static double unit_value(const Game *g, int i)
 {
-    int f = D(g, i)->force, k;
+    int f = D(g, i)->force + g->c[i].pf, k;
     for (k = 0; k < g->nc; k++)
         if (g->c[k].zone == Z_ATTACHED && g->c[k].host == i)
             f += D(g, k)->force;

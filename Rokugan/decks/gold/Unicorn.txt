@@ -25,11 +25,11 @@ Northern Provinces of the Moto
 1 Light Cavalry
 3 Kiseru
 3 Naginata
-3 Burning Smoke
-3 Focus
-3 A New Path
-3 A Wish Granted
-3 Aid of the Grand Master
-3 Ancestral Protection
-3 Balance in Nothingness
-3 Bane of the Anvil
+3 Hitsu-Do
+3 Purity of Spirit
+3 A Glimpse of the Soul's Shadow
+3 Arrows from the Woods
+3 Block Supply Lines
+3 Fist of the Earth
+3 Kaze-do
+3 Last Gift

@@ -23,13 +23,13 @@ The Sinister Citadel of the Spider
 1 Medium Infantry
 3 Parangu
 3 Simple Spears
-3 Colonial Edict
-3 Tactical Setback
-3 A Small Favor
-3 Strike as the Earth
-3 In Defense
-3 Focus
 1 A Game of Dice
-3 Coward!
 1 Creating Order
-1 Entrenched Position
+3 Entrenched Position
+3 Fall Back!
+3 Inspired Devotion
+3 Treachery and Deceit
+3 Colonial Edict
+3 Block Supply Lines
+3 Discretionary Valor
+1 Palm Strike

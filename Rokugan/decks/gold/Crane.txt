@@ -23,11 +23,11 @@ Kakita Dueling Academy
 1 Light Cavalry
 3 Kiseru
 3 Naginata
-3 Focus
-3 A New Path
-3 A Wish Granted
-3 Aid of the Grand Master
-3 Ancestral Protection
-3 Balance in Nothingness
-3 Bane of the Anvil
-3 Bane of the Bastard
+3 Arrows from the Woods
+3 Block Supply Lines
+3 Last Gift
+3 Return For Training
+3 Stay Your Blade
+3 Iaijutsu Challenge
+3 Iaijutsu Duel
+3 Meditation
